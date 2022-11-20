@@ -1,3 +1,20 @@
+import { Augmmentations } from "Augmentations.js";
+import { Bladeburner }  from "Bladeburner.js";
+import { CacheServer } from "CacheServer.js";
+import { Casino } from "Casino.js";
+import { Contracts } from "Contracts.js";
+import { Corp } from "Corp.js";
+import { DebugStuff } from "Debugstuff.js";
+import { Hacknet } from "Hacknet.js";
+import { Jeekipedia } from "Jeekipedia.js";
+import { Jobs } from "Jobs.js";
+import { Player } from "Player.js";
+import { ProcessList } from "ProcessList.js";
+import { Server } from "Server.js";
+import { Sleeves } from "Sleeves.js";
+import { Stockmarket } from "StockMarket.js";
+import "Windows.js";
+import "Worker.js";
 
 export class WholeGame {
 	constructor(ns) {
