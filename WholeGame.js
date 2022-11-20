@@ -4,7 +4,7 @@ import { CacheServer } from "CacheServer.js";
 import { Casino } from "Casino.js";
 import { Contracts } from "Contracts.js";
 import { Corp } from "Corp.js";
-import { DebugStuff } from "Debugstuff.js";
+import { DebugStuff } from "DebugStuff.js";
 import { Hacknet } from "Hacknet.js";
 import { Jeekipedia } from "Jeekipedia.js";
 import { Jobs } from "Jobs.js";
