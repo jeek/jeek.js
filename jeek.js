@@ -1122,7 +1122,10 @@ export class Contracts {
 		this.game = game ? game : new WholeGame(ns);
 		this.contracts = {};
 		this.times = {};
-	}
+		this.log = ns.tprint;
+		if (ns.flags(cmdlineflags)['logbox']) {
+			this.log = this.game.createSidebarItem("Contracts", "", "C").log;
+		}	}
 	async list() {
 		//		this['window'] = this['window'] || await makeNewWindow("Contracts", this.ns.ui.getTheme())
 		let files = [];
@@ -1187,21 +1190,21 @@ export class Contracts {
 				}
 				if (!done) {
 					if (this.contracts[contract].type === types[0]) {
-						this.ns.tprint("Starting " + types[0] + " on " + this.contracts[contract].server);
+						this.log("Starting " + types[0] + " on " + this.contracts[contract].server);
 						await this.ns.sleep(0);
 						let starttime = Date.now();
 						if (await Do(this.ns, "ns.codingcontract.attempt", types[1](this.contracts[contract].data, this.ns), contract, this.contracts[contract].server)) {
 							delete this.contracts[contract];
-							this.ns.toast("Succeeded at " + types[0]);
+							this.log("Succeeded at " + types[0]);
 							done = true;
 						} else {
-							this.ns.toast("Failed at " + types[0]);
-							this.ns.tprint("Failed at " + types[0], " ", types[1](this.contracts[contract].data, this.ns));
+							this.log("Failed at " + types[0]);
+							this.log("Failed at " + types[0], " ", types[1](this.contracts[contract].data, this.ns));
 							this.ns.exit();
 						}
 						this.times[types[0]].push(Date.now() - starttime);
-						this.ns.toast(types[0] + " average time: " + (this.times[types[0]].reduce((a, b) => a + b) / this.times[types[0]].length).toString());
-						this.ns.tprint(types[0] + " average time: " + (this.times[types[0]].reduce((a, b) => a + b) / this.times[types[0]].length).toString());
+						this.log(types[0] + " average time: " + (this.times[types[0]].reduce((a, b) => a + b) / this.times[types[0]].length).toString());
+						this.log(types[0] + " average time: " + (this.times[types[0]].reduce((a, b) => a + b) / this.times[types[0]].length).toString());
 					}
 				}
 			}
@@ -2404,15 +2407,21 @@ export class Hacknet {
 	constructor(ns, game) {
 		this.ns = ns;
 		this.game = game ? game : new WholeGame(ns);
+		this.log = ns.tprint;
+		if (ns.flags(cmdlineflags)['logbox']) {
+			this.log = this.game.createSidebarItem("Hacknet", "", "H").log;
+		}
 	}
 	async loop(goal = "Sell for Money") {
-		while ((4 <= (await Do(this.ns, 'ns.hacknet.numHashes', ''))) && ((await (this.game.Player.money)) < 1000000 * Math.floor((await Do(this.ns, 'ns.hacknet.numHashes', '')) / 4))) {
-			await Do(this.ns, "ns.hacknet.spendHashes", "Sell for Money");
-		}
+//		while ((4 <= (await Do(this.ns, 'ns.hacknet.numHashes', ''))) && ((await (this.game.Player.money)) < 1000000 * Math.floor((await Do(this.ns, 'ns.hacknet.numHashes', '')) / 4))) {
+//			await Do(this.ns, "ns.hacknet.spendHashes", "Sell for Money");
+//		}
 		if (goal == "Sell for Money") {
 			await Do(this.ns, "ns.hacknet.spendHashes", goal, "", Math.floor((await Do(this.ns, 'ns.hacknet.numHashes', '')) / 4));
+			this.log("Spent hashes for cash")
 		} else {
-			while (await Do(this.ns, "ns.hacknet.spendHashes", goal));
+			while (await Do(this.ns, "ns.hacknet.spendHashes", goal))
+			this.log("Spent hashes on " + goal);
 		}
 		let didSomething = true;
 		let mults = (await Do(this.ns, "ns.getPlayer", "")).mults.hacknet_node_money;
@@ -2430,7 +2439,7 @@ export class Hacknet {
 			shoppingCart = shoppingCart.filter(x => x[1] != null);
 			shoppingCart = shoppingCart.sort((a, b) => { return a[0] - b[0]; });
 			if (shoppingCart.length > 0) {
-				this.ns.tprint(shoppingCart[0]);
+				this.log(shoppingCart[0].slice(2).join(" "));
 				await Do(this.ns, ...(shoppingCart[0].slice(2)));
 				didSomething = true;
 			}
@@ -2451,7 +2460,8 @@ export class Hacknet {
 			}
 		}
 		if ((await Do(this.ns, "ns.hacknet.numHashes")) * 2 > (await Do(this.ns, "ns.hacknet.hashCapacity")) && !done) {
-			Do(this.ns, "ns.hacknet.spendHashes", "Sell for Money");
+			if (Do(this.ns, "ns.hacknet.spendHashes", "Sell for Money"))
+			this.log("Sold four hashes for cash.");
 		}
 		if (goal == "Sell for Money") {
 			await Do(this.ns, "ns.hacknet.spendHashes", goal, "", Math.floor((await Do(this.ns, 'ns.hacknet.numHashes', '')) / 4));
@@ -2779,10 +2789,14 @@ export class Player {
 	}
 	async hospitalizeIfNeeded() {
 		let hp = (await Do(this.ns, "ns.getPlayer")).hp;
-		while (hp.current / hp.max < 1) {
-			await Do(this.ns, "ns.singularity.hospitalize");
-			hp = (await Do(this.ns, "ns.getPlayer")).hp;
+		if (hp.current / hp.max < 1) {
+			while (hp.current / hp.max < 1) {
+				await Do(this.ns, "ns.singularity.hospitalize");
+				hp = (await Do(this.ns, "ns.getPlayer")).hp;
+			}
+			return true;
 		}
+		return false;
 	}
 	get skills() {
 		return (async () => {
@@ -2863,24 +2877,30 @@ export class Player {
 		return;
 	}
 	async joinFactionIfInvited(faction) {
-		if ((await Do(this.ns, "ns.singularity.checkFactionInvitations")).includes(faction))
+		if ((await Do(this.ns, "ns.singularity.checkFactionInvitations")).includes(faction)) {
 			await Do(this.ns, "ns.singularity.joinFaction", faction);
-		return (await Do(this.ns, "ns.getPlayer")).factions.includes(faction);
+			return true;
+		}
+		return false;
 	}
 	async trainCombatStatsUpTo(goal, withSleeves = false) {
+		let didSomething = false;
 		for (let stat of ["Strength", "Defense", "Dexterity", "Agility"]) {
 			if (withSleeves && (await (this.game.Sleeves.numSleeves)) > 0) {
-			if (goal > ((await Do(this.ns, "ns.getPlayer")).skills[stat.toLowerCase()])) {
-				await (this.game.Sleeves.trainWithMe(stat));
-			await this.Gym(stat, "Powerhouse Gym", false);
+				if (goal > ((await Do(this.ns, "ns.getPlayer")).skills[stat.toLowerCase()])) {
+					await (this.game.Sleeves.trainWithMe(stat));
+					await this.Gym(stat, "Powerhouse Gym", false);
+					didSomething = true;
+				}
 			}
-			}
-			while (goal > ((await Do(this.ns, "ns.getPlayer")).skills[stat.toLowerCase()]));
+			while (goal > ((await Do(this.ns, "ns.getPlayer")).skills[stat.toLowerCase()]))
+				didSomething = true;
 			await this.ns.sleep(1000);
 		}
 		if (withSleeves) {
 			await this.game.Sleeves.deShock();
 		}
+		return didSomething;
 	}
 }
 
