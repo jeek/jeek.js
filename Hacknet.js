@@ -51,6 +51,9 @@ export class Hacknet {
 				done = false;
 			}
 		}
+		if ((await Do(this.ns, "ns.hacknet.numHashes")) * 2 > (await Do(this.ns, "ns.hacknet.hashCapacity")) && !done) {
+			Do(this.ns, "ns.hacknet.spendHashes", goal, "Sell for Money");
+		}
 		if (goal == "Sell for Money") {
 			await Do(this.ns, "ns.hacknet.spendHashes", goal, "", Math.floor((await Do(this.ns, 'ns.hacknet.numHashes', '')) / 4));
 		} else {

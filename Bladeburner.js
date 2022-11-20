@@ -1,6 +1,7 @@
 import { Do, DoAll, DoAllComplex } from "Do.js";
 import { makeNewWindow } from "Windows.js";
 import { WholeGame } from "WholeGame.js";
+import { CITIES } from "data.js";
 
 export class Bladeburner {
 	constructor(ns, game) {
