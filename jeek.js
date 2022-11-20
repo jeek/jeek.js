@@ -88,6 +88,10 @@ export class Bladeburner {
 	constructor(ns, game) {
 		this.ns = ns;
 		this.game = game ? game : new WholeGame(ns);
+		this.log = ns.tprint;
+		if (ns.flags(cmdlineflags)['logbox']) {
+			this.log = this.game.createSidebarItem("Bladeburner", "", "B").log;
+		}
 	}
 	async start() {
 		return await Do(this.ns, "ns.bladeburner.joinBladeburnerDivision");
@@ -105,7 +109,10 @@ export class Bladeburner {
 		return false;
 	}
 	async UpgradeSkills() {
-		while (await Do(this.ns, "ns.bladeburner.upgradeSkill", "Overclock")) this.ns.toast("Upgraded Overclock");
+		while (await Do(this.ns, "ns.bladeburner.upgradeSkill", "Overclock")) {
+			this.ns.toast("Upgraded Overclock");
+			return true;
+		}
 		let skillmods = { "Blade's Intuition": 3, "Digital Observer": 4 };
 		let nextOp = await (this.nextBlackOp);
 		if ((1 > (await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Operation", "Assassination"))[1]) || (1 > (await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Black Op", "Operation Ultron"))[0])) {
@@ -131,8 +138,15 @@ export class Bladeburner {
 			currentrank[skill] -= 1;
 		}
 		upgrade = Object.entries(upgrade).sort((a, b) => -a[1] + b[1])[0][0];
-		while (await Do(this.ns, "ns.bladeburner.upgradeSkill", upgrade)) this.ns.toast("Upgraded " + upgrade);
-		while (await Do(this.ns, "ns.bladeburner.upgradeSkill", "Hyperdrive")) this.ns.toast("Upgraded Hyperdrive");
+		while (await Do(this.ns, "ns.bladeburner.upgradeSkill", upgrade)) {
+			this.log("Upgraded " + upgrade);
+			return true;
+		}
+		while (await Do(this.ns, "ns.bladeburner.upgradeSkill", "Hyperdrive")) {
+			this.log("Upgraded Hyperdrive");
+			return true;
+		}
+		return false;
 	}
 	async hardStop() {
 		await Do(this.ns, "ns.singularity.stopAction");
@@ -228,10 +242,10 @@ export class Bladeburner {
 					for (let i = 0; i < await (this.game.Sleeves.numSleeves); i++) {
 						if (((await Do(this.ns, "ns.sleeve.getInformation", i)).city) != ((await Do(this.ns, "ns.sleeve.getInformation", 0)).city))
 							wildcard = false;
-							try {
-						if (((await Do(this.ns, "ns.sleeve.getTask", i)).actionName) != ((await Do(this.ns, "ns.sleeve.getTask", 0))).actionName)
-							wildcard = false;
-							} catch { }
+						try {
+							if (((await Do(this.ns, "ns.sleeve.getTask", i)).actionName) != ((await Do(this.ns, "ns.sleeve.getTask", 0))).actionName)
+								wildcard = false;
+						} catch { }
 					}
 					if (wildcard) {
 						for (let i = 0; i < 1; i++) {
@@ -310,10 +324,10 @@ export class Bladeburner {
 					for (let i = 0; i < await (this.game.Sleeves.numSleeves); i++) {
 						if (((await Do(this.ns, "ns.sleeve.getInformation", i)).city) != ((await Do(this.ns, "ns.sleeve.getInformation", 0)).city))
 							wildcard = false;
-							try {
-						if (((await Do(this.ns, "ns.sleeve.getTask", i)).actionName) != ((await Do(this.ns, "ns.sleeve.getTask", 0))).actionName)
-							wildcard = false;
-							} catch { }
+						try {
+							if (((await Do(this.ns, "ns.sleeve.getTask", i)).actionName) != ((await Do(this.ns, "ns.sleeve.getTask", 0))).actionName)
+								wildcard = false;
+						} catch { }
 					}
 					if (wildcard) {
 						for (let i = 0; i < 1; i++) {
@@ -362,7 +376,7 @@ export class Bladeburner {
 		answer += "</TABLE>";
 		let currentAction = await Do(this.ns, "ns.bladeburner.getCurrentAction");
 		if (currentAction.type != "Idle") {
-			answer += "<CENTER><H1>" + currentAction.type.replace("BlackOp", "Black Op") + ": " + currentAction.name + " " + timeFormat(((await Do(this.ns, "ns.bladeburner.getActionTime", currentAction.type, currentAction.name))-(await Do(this.ns, "ns.bladeburner.getActionCurrentTime")))/1000) + "</H1></CENTER><BR>";
+			answer += "<CENTER><H1>" + currentAction.type.replace("BlackOp", "Black Op") + ": " + currentAction.name + " " + timeFormat(((await Do(this.ns, "ns.bladeburner.getActionTime", currentAction.type, currentAction.name)) - (await Do(this.ns, "ns.bladeburner.getActionCurrentTime"))) / 1000) + "</H1></CENTER><BR>";
 			answer += "<TABLE WIDTH=100% BORDER=0><TR>";
 			let percentage = 100 * (await Do(this.ns, "ns.bladeburner.getActionCurrentTime")) / (await Do(this.ns, "ns.bladeburner.getActionTime", currentAction.type, currentAction.name));
 			answer += "<TD WIDTH=" + Math.floor(percentage).toString() + "% style='background-color:" + this.ns.ui.getTheme()['success'] + "'>&nbsp;</TD><TD style='background-color:" + this.ns.ui.getTheme()['info'] + "'>&nbsp;</TD>";
@@ -3602,7 +3616,6 @@ export class StockMarket {
 	}
 }
 
-// Contains a port of box.js by Snarling https://github.com/Snarling/bitburner-scripts/tree/main/box
 export class WholeGame {
 	constructor(ns) {
 		this.ns = ns;
@@ -3620,7 +3633,7 @@ export class WholeGame {
 		this.Bladeburner = new Bladeburner(ns, this);
 		this.Sleeves = new Sleeves(ns, this);
 		if (ns.flags(cmdlineflags)['logbox']) {
-			let sidebar = this.doc.querySelector(".sb");
+			this.sidebar = this.doc.querySelector(".sb");
 			this.css = `body{--prilt:` + this.ns.ui.getTheme()['primarylight'] + `;--pri:` + this.ns.ui.getTheme()['primary'] + `;--pridk:` + this.ns.ui.getTheme()['primarydark'] + `;--successlt:` + this.ns.ui.getTheme()['successlight'] + `;--success:` + this.ns.ui.getTheme()['success'] + `;--successdk:` + this.ns.ui.getTheme()['successdark'] + `;--errlt:` + this.ns.ui.getTheme()['errorlight'] + `;--err:` + this.ns.ui.getTheme()['error'] + `;--errdk:` + this.ns.ui.getTheme()['errordark'] + `;--seclt:` + this.ns.ui.getTheme()['secondarylight'] + `;--sec:` + this.ns.ui.getTheme()['secondary'] + `;--secdk:` + this.ns.ui.getTheme()['secondarydark'] + `;--warnlt:` + this.ns.ui.getTheme()['warninglight'] + `;--warn:` + this.ns.ui.getTheme()['warning'] + `;--warndk:` + this.ns.ui.getTheme()['warningdark'] + `;--infolt:` + this.ns.ui.getTheme()['infolight'] + `;--info:` + this.ns.ui.getTheme()['info'] + `;--infodk:` + this.ns.ui.getTheme()['infodark'] + `;--welllt:` + this.ns.ui.getTheme()['welllight'] + `;--well:` + this.ns.ui.getTheme()['well'] + `;--white:#fff;--black:#000;--hp:` + this.ns.ui.getTheme()['hp'] + `;--money:` + this.ns.ui.getTheme()['money'] + `;--hack:` + this.ns.ui.getTheme()['hack'] + `;--combat:` + this.ns.ui.getTheme()['combat'] + `;--cha:` + this.ns.ui.getTheme()['cha'] + `;--int:` + this.ns.ui.getTheme()['int'] + `;--rep:` + this.ns.ui.getTheme()['rep'] + `;--disabled:` + this.ns.ui.getTheme()['disabled'] + `;--bgpri:` + this.ns.ui.getTheme()['backgroundprimary'] + `;--bgsec:` + this.ns.ui.getTheme()['backgroundsecondary'] + `;--button:` + this.ns.ui.getTheme()['button'] + `;--ff:"` + this.ns.ui.getStyles()['fontFamily'] + `";overflow:hidden;display:flex}#root{flex:1 1 calc(100vw - 500px);overflow:scroll}.sb{font:12px var(--ff);color:var(--pri);background:var(--bgsec);overflow:hidden scroll;width:499px;min-height:100%;border-left:1px solid var(--welllt)}.sb *{vertical-align:middle;margin:0;font:inherit}.sb.c{width:45px}.sb.t, .sb.t>div{transition:height 200ms, width 200ms, color 200ms}.sbitem,.box{overflow:hidden;min-height:28px;max-height:90%}.sbitem{border-top:1px solid var(--welllt);resize:vertical;width:unset !important}.sbitem.c{color:var(--sec)}.box{position:fixed;width:min-content;min-width:min-content;resize:both;background:var(--bgsec)}.box.c{height:unset !important;width:unset !important;background:none}.head{display:flex;white-space:pre;font-weight:bold;user-select:none;height:28px;align-items:center}:is(.sb,.sbitem)>.head{direction:rtl;cursor:pointer;padding:3px 0px}.box>.head{background:var(--pri);color:var(--bgpri);padding:0px 3px;cursor:move}.body{font-size:12px;flex-direction:column;height:calc(100% - 31px)}.flex,:not(.noflex)>.body{display:flex}.flex>*,.body>*{flex:1 1 auto}.box>.body{border:1px solid var(--welllt)}.sb .title{margin:0 auto;font-size:14px;line-height:}.sbitem .close{display:none}.c:not(.sb),.c>.sbitem{height:28px !important;resize:none}.box.c>.body{display:none}.box.prompt{box-shadow:0 0 0 10000px #0007;min-width:400px}.box.prompt>.head>.icon{display:none}.sb .contextMenu{opacity:0.95;resize:none;background:var(--bgpri)}.sb .contextMenu .head{display:none}.sb .contextMenu .body{height:unset;border-radius:5px}.sb .icon{cursor:pointer;font:25px "codicon";line-height:0.9;display:flex;align-items:center}.sb .icon span{display:inline-block;font:25px -ff;width:25px;text-align:center}.sb .icon svg{height:21px;width:21px;margin:2px}:is(.sb,.sbitem)>.head>.icon{padding:0px 10px}.c>.head>.collapser{transform:rotate(180deg)}.sb :is(input,select,button,textarea){color:var(--pri);outline:none;border:none;white-space:pre}.sb :is(textarea,.log){white-space:pre-wrap;background:none;padding:0px;overflow-y:scroll}.sb :is(input,select){padding:3px;background:var(--well);border-bottom:1px solid var(--prilt);transition:border-bottom 250ms}.sb input:hover{border-bottom:1px solid var(--black)}.sb input:focus{border-bottom:1px solid var(--prilt)}.sb :is(button,input[type=checkbox]){background:var(--button);transition:background 250ms;border:1px solid var(--well)}.sb :is(button,input[type=checkbox]):hover{background:var(--bgsec)}.sb :is(button,input[type=checkbox]):focus, .sb select{border:1px solid var(--sec)}.sb button{padding:3px 6px;user-select:none}.sb .ts{color:var(--infolt)}.sb input[type=checkbox]{appearance:none;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px}.sb input[type=checkbox]:checked::after{font:22px codicon;content:""}.g2{display:grid;grid:auto-flow auto / auto auto;gap:6px;margin:5px;place-items:center}.g2>.l{justify-self:start}.g2>.r{justify-self:end}.g2>.f{grid-column:1 / span 2;text-align:center}.hidden, .tooltip{display:none}*:hover>.tooltip{display:block;position:absolute;left:-5px;bottom:calc(100% + 5px);border:1px solid var(--welllt);background:var(--bgsec);color:var(--pri);font:14px var(--ff);padding:5px;white-space:pre}.nogrow{flex:0 1 auto !important}`;
 			if (!this.sidebar) {
 				// {"primarylight":"#0f0","primary":"#0c0","primarydark":"#090","successlight":"#0f0","success":"#0c0","successdark":"#090","errorlight":"#f00","error":"#c00","errordark":"#900","secondarylight":"#AAA","secondary":"#888","secondarydark":"#666","warninglight":"#ff0","warning":"#cc0","warningdark":"#990","infolight":"#69f","info":"#36c","infodark":"#039","welllight":"#444","well":"#222","white":"#fff","black":"#000","hp":"#dd3434","money":"#ffd700","hack":"#adff2f","combat":"#faffdf","cha":"#a671d1","int":"#6495ed","rep":"#faffdf","disabled":"#66cfbc","backgroundprimary":"#000","backgroundsecondary":"#000","button":"#333"};
