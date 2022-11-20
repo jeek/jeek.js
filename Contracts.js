@@ -564,7 +564,10 @@ export class Contracts {
 		this.game = game ? game : new WholeGame(ns);
 		this.contracts = {};
 		this.times = {};
-	}
+		this.log = ns.tprint;
+		if (ns.flags(cmdlineflags)['logbox']) {
+			this.log = this.game.createSidebarItem("Contracts", "", "C").log;
+		}	}
 	async list() {
 		//		this['window'] = this['window'] || await makeNewWindow("Contracts", this.ns.ui.getTheme())
 		let files = [];
@@ -629,21 +632,21 @@ export class Contracts {
 				}
 				if (!done) {
 					if (this.contracts[contract].type === types[0]) {
-						this.ns.tprint("Starting " + types[0] + " on " + this.contracts[contract].server);
+						this.log("Starting " + types[0] + " on " + this.contracts[contract].server);
 						await this.ns.sleep(0);
 						let starttime = Date.now();
 						if (await Do(this.ns, "ns.codingcontract.attempt", types[1](this.contracts[contract].data, this.ns), contract, this.contracts[contract].server)) {
 							delete this.contracts[contract];
-							this.ns.toast("Succeeded at " + types[0]);
+							this.log("Succeeded at " + types[0]);
 							done = true;
 						} else {
-							this.ns.toast("Failed at " + types[0]);
-							this.ns.tprint("Failed at " + types[0], " ", types[1](this.contracts[contract].data, this.ns));
+							this.log("Failed at " + types[0]);
+							this.log("Failed at " + types[0], " ", types[1](this.contracts[contract].data, this.ns));
 							this.ns.exit();
 						}
 						this.times[types[0]].push(Date.now() - starttime);
-						this.ns.toast(types[0] + " average time: " + (this.times[types[0]].reduce((a, b) => a + b) / this.times[types[0]].length).toString());
-						this.ns.tprint(types[0] + " average time: " + (this.times[types[0]].reduce((a, b) => a + b) / this.times[types[0]].length).toString());
+						this.log(types[0] + " average time: " + (this.times[types[0]].reduce((a, b) => a + b) / this.times[types[0]].length).toString());
+						this.log(types[0] + " average time: " + (this.times[types[0]].reduce((a, b) => a + b) / this.times[types[0]].length).toString());
 					}
 				}
 			}

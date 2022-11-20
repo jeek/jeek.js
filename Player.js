@@ -25,10 +25,14 @@ export class Player {
 	}
 	async hospitalizeIfNeeded() {
 		let hp = (await Do(this.ns, "ns.getPlayer")).hp;
-		while (hp.current / hp.max < 1) {
-			await Do(this.ns, "ns.singularity.hospitalize");
-			hp = (await Do(this.ns, "ns.getPlayer")).hp;
+		if (hp.current / hp.max < 1) {
+			while (hp.current / hp.max < 1) {
+				await Do(this.ns, "ns.singularity.hospitalize");
+				hp = (await Do(this.ns, "ns.getPlayer")).hp;
+			}
+			return true;
 		}
+		return false;
 	}
 	get skills() {
 		return (async () => {
@@ -109,23 +113,29 @@ export class Player {
 		return;
 	}
 	async joinFactionIfInvited(faction) {
-		if ((await Do(this.ns, "ns.singularity.checkFactionInvitations")).includes(faction))
+		if ((await Do(this.ns, "ns.singularity.checkFactionInvitations")).includes(faction)) {
 			await Do(this.ns, "ns.singularity.joinFaction", faction);
-		return (await Do(this.ns, "ns.getPlayer")).factions.includes(faction);
+			return true;
+		}
+		return false;
 	}
 	async trainCombatStatsUpTo(goal, withSleeves = false) {
+		let didSomething = false;
 		for (let stat of ["Strength", "Defense", "Dexterity", "Agility"]) {
 			if (withSleeves && (await (this.game.Sleeves.numSleeves)) > 0) {
-			if (goal > ((await Do(this.ns, "ns.getPlayer")).skills[stat.toLowerCase()])) {
-				await (this.game.Sleeves.trainWithMe(stat));
-			await this.Gym(stat, "Powerhouse Gym", false);
+				if (goal > ((await Do(this.ns, "ns.getPlayer")).skills[stat.toLowerCase()])) {
+					await (this.game.Sleeves.trainWithMe(stat));
+					await this.Gym(stat, "Powerhouse Gym", false);
+					didSomething = true;
+				}
 			}
-			}
-			while (goal > ((await Do(this.ns, "ns.getPlayer")).skills[stat.toLowerCase()]));
+			while (goal > ((await Do(this.ns, "ns.getPlayer")).skills[stat.toLowerCase()]))
+				didSomething = true;
 			await this.ns.sleep(1000);
 		}
 		if (withSleeves) {
 			await this.game.Sleeves.deShock();
 		}
+		return didSomething;
 	}
 }
