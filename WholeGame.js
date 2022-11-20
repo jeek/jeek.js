@@ -1,4 +1,4 @@
-import { Augmmentations } from "Augmentations.js";
+import { Augmentations } from "Augmentations.js";
 import { Bladeburner }  from "Bladeburner.js";
 import { CacheServer } from "CacheServer.js";
 import { Casino } from "Casino.js";
@@ -10,9 +10,9 @@ import { Jeekipedia } from "Jeekipedia.js";
 import { Jobs } from "Jobs.js";
 import { Player } from "Player.js";
 import { ProcessList } from "ProcessList.js";
-import { Server } from "Server.js";
+import { Servers } from "Servers.js";
 import { Sleeves } from "Sleeves.js";
-import { Stockmarket } from "StockMarket.js";
+import { StockMarket } from "StockMarket.js";
 import "Windows.js";
 import "Worker.js";
 
