@@ -1,4 +1,4 @@
-import { Do } from "Do.js;
+import { Do } from "Do.js";
 import "killModal.js";
 
 export class Casino {

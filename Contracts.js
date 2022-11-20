@@ -1,4 +1,4 @@
-import { Do } from "Do.js;
+import { Do } from "Do.js";
 import { makeNewWindow } from "Windows.js";
 import { WholeGame } from "WholeGame.js";
 
