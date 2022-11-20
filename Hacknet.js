@@ -5,15 +5,21 @@ export class Hacknet {
 	constructor(ns, game) {
 		this.ns = ns;
 		this.game = game ? game : new WholeGame(ns);
+		this.log = ns.tprint;
+		if (ns.flags(cmdlineflags)['logbox']) {
+			this.log = this.game.createSidebarItem("Hacknet", "", "H").log;
+		}
 	}
 	async loop(goal = "Sell for Money") {
-		while ((4 <= (await Do(this.ns, 'ns.hacknet.numHashes', ''))) && ((await (this.game.Player.money)) < 1000000 * Math.floor((await Do(this.ns, 'ns.hacknet.numHashes', '')) / 4))) {
-			await Do(this.ns, "ns.hacknet.spendHashes", "Sell for Money");
-		}
+//		while ((4 <= (await Do(this.ns, 'ns.hacknet.numHashes', ''))) && ((await (this.game.Player.money)) < 1000000 * Math.floor((await Do(this.ns, 'ns.hacknet.numHashes', '')) / 4))) {
+//			await Do(this.ns, "ns.hacknet.spendHashes", "Sell for Money");
+//		}
 		if (goal == "Sell for Money") {
 			await Do(this.ns, "ns.hacknet.spendHashes", goal, "", Math.floor((await Do(this.ns, 'ns.hacknet.numHashes', '')) / 4));
+			this.log("Spent hashes for cash")
 		} else {
-			while (await Do(this.ns, "ns.hacknet.spendHashes", goal));
+			while (await Do(this.ns, "ns.hacknet.spendHashes", goal))
+			this.log("Spent hashes on " + goal);
 		}
 		let didSomething = true;
 		let mults = (await Do(this.ns, "ns.getPlayer", "")).mults.hacknet_node_money;
@@ -31,7 +37,7 @@ export class Hacknet {
 			shoppingCart = shoppingCart.filter(x => x[1] != null);
 			shoppingCart = shoppingCart.sort((a, b) => { return a[0] - b[0]; });
 			if (shoppingCart.length > 0) {
-				this.ns.tprint(shoppingCart[0]);
+				this.log(shoppingCart[0].slice(2).join(" "));
 				await Do(this.ns, ...(shoppingCart[0].slice(2)));
 				didSomething = true;
 			}
@@ -52,7 +58,8 @@ export class Hacknet {
 			}
 		}
 		if ((await Do(this.ns, "ns.hacknet.numHashes")) * 2 > (await Do(this.ns, "ns.hacknet.hashCapacity")) && !done) {
-			Do(this.ns, "ns.hacknet.spendHashes", "Sell for Money");
+			if (Do(this.ns, "ns.hacknet.spendHashes", "Sell for Money"))
+			this.log("Sold four hashes for cash.");
 		}
 		if (goal == "Sell for Money") {
 			await Do(this.ns, "ns.hacknet.spendHashes", goal, "", Math.floor((await Do(this.ns, 'ns.hacknet.numHashes', '')) / 4));
