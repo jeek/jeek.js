@@ -1,3 +1,6 @@
+import { Do, DoAll } from "Do.js;
+import { WholeGame } from "WholeGame.js";
+
 export class Sleeves {
 	constructor(ns, game) {
 		this.ns = ns;

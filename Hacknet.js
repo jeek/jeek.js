@@ -1,3 +1,6 @@
+import { Do } from "Do.js;
+import { WholeGame } from "WholeGame.js";
+
 export class Hacknet {
 	constructor(ns, game) {
 		this.ns = ns;

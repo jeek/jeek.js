@@ -39,7 +39,7 @@ export let FACTIONS = {
 	"Shadows of Anarchy": { "abbrev": "SoA" }
 }
 
-let stockSymbolToCompany = {
+export let stockSymbolToCompany = {
 	"ECP": "ECorp",
 	"MGCP": "MegaCorp",
 	"BLD": "Blade Industries",
@@ -75,7 +75,7 @@ let stockSymbolToCompany = {
 	"TITN": "Titan Laboratories"
 };
 
-let LOCATIONS = {
+export let LOCATIONS = {
 	"AeroCorp": {
 		"city": "Aevum"
 	},

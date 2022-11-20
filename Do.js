@@ -9,7 +9,7 @@ export function hashCode(s) {
 }
 
 // Write the content to the file if it's different than what is already there
-function writeIfNotSame(ns, filename, content) {
+export function writeIfNotSame(ns, filename, content) {
 	if (ns.read(filename) != content) {
 		ns.write(filename, content, 'w');
 	}

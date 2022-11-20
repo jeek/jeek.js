@@ -1,3 +1,6 @@
+import { WholeGame } from "WholeGame.js";
+import { Server } from "Server.js";
+
 export class CacheServer {
 	constructor(ns, name = "home", game) {
 		this.ns = ns;

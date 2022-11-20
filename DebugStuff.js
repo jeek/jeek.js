@@ -1,3 +1,5 @@
+import { WholeGame } from "WholeGame.js";
+
 export class DebugStuff {
 	constructor(ns, game) {
 		this.ns = ns;

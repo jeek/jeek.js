@@ -1,3 +1,6 @@
+import { Do } from "Do.js;
+import { WholeGame } from "WholeGame.js";
+
 export class Server {
 	constructor(ns, name = "home", game) {
 		this.ns = ns;

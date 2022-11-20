@@ -1,3 +1,7 @@
+import { Do, DoAll, DoAllComplex } from "Do.js;
+import { makeNewWindow } from "Windows.js";
+import { WholeGame } from "WholeGame.js";
+
 const stockMapping = {
 	"ECP": "ecorp",
 	"MGCP": "megacorp",

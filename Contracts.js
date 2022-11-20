@@ -1,3 +1,7 @@
+import { Do } from "Do.js;
+import { makeNewWindow } from "Windows.js";
+import { WholeGame } from "WholeGame.js";
+
 export function minpathsum(data) {
 	while (data.length > 1) {
 		for (let i = 0; i < (data[data.length - 2]).length; i++) {

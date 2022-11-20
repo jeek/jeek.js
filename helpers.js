@@ -1,3 +1,5 @@
+import { writeIfNotSame } from "Do.js";
+
 function helperScripts(ns) {
 	writeIfNotSame(ns, "/temp/hack.js", `export async function main(ns) {await ns.hack(ns.args[0]);}`);
 	writeIfNotSame(ns, "/temp/hackstock.js", `export async function main(ns) {await ns.hack(ns.args[0], {"stock": true});}`);

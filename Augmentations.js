@@ -1,3 +1,7 @@
+import { Do, DoAll } from "Do.js;
+import { makeNewWindow } from "Windows.js";
+import { WholeGame } from "WholeGame.js";
+
 export class Augmentations {
 	constructor(ns, game) {
 		this.ns = ns

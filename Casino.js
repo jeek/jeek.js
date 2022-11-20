@@ -1,4 +1,5 @@
-import "../helpers/killModal.js";
+import { Do } from "Do.js;
+import "killModal.js";
 
 export class Casino {
 	constructor(ns, game) {

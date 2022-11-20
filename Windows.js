@@ -1,6 +1,6 @@
 // Thanks to omuretsu
 let slp = ms => new Promise(r => setTimeout(r, ms));
-let makeNewWindow = async (title = "Default Window Title", theme) => {
+export let makeNewWindow = async (title = "Default Window Title", theme) => {
 	let win = open("steam_appid.txt", title.replaceAll(" ", "_"), "popup=yes,height=200,width=500,left=100,top=100,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,directories=no,status=no");
 	await slp(1000);
 	let doc = win["document"];
