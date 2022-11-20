@@ -7,6 +7,10 @@ export class Bladeburner {
 	constructor(ns, game) {
 		this.ns = ns;
 		this.game = game ? game : new WholeGame(ns);
+		this.log = ns.tprint;
+		if (ns.flags(cmdlineflags)['logbox']) {
+			this.log = this.game.createSidebarItem("Bladeburner", "", "B").log;
+		}
 	}
 	async start() {
 		return await Do(this.ns, "ns.bladeburner.joinBladeburnerDivision");
@@ -24,7 +28,10 @@ export class Bladeburner {
 		return false;
 	}
 	async UpgradeSkills() {
-		while (await Do(this.ns, "ns.bladeburner.upgradeSkill", "Overclock")) this.ns.toast("Upgraded Overclock");
+		while (await Do(this.ns, "ns.bladeburner.upgradeSkill", "Overclock")) {
+			this.ns.toast("Upgraded Overclock");
+			return true;
+		}
 		let skillmods = { "Blade's Intuition": 3, "Digital Observer": 4 };
 		let nextOp = await (this.nextBlackOp);
 		if ((1 > (await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Operation", "Assassination"))[1]) || (1 > (await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Black Op", "Operation Ultron"))[0])) {
@@ -50,8 +57,15 @@ export class Bladeburner {
 			currentrank[skill] -= 1;
 		}
 		upgrade = Object.entries(upgrade).sort((a, b) => -a[1] + b[1])[0][0];
-		while (await Do(this.ns, "ns.bladeburner.upgradeSkill", upgrade)) this.ns.toast("Upgraded " + upgrade);
-		while (await Do(this.ns, "ns.bladeburner.upgradeSkill", "Hyperdrive")) this.ns.toast("Upgraded Hyperdrive");
+		while (await Do(this.ns, "ns.bladeburner.upgradeSkill", upgrade)) {
+			this.log("Upgraded " + upgrade);
+			return true;
+		}
+		while (await Do(this.ns, "ns.bladeburner.upgradeSkill", "Hyperdrive")) {
+			this.log("Upgraded Hyperdrive");
+			return true;
+		}
+		return false;
 	}
 	async hardStop() {
 		await Do(this.ns, "ns.singularity.stopAction");
@@ -147,10 +161,10 @@ export class Bladeburner {
 					for (let i = 0; i < await (this.game.Sleeves.numSleeves); i++) {
 						if (((await Do(this.ns, "ns.sleeve.getInformation", i)).city) != ((await Do(this.ns, "ns.sleeve.getInformation", 0)).city))
 							wildcard = false;
-							try {
-						if (((await Do(this.ns, "ns.sleeve.getTask", i)).actionName) != ((await Do(this.ns, "ns.sleeve.getTask", 0))).actionName)
-							wildcard = false;
-							} catch { }
+						try {
+							if (((await Do(this.ns, "ns.sleeve.getTask", i)).actionName) != ((await Do(this.ns, "ns.sleeve.getTask", 0))).actionName)
+								wildcard = false;
+						} catch { }
 					}
 					if (wildcard) {
 						for (let i = 0; i < 1; i++) {
@@ -229,10 +243,10 @@ export class Bladeburner {
 					for (let i = 0; i < await (this.game.Sleeves.numSleeves); i++) {
 						if (((await Do(this.ns, "ns.sleeve.getInformation", i)).city) != ((await Do(this.ns, "ns.sleeve.getInformation", 0)).city))
 							wildcard = false;
-							try {
-						if (((await Do(this.ns, "ns.sleeve.getTask", i)).actionName) != ((await Do(this.ns, "ns.sleeve.getTask", 0))).actionName)
-							wildcard = false;
-							} catch { }
+						try {
+							if (((await Do(this.ns, "ns.sleeve.getTask", i)).actionName) != ((await Do(this.ns, "ns.sleeve.getTask", 0))).actionName)
+								wildcard = false;
+						} catch { }
 					}
 					if (wildcard) {
 						for (let i = 0; i < 1; i++) {
@@ -281,7 +295,7 @@ export class Bladeburner {
 		answer += "</TABLE>";
 		let currentAction = await Do(this.ns, "ns.bladeburner.getCurrentAction");
 		if (currentAction.type != "Idle") {
-			answer += "<CENTER><H1>" + currentAction.type.replace("BlackOp", "Black Op") + ": " + currentAction.name + " " + timeFormat(((await Do(this.ns, "ns.bladeburner.getActionTime", currentAction.type, currentAction.name))-(await Do(this.ns, "ns.bladeburner.getActionCurrentTime")))/1000) + "</H1></CENTER><BR>";
+			answer += "<CENTER><H1>" + currentAction.type.replace("BlackOp", "Black Op") + ": " + currentAction.name + " " + timeFormat(((await Do(this.ns, "ns.bladeburner.getActionTime", currentAction.type, currentAction.name)) - (await Do(this.ns, "ns.bladeburner.getActionCurrentTime"))) / 1000) + "</H1></CENTER><BR>";
 			answer += "<TABLE WIDTH=100% BORDER=0><TR>";
 			let percentage = 100 * (await Do(this.ns, "ns.bladeburner.getActionCurrentTime")) / (await Do(this.ns, "ns.bladeburner.getActionTime", currentAction.type, currentAction.name));
 			answer += "<TD WIDTH=" + Math.floor(percentage).toString() + "% style='background-color:" + this.ns.ui.getTheme()['success'] + "'>&nbsp;</TD><TD style='background-color:" + this.ns.ui.getTheme()['info'] + "'>&nbsp;</TD>";
