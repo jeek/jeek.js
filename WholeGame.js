@@ -315,7 +315,6 @@ export class WholeGame {
 					best.push([0, "Black Op", nextBlackOp, "Sector-12"]);
 				}
 			}
-			this.Bladeburner.log(best[best.length - 1].slice(0, 4).join(" "));
 			if (best[best.length - 1][1] != "Black Op") {
 				await Do(this.ns, "ns.bladeburner.setActionAutolevel", best[best.length - 1][1], best[best.length - 1][2], false);
 				if (best[best.length - 1][3] != await Do(this.ns, "ns.bladeburner.getCity")) {
@@ -329,8 +328,9 @@ export class WholeGame {
 			await (this.Bladeburner.hardStop());
 			if (best[best.length - 1][1] == "Black Op") {
 				await this.Sleeves.bbEverybody(null, "Support main sleeve");
-				await Do(this.ns, "ns.bladeburner.setTeamSize", "Black Op", best[best.length - 1][2], numberOfSleeves);
+				await Do(this.ns, "ns.bladeburner.setTeamSize", "Black Op", best[best.length - 1][2], 1000);
 			}
+			this.Bladeburner.log(best[best.length - 1].slice(0, 4).join(" "));
 			await Do(this.ns, "ns.bladeburner.startAction", best[best.length - 1][1], best[best.length - 1][2]);
 			if (best[best.length - 1][1] != "Black Op") {
 				for (let i = 0; i < numberOfSleeves; i++) {
