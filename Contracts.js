@@ -646,7 +646,6 @@ export class Contracts {
 						}
 						this.times[types[0]].push(Date.now() - starttime);
 						this.log(types[0] + " average time: " + (this.times[types[0]].reduce((a, b) => a + b) / this.times[types[0]].length).toString());
-						this.log(types[0] + " average time: " + (this.times[types[0]].reduce((a, b) => a + b) / this.times[types[0]].length).toString());
 					}
 				}
 			}

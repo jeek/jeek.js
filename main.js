@@ -1,6 +1,7 @@
 /** @param {NS} ns */
 
 const cmdlineflags = [
+	["logbox", false], //box.js
 	["roulettestart", false], // Play roulette and buy ram and reset until you can't buy RAM
 	["roulette", false], // Play roulette
 	["contracts", false], // Solve contracts

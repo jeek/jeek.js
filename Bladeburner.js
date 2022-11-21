@@ -29,7 +29,7 @@ export class Bladeburner {
 	}
 	async UpgradeSkills() {
 		while (await Do(this.ns, "ns.bladeburner.upgradeSkill", "Overclock")) {
-			this.ns.toast("Upgraded Overclock");
+			this.log("Upgraded Overclock");
 			return true;
 		}
 		let skillmods = { "Blade's Intuition": 3, "Digital Observer": 4 };
@@ -75,6 +75,7 @@ export class Bladeburner {
 		await Do(this.ns, "ns.bladeburner.stopBladeburnerAction");
 	}
 	async inciteViolenceEverywhere() {
+			this.log("Inciting Violence");
 		for (let city of CITIES) {
 			await Do(this.ns, "ns.bladeburner.switchCity", city);
 			await Do(this.ns, "ns.bladeburner.startAction", "General", "Incite Violence");
@@ -83,6 +84,7 @@ export class Bladeburner {
 	}
 	async recoverIfNecessary(lower = .6, upper = .9) {
 		if (lower > (await Do(this.ns, "ns.bladeburner.getStamina")).reduce((a, b) => a / b)) {
+			this.log("Recovering Stamina...");
 			await this.hardStop();
 			await Do(this.ns, "ns.bladeburner.startAction", "General", "Hyperbolic Regeneration Chamber");
 			await this.game.Sleeves.bbEverybody(await Do(this.ns, "ns.bladeburner.getCity"), "Hyperbolic Regeneration Chamber")
@@ -90,12 +92,14 @@ export class Bladeburner {
 				await this.ns.sleep(1000);
 			}
 			await this.hardStop();
+			this.log("...done");
 			return true;
 		}
 		return false;
 	}
 	async deescalate(goal = 30) {
 		if (goal < (await Do(this.ns, "ns.bladeburner.getCityChaos", await Do(this.ns, "ns.bladeburner.getCity")))) {
+			this.log("Deescalating " + await Do(this.ns, "ns.bladeburner.getCity"));
 			await this.hardStop();
 			await Do(this.ns, "ns.bladeburner.startAction", "General", "Diplomacy");
 			await this.game.Sleeves.bbEverybody(await Do(this.ns, "ns.bladeburner.getCity"), "Diplomacy");
