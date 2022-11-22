@@ -429,7 +429,7 @@ export class Bladeburner {
 		answer += "</TR></TABLE>";
 		this.bbWindow.update(answer);
 	}
-}import { WholeGame } from "WholeGame.js";
+}
 
 export class CacheServer {
 	constructor(ns, name = "home", game) {
