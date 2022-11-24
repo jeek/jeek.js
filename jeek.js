@@ -4253,7 +4253,7 @@ export class StockMarket {
 	}
 	async updateDisplay() {
 		if (this.lastPrice == await Do(this.ns, "ns.stock.getPrice", "ECP")) {
-			await ns.sleep(0);
+			await this.ns.sleep(0);
 			return;
 		}
 		this.lastPrice = await Do(this.ns, "ns.stock.getPrice", "ECP");
