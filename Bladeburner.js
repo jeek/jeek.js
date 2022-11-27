@@ -32,7 +32,15 @@ export class Bladeburner {
 			this.log("Upgraded Overclock");
 			return true;
 		}
-		let skillmods = { "Blade's Intuition": 3, "Digital Observer": 4 };
+		let skillmods = { };
+		if ((1 > (await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Operation", "Assassination"))[1]) || (1 > (await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Black Op", "Operation Daedalus"))[0])) {
+			skillmods["Blade's Intuition"] = 3;
+			skillmods["Digital Observer"] = 4;
+		} else {
+			skillmods["Reaper"] = .1;
+			skillmods["Evasive Systems"] = .1;
+		}
+		skillmods["Hyperdrive"] = 1;
 		let nextOp = await (this.nextBlackOp);
 		if ((1 > (await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Operation", "Assassination"))[1]) || (1 > (await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Black Op", "Operation Ultron"))[0])) {
 			skillmods["Short-Circuit"] = 5.5;
@@ -59,10 +67,6 @@ export class Bladeburner {
 		upgrade = Object.entries(upgrade).sort((a, b) => -a[1] + b[1])[0][0];
 		while (await Do(this.ns, "ns.bladeburner.upgradeSkill", upgrade)) {
 			this.log("Upgraded " + upgrade);
-			return true;
-		}
-		while (await Do(this.ns, "ns.bladeburner.upgradeSkill", "Hyperdrive")) {
-			this.log("Upgraded Hyperdrive");
 			return true;
 		}
 		return false;
