@@ -512,9 +512,11 @@ export async function bn7(Game) {
         await Do(Game.ns, "ns.bladeburner.setTeamSize", "Black Op", best[best.length - 1][2], numberOfSleeves);
         let nextBlackOp = await (Game.Bladeburner.nextBlackOp);
         //Game.ns.tprint(nextBlackOp, " ", (await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Black Op", nextBlackOp)));
-        if ((await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Black Op", "Operation Ultron"))[0] > .99) {
-            if ((await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Black Op", nextBlackOp))[0] > (["Operation Centurion", "Operation Vindictus", "Operation Daedalus"].includes(nextBlackOp) ? .2 : .99)) {
-                best.push([0, "Black Op", nextBlackOp, "Sector-12"]);
+        if ((await Do(Game.ns, "ns.Bladeburner.getRank", "")) >= (await Do(Game.ns, "ns.bladeburner.getBlackOpRank", nextBlackOp))) {
+            if ((await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Black Op", "Operation Ultron"))[0] > .99) {
+                if ((await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Black Op", nextBlackOp))[0] > (["Operation Centurion", "Operation Vindictus", "Operation Daedalus"].includes(nextBlackOp) ? .2 : .99)) {
+                    best.push([0, "Black Op", nextBlackOp, "Sector-12"]);
+                }
             }
         }
         if (best[best.length - 1][1] != "Black Op") {
