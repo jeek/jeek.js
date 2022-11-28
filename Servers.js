@@ -39,6 +39,12 @@ export class Servers {
 		}
 		return result;
 	}
+	async buyDubs() {
+		let servers = await Do(this.ns, "ns.getPurchasedServers", "");
+		let rams = Object.values(await DoAll(this.ns, "ns.getServerMaxRam", servers)).reduce((a, b) => a > b ? a : b, 8) * 2;
+		let maxRam = await Do(this.ns, "ns.getPurchasedServerMaxRam", "");
+		return await Do(this.ns, "ns.purchaseServer", "pserv-" + servers.length.toString(), rams * 2 < maxRam ? rams * 2 : maxRam);
+	}
 	async display() {
 		this['window'] = this['window'] || await makeNewWindow("Servers", this.ns.ui.getTheme());
 		let text = "<TABLE CELLPADDING=0 CELLSPACING = 0 BORDER=1><TR><TH>Name</TD><TH>Popped</TD></TR>";
