@@ -3984,7 +3984,7 @@ export class Servers {
 				}
 			}
 		}
-		for (let server of await this.serverlist) {
+		for (let server of await (this.serverlist)) {
 			if ((await Do(this.ns, "ns.getServer", server)).openPortCount >= (await Do(this.ns, "ns.getServerNumPortsRequired", server))) {
 				await Do(this.ns, "ns.nuke", server);
 			}
