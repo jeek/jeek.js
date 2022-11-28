@@ -12,7 +12,8 @@ const cmdlineflags = [
 	["stockdisplay", false], // Display Stock Info
 	["stockfilter", false], // Only show owned stocks
 	["ps", false],  // Process List
-	["augs", false] // Augmentations
+	["augs", false], // Augmentations
+	["popemall", false] // Get access to all possible servers
 ];
 
 import { WholeGame } from "WholeGame.js"
@@ -23,6 +24,9 @@ export async function main(ns) {
 	var cmdlineargs = ns.flags(cmdlineflags);
 	if (cmdlineargs['roulettestart']) {
 		await Game.roulettestart();
+	}
+	if (cmdlineargs['popemall']) {
+		await Game.Servers.pop_them_all();
 	}
 	if (cmdlineargs['roulette']) {
 		await Game.Casino.roulette();
