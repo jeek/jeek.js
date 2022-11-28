@@ -41,9 +41,21 @@ export class Servers {
 	}
 	async buyDubs() {
 		let servers = await Do(this.ns, "ns.getPurchasedServers", "");
-		let rams = Object.values(await DoAll(this.ns, "ns.getServerMaxRam", servers)).reduce((a, b) => a > b ? a : b, 8) * 2;
 		let maxRam = await Do(this.ns, "ns.getPurchasedServerMaxRam", "");
-		return await Do(this.ns, "ns.purchaseServer", "pserv-" + servers.length.toString(), rams * 2 < maxRam ? rams * 2 : maxRam);
+		if (servers.length == await Do(this.ns, "ns.getPurchasedServerLimit", "")) {
+		    if (maxRam > await Do(this.ns, "ns.getServerMaxRam", servers[0])) {
+				if ((await (this.game.Player.money)) > (await Do(this.ns, "ns.getPurchasedServerCost", maxRam))) {
+					await Do(this.ns, "ns.killall", servers[0]);
+					await Do(this.ns, "ns.deleteServer", servers[0]);
+					return await this.buyDubs();
+				}
+			}
+		}
+		if (servers.length < await Do(this.ns, "ns.getPurchasedServerLimit", "")) {
+			let rams = Object.values(await DoAll(this.ns, "ns.getServerMaxRam", servers)).reduce((a, b) => a > b ? a : b, 4);
+		    return await Do(this.ns, "ns.purchaseServer", "pserv-" + servers.length.toString(), rams * 2 < maxRam ? rams * 2 : maxRam);
+		}
+		return false;
 	}
 	async display() {
 		this['window'] = this['window'] || await makeNewWindow("Servers", this.ns.ui.getTheme());
