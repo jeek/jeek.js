@@ -82,6 +82,9 @@ export class Bladeburner {
 	async bbStop() {
 		await Do(this.ns, "ns.bladeburner.stopBladeburnerAction");
 	}
+	async bbCity(city) {
+		await Do(this.ns, "ns.bladeburner.switchCity", city);
+	}
 	async inciteViolenceEverywhere() {
 			this.log("Inciting Violence");
 		for (let city of CITIES) {
@@ -124,6 +127,15 @@ export class Bladeburner {
 				return ((await Do(this.ns, "ns.bladeburner.getActionCountRemaining", "Contract", "Tracking")) > 0) + ((await Do(this.ns, "ns.bladeburner.getActionCountRemaining", "Contract", "Bounty Hunter")) > 0) + ((await Do(this.ns, "ns.bladeburner.getActionCountRemaining", "Contract", "Retirement")) > 0);
 			} catch (e) {
 				return 0;
+			}
+		})();
+	}
+	get opNames() {
+		return (async () => {
+			try {
+				return await Do(this.ns, "ns.bladeburner.getOperationNames");
+			} catch (e) {
+				return [];
 			}
 		})();
 	}

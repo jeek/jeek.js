@@ -5,22 +5,22 @@ export async function bn7(Game) {
     if (!await Game.Bladeburner.start())
         return false;
     Game.Bladeburner.log("Start.")
-    await Game.Bladeburner.UpgradeSkills();
+    while (await Game.Bladeburner.UpgradeSkills());
     await Game.Sleeves.bbEverybody(null, "Field analysis"); // The null is the city to travel to, not needed in this case
     await Game.Bladeburner.hardStop();
     while ((await (Game.Bladeburner.contractCount)) > 0) {
         if (await Game.Player.hospitalizeIfNeeded())
-                    Game.Bladeburner.log("Hospitalized.."); // HP
-        if(await Game.Player.joinFactionIfInvited("Bladeburners"))
-                    Game.Bladeburner.log("Joined Bladeburned Faction..");
+            Game.Bladeburner.log("Hospitalized.."); // HP
+        if (await Game.Player.joinFactionIfInvited("Bladeburners"))
+            Game.Bladeburner.log("Joined Bladeburned Faction..");
         await Game.Bladeburner.recoverIfNecessary(); // Stamina
-        await Game.Bladeburner.UpgradeSkills();
+        while (await Game.Bladeburner.UpgradeSkills());
         let best = [];
         for (let city of CITIES) {
-            await Do(Game.ns, "ns.bladeburner.switchCity", city);
-            await Game.Bladeburner.deescalate(); // Reduces Chaos to 40 if higher
-            for (let operation of await Do(Game.ns, "ns.bladeburner.getOperationNames")) {
-                if ((await Do(Game.ns, 'ns.bladeburner.getActionCountRemaining', "Operation", operation)) > 0) {
+            await Game.Bladeburner.bbCity(city);
+            await Game.Bladeburner.deescalate(30); // Reduces Chaos to 30 if higher
+            for (let operation of await (Game.Bladeburner.opNames)) {
+                if ((await (Game.Bladeburner.bbOpCount(operation))) > 0) {
                     for (let level = 1; level <= await Do(Game.ns, "ns.bladeburner.getActionMaxLevel", "Operation", operation); level++) {
                         let chance = (await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Operation", operation));
                         if (chance[0] + .01 < chance[1]) {
@@ -52,10 +52,10 @@ export async function bn7(Game) {
                             }
                             if (chance[0] + .01 < chance[1]) {
                                 Game.Bladeburner.log("Field Analysis in " + city);
-                            while (chance[0] + .01 < chance[1]) {
-                                await Game.ns.sleep(await Do(Game.ns, "ns.bladeburner.getActionTime", "General", "Field Analysis"));
-                                chance = await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Contract", contract);
-                            }
+                                while (chance[0] + .01 < chance[1]) {
+                                    await Game.ns.sleep(await Do(Game.ns, "ns.bladeburner.getActionTime", "General", "Field Analysis"));
+                                    chance = await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Contract", contract);
+                                }
                             }
                         }
                         await Do(Game.ns, "ns.bladeburner.setActionLevel", "Contract", contract, level);
@@ -67,11 +67,9 @@ export async function bn7(Game) {
         best = best.filter(x => !["Sting Operation", "Raid"].includes(x[2]));
         best = best.sort((a, b) => a[4] - b[4]);
         best = best.sort((a, b) => { if (a[2] == "Assassination" && b[2] != "Assassination") return 1; if (a[2] != "Assassination" && b[2] == "Assassination") return -1; if (a[1] == "Operation" && b[1] != "Operation") return 1; if (a[1] != "Operation" && b[1] == "Operation") return -1; return 0; });
-        //			best = best.sort((a, b) => { if (a[2] == "Assassination" && b[1] != "Assassination") return 1; if (a[1] != "Assassination" && b[1] == "Assassination") return -1; return 0; });
         await Game.Sleeves.bbEverybody(null, "Support main sleeve");
         await Do(Game.ns, "ns.bladeburner.setTeamSize", "Black Op", best[best.length - 1][2], numberOfSleeves);
         let nextBlackOp = await (Game.Bladeburner.nextBlackOp);
-        //Game.ns.tprint(nextBlackOp, " ", (await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Black Op", nextBlackOp)));
         if ((await Do(Game.ns, "ns.Bladeburner.getRank", "")) >= (await Do(Game.ns, "ns.bladeburner.getBlackOpRank", nextBlackOp))) {
             if ((await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Black Op", "Operation Ultron"))[0] > .99) {
                 if ((await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Black Op", nextBlackOp))[0] > (["Operation Centurion", "Operation Vindictus", "Operation Daedalus"].includes(nextBlackOp) ? .2 : .99)) {
@@ -82,7 +80,7 @@ export async function bn7(Game) {
         if (best[best.length - 1][1] != "Black Op") {
             await Do(Game.ns, "ns.bladeburner.setActionAutolevel", best[best.length - 1][1], best[best.length - 1][2], false);
             if (best[best.length - 1][3] != await Do(Game.ns, "ns.bladeburner.getCity")) {
-                await Do(Game.ns, "ns.bladeburner.switchCity", best[best.length - 1][3]);
+                await Game.Bladeburner.bbCity(best[best.length - 1][3]);
             }
         }
         await Game.Bladeburner.deescalate();
