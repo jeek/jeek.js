@@ -85,6 +85,9 @@ export class Bladeburner {
 	async bbCity(city) {
 		await Do(this.ns, "ns.bladeburner.switchCity", city);
 	}
+	async bbOpCount(operation) {
+		await Do(this.ns, "getActionCountRemaining", "Operation", operation);
+	}
 	async inciteViolenceEverywhere() {
 			this.log("Inciting Violence");
 		for (let city of CITIES) {
