@@ -37,8 +37,10 @@ export class Bladeburner {
 			skillmods["Blade's Intuition"] = 3;
 			skillmods["Digital Observer"] = 4;
 		} else {
-			skillmods["Reaper"] = .1;
-			skillmods["Evasive Systems"] = .1;
+			if ((await Do(this.ns, "ns.bladeburner.getActionTime", "Operation", "Assassination")) > 1000) {
+			    skillmods["Reaper"] = 2;
+			    skillmods["Evasive Systems"] = 4;
+			}
 		}
 		let nextOp = await (this.nextBlackOp);
 		if ((1 > (await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Operation", "Assassination"))[1]) || (1 > (await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Black Op", "Operation Ultron"))[0])) {
