@@ -136,20 +136,22 @@ export class Bladeburner {
 		for (let skill of Object.keys(skillmods)) {
 			current *= skillmods[skill] * (1 + currentrank[skill] / 100);
 		}
-		let upgrade = {};
-		for (let skill of Object.keys(skillmods)) {
-			currentrank[skill] += 1;
-			upgrade[skill] = 1;
-			for (let skill2 of Object.keys(skillmods)) {
-				upgrade[skill] *= skillmods[skill2] * (1 + currentrank[skill2] / 100);
-			}
-			upgrade[skill] = (upgrade[skill] - current) / cost[skill];
-			currentrank[skill] -= 1;
-		}
-		upgrade = Object.entries(upgrade).sort((a, b) => -a[1] + b[1])[0][0];
-		while (await Do(this.ns, "ns.bladeburner.upgradeSkill", upgrade)) {
-			this.log("Upgraded " + upgrade);
-			return true;
+		if (Object.keys(skillmods).length > 0) {
+    		let upgrade = {};
+	    	for (let skill of Object.keys(skillmods)) {
+		    	currentrank[skill] += 1;
+			    upgrade[skill] = 1;
+			    for (let skill2 of Object.keys(skillmods)) {
+				    upgrade[skill] *= skillmods[skill2] * (1 + currentrank[skill2] / 100);
+    			}
+	    		upgrade[skill] = (upgrade[skill] - current) / cost[skill];
+		    	currentrank[skill] -= 1;
+    		}
+	    	upgrade = Object.entries(upgrade).sort((a, b) => -a[1] + b[1])[0][0];
+		    while (await Do(this.ns, "ns.bladeburner.upgradeSkill", upgrade)) {
+		    	this.log("Upgraded " + upgrade);
+			    return true;
+    		}
 		}
 		upgrade = "Hyperdrive";
 		while (await Do(this.ns, "ns.bladeburner.upgradeSkill", upgrade)) {
