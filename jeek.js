@@ -120,7 +120,7 @@ export class Bladeburner {
 		} else {
 			if ((await Do(this.ns, "ns.bladeburner.getActionTime", "Operation", "Assassination")) > 1000) {
 			    skillmods["Reaper"] = 2;
-			    skillmods["Evasive Systems"] = 4;
+			    skillmods["Evasive System"] = 4;
 			}
 		}
 		let nextOp = await (this.nextBlackOp);
@@ -1923,9 +1923,10 @@ export class Contracts {
 						this.log("Starting " + types[0] + " on " + this.contracts[contract].server);
 						await this.ns.sleep(0);
 						let starttime = Date.now();
-						if (await Do(this.ns, "ns.codingcontract.attempt", types[1](this.contracts[contract].data, this.ns), contract, this.contracts[contract].server)) {
+						let success = await Do(this.ns, "ns.codingcontract.attempt", types[1](this.contracts[contract].data, this.ns), contract, this.contracts[contract].server);
+						if (success.length > 0) {
 							delete this.contracts[contract];
-							this.log("Succeeded at " + types[0]);
+							this.log("Succeeded at " + types[0] + ": " + success);
 							done = true;
 						} else {
 							this.log("Failed at " + types[0]);
@@ -4074,11 +4075,11 @@ export class Sleeves {
 				if (sleeves.length == 0) {
 					return [];
 				}
-				let sleevestats = await DoAll(this.ns, "ns.sleeve.getSleeveStats", sleeves);
+				let sleevestats = await DoAll(this.ns, "ns.sleeve.getSleeve", sleeves);
 				if (sleeves.length == 0) {
 					return [];
 				}
-				sleeves = sleeves.sort((b, a) => (100 - sleevestats[a].shock) * sleevestats[a].strength * sleevestats[a].defense * sleevestats[a].dexterity * sleevestats[a].agility - (100 - sleevestats[b].shock) * sleevestats[b].strength * sleevestats[b].defense * sleevestats[b].dexterity * sleevestats[b].agility);
+				sleeves = sleeves.sort((b, a) => (100 - sleevestats[a].shock) * sleevestats[a].skills.strength * sleevestats[a].skills.defense * sleevestats[a].skills.dexterity * sleevestats[a].skills.agility - (100 - sleevestats[b].shock) * sleevestats[b].skills.strength * sleevestats[b].skills.defense * sleevestats[b].skills.dexterity * sleevestats[b].skills.agility);
 				return sleeves;
 			} catch (e) {
 				return [];
@@ -4093,7 +4094,7 @@ export class Sleeves {
 		if (sleeves.length == 0) {
 			return false;
 		}
-		let sleevestats = await DoAll(this.ns, "ns.sleeve.getSleeveStats", sleeves);
+		let sleevestats = await DoAll(this.ns, "ns.sleeve.getSleeve", sleeves);
 		sleeves = sleeves.filter(x => sleevestats[x].shock == 0);
 		if (sleeves.length == 0) {
 			return false;
