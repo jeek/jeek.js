@@ -136,8 +136,8 @@ export class Bladeburner {
 		for (let skill of Object.keys(skillmods)) {
 			current *= skillmods[skill] * (1 + currentrank[skill] / 100);
 		}
+		let upgrade = {};
 		if (Object.keys(skillmods).length > 0) {
-    		let upgrade = {};
 	    	for (let skill of Object.keys(skillmods)) {
 		    	currentrank[skill] += 1;
 			    upgrade[skill] = 1;
@@ -160,9 +160,19 @@ export class Bladeburner {
 		}
 		return false;
 	}
+	get hasSimulacrum() {
+		return (async () => {
+			try {
+				return await (this.game.Player.hasAug("The Blade's Simulacrum"));
+			} catch (e) {
+				return [];
+			}
+		})();
+	}
 	async hardStop() {
-		await Do(this.ns, "ns.singularity.stopAction");
-		await Do(this.ns, "ns.bladeburner.stopBladeburnerAction");
+		if (!await (this.hasSimulacrum))
+    		await Do(this.ns, "ns.singularity.stopAction");
+		await (this.bbStop());
 	}
 	async bbStop() {
 		await Do(this.ns, "ns.bladeburner.stopBladeburnerAction");
@@ -3612,6 +3622,10 @@ export class Player {
 		}
 		await Do(this.ns, "ns.singularity.gymWorkout", gymName, stat, focus);
 		return;
+	}
+	async hasAug(aug) {
+		let augs = await Do(this.ns, "ns.singularity.getOwnedAugmentations");
+		return augs.includes(aug);
 	}
 	async joinFactionIfInvited(faction) {
 		if ((await Do(this.ns, "ns.singularity.checkFactionInvitations")).includes(faction)) {
