@@ -39,7 +39,7 @@ export class Bladeburner {
 		} else {
 			if ((await Do(this.ns, "ns.bladeburner.getActionTime", "Operation", "Assassination")) > 1000) {
 			    skillmods["Reaper"] = 2;
-			    skillmods["Evasive Systems"] = 4;
+			    skillmods["Evasive System"] = 4;
 			}
 		}
 		let nextOp = await (this.nextBlackOp);
