@@ -635,9 +635,10 @@ export class Contracts {
 						this.log("Starting " + types[0] + " on " + this.contracts[contract].server);
 						await this.ns.sleep(0);
 						let starttime = Date.now();
-						if (await Do(this.ns, "ns.codingcontract.attempt", types[1](this.contracts[contract].data, this.ns), contract, this.contracts[contract].server)) {
+						let success = await Do(this.ns, "ns.codingcontract.attempt", types[1](this.contracts[contract].data, this.ns), contract, this.contracts[contract].server);
+						if (success.length > 0) {
 							delete this.contracts[contract];
-							this.log("Succeeded at " + types[0]);
+							this.log("Succeeded at " + types[0] + ": " + success);
 							done = true;
 						} else {
 							this.log("Failed at " + types[0]);
