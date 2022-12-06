@@ -79,9 +79,19 @@ export class Bladeburner {
 		}
 		return false;
 	}
+	get hasSimulacrum() {
+		return (async () => {
+			try {
+				return await (this.game.Player.hasAug("The Blade's Simulacrum"));
+			} catch (e) {
+				return [];
+			}
+		})();
+	}
 	async hardStop() {
-		await Do(this.ns, "ns.singularity.stopAction");
-		await Do(this.ns, "ns.bladeburner.stopBladeburnerAction");
+		if (!await (this.hasSimulacrum))
+    		await Do(this.ns, "ns.singularity.stopAction");
+		await (this.bbStop());
 	}
 	async bbStop() {
 		await Do(this.ns, "ns.bladeburner.stopBladeburnerAction");

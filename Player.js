@@ -112,6 +112,10 @@ export class Player {
 		await Do(this.ns, "ns.singularity.gymWorkout", gymName, stat, focus);
 		return;
 	}
+	async hasAug(aug) {
+		let augs = await Do(this.ns, "ns.singularity.getOwnedAugmentations");
+		return augs.includes(aug);
+	}
 	async joinFactionIfInvited(faction) {
 		if ((await Do(this.ns, "ns.singularity.checkFactionInvitations")).includes(faction)) {
 			await Do(this.ns, "ns.singularity.joinFaction", faction);
