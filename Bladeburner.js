@@ -55,8 +55,8 @@ export class Bladeburner {
 		for (let skill of Object.keys(skillmods)) {
 			current *= skillmods[skill] * (1 + currentrank[skill] / 100);
 		}
+		let upgrade = {};
 		if (Object.keys(skillmods).length > 0) {
-    		let upgrade = {};
 	    	for (let skill of Object.keys(skillmods)) {
 		    	currentrank[skill] += 1;
 			    upgrade[skill] = 1;
