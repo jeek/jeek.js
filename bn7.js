@@ -108,7 +108,7 @@ export async function bn7(Game) {
         while ((await Do(Game.ns, "ns.bladeburner.getCurrentAction")).type != "Idle" && (.6 < (await Do(Game.ns, "ns.bladeburner.getStamina")).reduce((a, b) => a / b)) && ((await Do(Game.ns, "ns.bladeburner.getActionCountRemaining", best[best.length - 1][1], best[best.length - 1][2])) > 0)) {
             for (let i = 0; i < numberOfSleeves; i++) {
                 if (null == (await Do(Game.ns, "ns.sleeve.getTask", i))) {
-                    await Game.Sleeves.bbGoHereAnd(i, null, ((await Do(Game.ns, "ns.bladeburner.getCityChaos", ((await Do(Game.ns, "ns.sleeve.getInformation", i)).city)))) < 20 ? "Infiltrate synthoids" : "Diplomacy");
+                    await Game.Sleeves.bbGoHereAnd(i, null, ((await Do(Game.ns, "ns.bladeburner.getCityChaos", ((await Do(Game.ns, "ns.sleeve.getSleeve", i)).city)))) < 20 ? "Infiltrate synthoids" : "Diplomacy");
                 }
             }
             if (best[best.length - 1][0] == "Black Op" && .2 > ((await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Black Op", nextBlackOp))[0]))
