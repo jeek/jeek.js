@@ -3,6 +3,18 @@ import { makeNewWindow } from "Windows.js";
 import { WholeGame } from "WholeGame.js";
 import { CITIES } from "data.js";
 
+let bbTypes = {
+	"Tracking": "Contract",
+	"Bounty Hunter": "Contract",
+	"Retirement": "Contract",
+	"Investigation": "Operation",
+	"Undercover": "Operation",
+	"Sting": "Operation",
+	"Raid": "Operation",
+	"Stealth Retirement": "Operation",
+	"Assassination": "Operation"
+}
+
 export class Bladeburner {
 	constructor(ns, game) {
 		this.ns = ns;
@@ -11,6 +23,18 @@ export class Bladeburner {
 		if (ns.flags(cmdlineflags)['logbox']) {
 			this.log = this.game.createSidebarItem("Bladeburner", "", "B").log;
 		}
+	}
+	async getChance(name) {
+		return await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", bbTypes[name], name);
+	}
+	async maxLevel(name) {
+		return await Do(this.ns, "ns.bladeburner.getActionMaxLevel", bbTypes[name], name);
+	}
+	async setLevel(name, level) {
+		return await Do(this.ns, "ns.bladeburner.setActionMaxLevel", bbTypes[name], name, level);
+	}
+	async fieldAnal() {
+		await Do(Game.ns, "ns.bladeburner.startAction", "General", "Field Analysis");
 	}
 	async start() {
 		return await Do(this.ns, "ns.bladeburner.joinBladeburnerDivision");
@@ -102,6 +126,15 @@ export class Bladeburner {
 	async bbOpCount(operation) {
 		return await Do(this.ns, "ns.bladeburner.getActionCountRemaining", "Operation", operation);
 	}
+	async repGain(action, level) {
+		return await Do(this.ns, "ns.bladeburner.getActionRepGain", bbTypes[action], action, level);
+	}
+	async bbActionTime(action) {
+		return await Do(this.ns, "ns.bladeburner.getActionTime", bbTypes[action], action);
+	}
+	async bbActionCount(action) {
+		return await Do(this.ns, "ns.bladeburner.getActionCountRemaining", bbTypes[action], action);
+	}
 	async inciteViolenceEverywhere() {
 			this.log("Inciting Violence");
 		for (let city of CITIES) {
@@ -160,6 +193,15 @@ export class Bladeburner {
 		return (async () => {
 			try {
 				return await Do(this.ns, "ns.bladeburner.getOperationNames");
+			} catch (e) {
+				return [];
+			}
+		})();
+	}
+	get contractNames() {
+		return (async () => {
+			try {
+				return await Do(this.ns, "ns.bladeburner.getContractNames");
 			} catch (e) {
 				return [];
 			}
