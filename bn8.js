@@ -14,7 +14,7 @@ export async function bn8(Game) {
     let maxram = {};
     let neededports = {};
     let reqhackinglevel = {};
-    maxram["home"] = await Game.Servers['home'].maxRam;
+    maxram["home"] = await (Game.Servers['home'].maxRam);
     for (let server of Object.keys(stockMapping)) {
         neededports[stockMapping[server]] = await Do(Game.ns, "ns.getServerNumPortsRequired", stockMapping[server]);
         reqhackinglevel[stockMapping[server]] = await Do(Game.ns, "ns.getServerRequiredHackingLevel", stockMapping[server]);

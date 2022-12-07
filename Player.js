@@ -46,7 +46,7 @@ export class Player {
 	get bitNodeN() {
 		return (async () => {
 			try {
-				return (await Do(this.ns, "ns.getPlayer").bitNodeN);
+				return ((await Do(this.ns, "ns.getPlayer")).bitNodeN);
 			} catch (e) {
 				return [];
 			}
