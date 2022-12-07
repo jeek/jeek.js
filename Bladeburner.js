@@ -200,7 +200,7 @@ export class Bladeburner {
 				if (city == mycity) {
 					let wildcard = true;
 					for (let i = 0; i < await (this.game.Sleeves.numSleeves); i++) {
-						if (((await Do(this.ns, "ns.sleeve.getInformation", i)).city) != ((await Do(this.ns, "ns.sleeve.getInformation", 0)).city))
+						if (((await Do(this.ns, "ns.sleeve.getSleeve", i)).city) != ((await Do(this.ns, "ns.sleeve.getSleeve", 0)).city))
 							wildcard = false;
 						try {
 							if (((await Do(this.ns, "ns.sleeve.getTask", i)).actionName) != ((await Do(this.ns, "ns.sleeve.getTask", 0))).actionName)
@@ -209,7 +209,7 @@ export class Bladeburner {
 					}
 					if (wildcard) {
 						for (let i = 0; i < 1; i++) {
-							if (city == (await Do(this.ns, "ns.sleeve.getInformation", i)).city) {
+							if (city == (await Do(this.ns, "ns.sleeve.getSleeve", i)).city) {
 								if (null != (await Do(this.ns, "ns.sleeve.getTask", i))) {
 									let z = (await Do(this.ns, "ns.sleeve.getTask", i));
 									if (z.type == "INFILTRATE") {
@@ -228,7 +228,7 @@ export class Bladeburner {
 						}
 					} else {
 						for (let i = 0; i < await (this.game.Sleeves.numSleeves); i++) {
-							if (city == (await Do(this.ns, "ns.sleeve.getInformation", i)).city) {
+							if (city == (await Do(this.ns, "ns.sleeve.getSleeve", i)).city) {
 								if (null != (await Do(this.ns, "ns.sleeve.getTask", i))) {
 									let z = (await Do(this.ns, "ns.sleeve.getTask", i));
 									if (z.type == "INFILTRATE") {
@@ -282,7 +282,7 @@ export class Bladeburner {
 					answer += "<TD>";
 					let wildcard = true;
 					for (let i = 0; i < await (this.game.Sleeves.numSleeves); i++) {
-						if (((await Do(this.ns, "ns.sleeve.getInformation", i)).city) != ((await Do(this.ns, "ns.sleeve.getInformation", 0)).city))
+						if (((await Do(this.ns, "ns.sleeve.getSleeve", i)).city) != ((await Do(this.ns, "ns.sleeve.getSleeve", 0)).city))
 							wildcard = false;
 						try {
 							if (((await Do(this.ns, "ns.sleeve.getTask", i)).actionName) != ((await Do(this.ns, "ns.sleeve.getTask", 0))).actionName)
@@ -291,7 +291,7 @@ export class Bladeburner {
 					}
 					if (wildcard) {
 						for (let i = 0; i < 1; i++) {
-							if (city == (await Do(this.ns, "ns.sleeve.getInformation", i)).city) {
+							if (city == (await Do(this.ns, "ns.sleeve.getSleeve", i)).city) {
 								if (null != (await Do(this.ns, "ns.sleeve.getTask", i))) {
 									let z = (await Do(this.ns, "ns.sleeve.getTask", i));
 									if (z.type == "INFILTRATE") {
@@ -310,7 +310,7 @@ export class Bladeburner {
 						}
 					} else {
 						for (let i = 0; i < await (this.game.Sleeves.numSleeves); i++) {
-							if (city == (await Do(this.ns, "ns.sleeve.getInformation", i)).city) {
+							if (city == (await Do(this.ns, "ns.sleeve.getSleeve", i)).city) {
 								if (null != (await Do(this.ns, "ns.sleeve.getTask", i))) {
 									let z = (await Do(this.ns, "ns.sleeve.getTask", i));
 									if (z.type == "INFILTRATE") {
