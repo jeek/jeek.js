@@ -639,7 +639,7 @@ export async function bn7(Game) {
             await Game.Contracts.solve();
             if (await (Game.Bladeburner.hasSimulacrum))
                 await Game.Grafting.checkIn("Combat");
-            await Game.Hacknet.loop(1000 < (await Do(Game.ns, "ns.bladeburner.getSkillPoints")) ? "Exchange for Bladeburner SP" : "Generate Coding Contract");
+            await Game.Hacknet.loop(1000 > (await Do(Game.ns, "ns.bladeburner.getSkillPoints")) ? "Exchange for Bladeburner SP" : "Generate Coding Contract");
             if (.999 < await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Black Op", nextBlackOp))
                 break;
             if (best[best.length - 1][0] < await Do(Game.ns, "ns.bladeburner.getActionMaxLevel", best[best.length - 1][1], best[best.length - 1][2])) {
@@ -893,7 +893,7 @@ export async function bn8(Game) {
         }
         tickPrice = await Do(Game.ns, "ns.stock.getPurchaseCost", 'ECP', 1, "Long");
 
-        await Game.Grafting.checkin();
+        await Game.Grafting.checkIn();
 
         while ((await Do(Game.ns, "ns.singularity.getUpgradeHomeRamCost")) * 2 < await Do(Game.ns, "ns.getServerMoneyAvailable", "home") && await Do(Game.ns, "ns.singularity.upgradeHomeRam", ""));
         let chances = {};
@@ -951,26 +951,28 @@ export async function bn8(Game) {
         //			ns.toast(ns.nFormat((await Do(ns, "ns.getServerMoneyAvailable", "home")) + portvalue, "$0.000a"));
         let ownedAugs = await Do(Game.ns, "ns.singularity.getOwnedAugmentations");
         let playerhack = (await Do(Game.ns, "ns.getPlayer")).skills.hacking;
-        if (playerhack > 3000 && ownedAugs.length >= 30 && !ownedAugs.includes("The Red Pill")) {
-            while (((await (Game.Player.money)) > 100e9) && (!((await Do(Game.ns, "ns.singularity.checkFactionInvitations")).includes("Daedalus"))) && (!((await Do(Game.ns, "ns.getPlayer")).factions.includes("Daedalus")))) {
-                await Game.ns.sleep(1000);
-            }
-            if ((await Do(Game.ns, "ns.singularity.checkFactionInvitations")).includes("Daedalus")) {
-                await Do(Game.ns, "ns.singularity.joinFaction", "Daedalus");
-            }
-            if ((await Do(Game.ns, "ns.getPlayer")).factions.includes("Daedalus")) {
-                if ((await Do(Game.ns, "ns.singularity.getFactionRep", "Daedalus")) < ((await Do(Game.ns, "ns.singularity.getAugmentationRepReq", "The Red Pill")))) {
-                    if ((await Do(Game.ns, "ns.getPlayer")).money > 1e9) {
-                        await Do(Game.ns, "ns.singularity.donateToFaction", "Daedalus", Math.floor(.1 * ((await Do(Game.ns, "ns.getPlayer")).money)));
+        if (8 == await (Game.Player.bitNodeN)) {
+            if (playerhack > 3000 && ownedAugs.length >= 30 && !ownedAugs.includes("The Red Pill")) {
+                while (((await (Game.Player.money)) > 100e9) && (!((await Do(Game.ns, "ns.singularity.checkFactionInvitations")).includes("Daedalus"))) && (!((await Do(Game.ns, "ns.getPlayer")).factions.includes("Daedalus")))) {
+                    await Game.ns.sleep(1000);
+                }
+                if ((await Do(Game.ns, "ns.singularity.checkFactionInvitations")).includes("Daedalus")) {
+                    await Do(Game.ns, "ns.singularity.joinFaction", "Daedalus");
+                }
+                if ((await Do(Game.ns, "ns.getPlayer")).factions.includes("Daedalus")) {
+                    if ((await Do(Game.ns, "ns.singularity.getFactionRep", "Daedalus")) < ((await Do(Game.ns, "ns.singularity.getAugmentationRepReq", "The Red Pill")))) {
+                        if ((await Do(Game.ns, "ns.getPlayer")).money > 1e9) {
+                            await Do(Game.ns, "ns.singularity.donateToFaction", "Daedalus", Math.floor(.1 * ((await Do(Game.ns, "ns.getPlayer")).money)));
+                        }
+                    }
+                    if ((await Do(Game.ns, "ns.singularity.getFactionRep", "Daedalus")) >= ((await Do(Game.ns, "ns.singularity.getAugmentationRepReq", "The Red Pill")))) {
+                        await Do(Game.ns, "ns.singularity.purchaseAugmentation", "Daedalus", "The Red Pill");
                     }
                 }
-                if ((await Do(Game.ns, "ns.singularity.getFactionRep", "Daedalus")) >= ((await Do(Game.ns, "ns.singularity.getAugmentationRepReq", "The Red Pill")))) {
-                    await Do(Game.ns, "ns.singularity.purchaseAugmentation", "Daedalus", "The Red Pill");
-                }
             }
-        }
-        if (playerhack > 3000 && ownedAugs.length >= 30 && !ownedAugs.includes("The Red Pill") && ((await Do(Game.ns, "ns.singularity.getOwnedAugmentations", true))).includes("The Red Pill")) {
-            await Game.SoftReset();
+            if (playerhack > 3000 && ownedAugs.length >= 30 && !ownedAugs.includes("The Red Pill") && ((await Do(Game.ns, "ns.singularity.getOwnedAugmentations", true))).includes("The Red Pill")) {
+                await Game.SoftReset();
+            }
         }
     }
 }
