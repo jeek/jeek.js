@@ -142,7 +142,7 @@ export class Bladeburner {
 			skillmods["Blade's Intuition"] = 3;
 			skillmods["Digital Observer"] = 4;
 		} else {
-			if ((await Do(this.ns, "ns.bladeburner.getActionTime", "Operation", "Assassination")) > 1000) {
+			if (Math.max((await Do(this.ns, "ns.bladeburner.getActionTime", "Operation", "Assassination")),(await Do(this.ns, "ns.bladeburner.getActionTime", "Operation", "Investigation")),(await Do(this.ns, "ns.bladeburner.getActionTime", "Operation", "Undercover Operation")),(await Do(this.ns, "ns.bladeburner.getActionTime", "Operation", "Stealth Retirement Operation"))) > 1000) {
 			    skillmods["Reaper"] = 2;
 			    skillmods["Evasive System"] = 4;
 			}
@@ -581,7 +581,7 @@ export async function bn7(Game) {
 			}
 		}
         if (best[best.length - 1][1] != "Black Op") {
-            await Do(Game.ns, "ns.bladeburner.setActionAutolevel", best[best.length - 1][1], best[best.length - 1][2], false);
+            await Do(Game.ns, "ns.bladeburner.setActionAutolevel", best[best.length - 1][1], best[best.length - 1][2], 1e6 < (await Do(Game.ns, "ns.bladeburner.getRank", "")));
             if (best[best.length - 1][3] != await Do(Game.ns, "ns.bladeburner.getCity")) {
                 await Game.Bladeburner.bbCity(best[best.length - 1][3]);
             }
@@ -635,11 +635,11 @@ export async function bn7(Game) {
                 break;
             await Game.Sleeves.bbCombatAugs();
             await Game.Player.hospitalizeIfNeeded();
-            await Game.Bladeburner.UpgradeSkills();
+            while (await Game.Bladeburner.UpgradeSkills());
             await Game.Contracts.solve();
             if (await (Game.Bladeburner.hasSimulacrum))
                 await Game.Grafting.checkIn("Combat");
-            await Game.Hacknet.loop("Exchange for Bladeburner SP");
+            await Game.Hacknet.loop(1000 < (await Do(Game.ns, "ns.bladeburner.getSkillPoints")) ? "Exchange for Bladeburner SP" : "Generate Coding Contract");
             if (.999 < await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Black Op", nextBlackOp))
                 break;
             if (best[best.length - 1][0] < await Do(Game.ns, "ns.bladeburner.getActionMaxLevel", best[best.length - 1][1], best[best.length - 1][2])) {
@@ -893,48 +893,8 @@ export async function bn8(Game) {
         }
         tickPrice = await Do(Game.ns, "ns.stock.getPurchaseCost", 'ECP', 1, "Long");
 
-        if ((!await Do(Game.ns, "ns.singularity.isBusy", "")) && (!await Do(Game.ns, "ns.singularity.isFocused", ""))) {
-            let auglist = await Do(Game.ns, "ns.grafting.getGraftableAugmentations", "");
-            let augs = {};
-            for (let aug of auglist) {
-                augs[aug] = await Do(Game.ns, "ns.singularity.getAugmentationStats", aug);
-                augs[aug].price = await Do(Game.ns, "ns.grafting.getAugmentationGraftPrice", aug);
-                augs[aug].time = await Do(Game.ns, "ns.grafting.getAugmentationGraftTime", aug);
-            }
-            let currentmoney = await Do(Game.ns, "ns.getServerMoneyAvailable", "home");
-            auglist = auglist.filter(x => augs[x].price <= currentmoney / 2);
-            auglist = auglist.sort((a, b) => augs[b].hacking_grow * augs[b].hacking_speed * (augs[b].hacking ** 2) * (augs[b].hacking_exp ** 2) * (augs[b].faction_rep ** .1) - augs[a].hacking_grow * (augs[a].hacking ** 2) * (augs[a].hacking_exp ** 2) * augs[a].hacking_speed * (augs[a].faction_rep ** .1));
-            let currentaugs = await Do(Game.ns, "ns.singularity.getOwnedAugmentations", true);
-            for (let i = 0; i < auglist.length; i++) {
-                let good = true;
-                let prereqs = await Do(Game.ns, "ns.singularity.getAugmentationPrereq", auglist[i]);
-                for (let aug of prereqs) {
-                    if (!(currentaugs.includes(aug))) {
-                        good = false;
-                    }
-                }
-                if (!good) {
-                    auglist.splice(i, 1);
-                    i -= 1;
-                }
-            }
-            if ((await Do(Game.ns, "ns.grafting.getGraftableAugmentations", "")).includes("nickofolas Congruity Implant")) {
-                if ((await Do(Game.ns, "ns.grafting.getAugmentationGraftPrice", "nickofolas Congruity Implant")) < (await Do(Game.ns, "ns.getServerMoneyAvailable", "home"))) {
-                    auglist.unshift("nickofolas Congruity Implant");
-                }
-            }
-            let playerhack = await (Game.Player.hacking);
-            let ownedAugs = await Do(Game.ns, "ns.singularity.getOwnedAugmentations");
-            if (playerhack > 3000 && ownedAugs.length < 30) {
-                auglist = auglist.sort((a, b) => augs[a].time - augs[b].time);
-            }
-            if (auglist.length > 0) {
-                if (!(((await Do(Game.ns, "ns.getPlayer", "")).city) == "New Tokyo"))
-                    await Do(Game.ns, "ns.singularity.travelToCity", "New Tokyo");
-                if (playerhack < 4000 || ownedAugs.length < 30)
-                    await Do(Game.ns, "ns.grafting.graftAugmentation", auglist[0]);
-            }
-        }
+        await Game.Grafting.checkin();
+
         while ((await Do(Game.ns, "ns.singularity.getUpgradeHomeRamCost")) * 2 < await Do(Game.ns, "ns.getServerMoneyAvailable", "home") && await Do(Game.ns, "ns.singularity.upgradeHomeRam", ""));
         let chances = {};
         let portvalue = 0;
@@ -3217,9 +3177,11 @@ export class Grafting {
                     i -= 1;
                 }
             }
-            if ((await Do(Game.ns, "ns.grafting.getGraftableAugmentations", "")).includes("nickofolas Congruity Implant")) {
-                if ((await Do(Game.ns, "ns.grafting.getAugmentationGraftPrice", "nickofolas Congruity Implant")) < (await Do(Game.ns, "ns.getServerMoneyAvailable", "home"))) {
-                    auglist.unshift("nickofolas Congruity Implant");
+            for (let special of ["Neuroreceptor Management Implant", "nickofolas Congruity Implant"]) {
+                if ((await Do(Game.ns, "ns.grafting.getGraftableAugmentations", "")).includes(special)) {
+                    if ((await Do(Game.ns, "ns.grafting.getAugmentationGraftPrice", special)) < (await Do(Game.ns, "ns.getServerMoneyAvailable", "home"))) {
+                        auglist.unshift(special);
+                    }
                 }
             }
             let playerhack = await (Game.Player.hacking);
