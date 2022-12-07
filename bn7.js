@@ -119,7 +119,7 @@ export async function bn7(Game) {
             await Game.Contracts.solve();
             if (await (Game.Bladeburner.hasSimulacrum))
                 await Game.Grafting.checkIn("Combat");
-            await Game.Hacknet.loop(1000 < (await Do(Game.ns, "ns.bladeburner.getSkillPoints")) ? "Exchange for Bladeburner SP" : "Generate Coding Contract");
+            await Game.Hacknet.loop(1000 > (await Do(Game.ns, "ns.bladeburner.getSkillPoints")) ? "Exchange for Bladeburner SP" : "Generate Coding Contract");
             if (.999 < await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Black Op", nextBlackOp))
                 break;
             if (best[best.length - 1][0] < await Do(Game.ns, "ns.bladeburner.getActionMaxLevel", best[best.length - 1][1], best[best.length - 1][2])) {
