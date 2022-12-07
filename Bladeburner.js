@@ -31,10 +31,10 @@ export class Bladeburner {
 		return await Do(this.ns, "ns.bladeburner.getActionMaxLevel", bbTypes[name], name);
 	}
 	async setLevel(name, level) {
-		return await Do(this.ns, "ns.bladeburner.setActionMaxLevel", bbTypes[name], name, level);
+		return await Do(this.ns, "ns.bladeburner.setActionLevel", bbTypes[name], name, level);
 	}
 	async fieldAnal() {
-		await Do(Game.ns, "ns.bladeburner.startAction", "General", "Field Analysis");
+		await Do(this.ns, "ns.bladeburner.startAction", "General", "Field Analysis");
 	}
 	async start() {
 		return await Do(this.ns, "ns.bladeburner.joinBladeburnerDivision");

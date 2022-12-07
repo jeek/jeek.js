@@ -8,8 +8,6 @@ export async function bn7(Game) {
     while (await Game.Bladeburner.UpgradeSkills());
     await Game.Sleeves.bbEverybody(null, "Field analysis"); // The null is the city to travel to, not needed in this case
     await Game.Bladeburner.hardStop();
-    Game.Bladeburner.log(await (Game.Bladeburner.contractCount));
-    Game.Bladeburner.log(await (Game.Bladeburner.operationCount));
     while (((await (Game.Bladeburner.contractCount))+((await (Game.Bladeburner.operationCount)))) > 0) {
         if (await Game.Player.hospitalizeIfNeeded())
             Game.Bladeburner.log("Hospitalized.."); // HP
@@ -41,6 +39,7 @@ export async function bn7(Game) {
                         if ((await (Game.Bladeburner.getChance(action)))[0] > .95)
                             best.push([level, bbTypes[action], action, city, (await (Game.Bladeburner.bbActionCount(action)))*((await (Game.Bladeburner.getChance(action))).reduce((a, b) => (a + b) / 2) * (await (Game.Bladeburner.repGain(action, level))) / (await (Game.Bladeburner.bbActionTime(action))))]);
                     }
+                    await (Game.Bladeburner.setLevel(action, maxlevel))
                 }
             }
         }
