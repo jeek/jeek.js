@@ -100,7 +100,7 @@ export class Bladeburner {
 		await Do(this.ns, "ns.bladeburner.switchCity", city);
 	}
 	async bbOpCount(operation) {
-		await Do(this.ns, "ns.bladeburner.getActionCountRemaining", "Operation", operation);
+		return await Do(this.ns, "ns.bladeburner.getActionCountRemaining", "Operation", operation);
 	}
 	async inciteViolenceEverywhere() {
 			this.log("Inciting Violence");
@@ -141,7 +141,16 @@ export class Bladeburner {
 	get contractCount() {
 		return (async () => {
 			try {
-				return ((await Do(this.ns, "ns.bladeburner.getActionCountRemaining", "Contract", "Tracking")) > 0) + ((await Do(this.ns, "ns.bladeburner.getActionCountRemaining", "Contract", "Bounty Hunter")) > 0) + ((await Do(this.ns, "ns.bladeburner.getActionCountRemaining", "Contract", "Retirement")) > 0);
+				return ((await Do(this.ns, "ns.bladeburner.getActionCountRemaining", "Contract", "Tracking"))) + ((await Do(this.ns, "ns.bladeburner.getActionCountRemaining", "Contract", "Bounty Hunter"))) + ((await Do(this.ns, "ns.bladeburner.getActionCountRemaining", "Contract", "Retirement")));
+			} catch (e) {
+				return 0;
+			}
+		})();
+	}
+	get operationCount() {
+		return (async () => {
+			try {
+				return (await(this.bbOpCount("Investigation")))+(await(this.bbOpCount("Undercover")))+(await(this.bbOpCount("Stealth Retirement")))+(await(this.bbOpCount("Assassination")));
 			} catch (e) {
 				return 0;
 			}
