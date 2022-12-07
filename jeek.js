@@ -637,6 +637,8 @@ export async function bn7(Game) {
             await Game.Player.hospitalizeIfNeeded();
             await Game.Bladeburner.UpgradeSkills();
             await Game.Contracts.solve();
+            if (await (Game.Bladeburner.hasSimulacrum))
+                await Game.Grafting.checkIn("Combat");
             await Game.Hacknet.loop("Exchange for Bladeburner SP");
             if (.999 < await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Black Op", nextBlackOp))
                 break;
@@ -3177,6 +3179,65 @@ class Employee {
 	}
 }
 
+export class Grafting {
+    constructor(ns, game) {
+        this.ns = ns;
+        this.game = game ? game : new WholeGame(ns);
+        this.log = ns.tprint;
+        if (ns.flags(cmdlineflags)['logbox']) {
+            this.log = this.game.createSidebarItem("Grafting", "", "G").log;
+        }
+    }
+    async checkIn(type = "Hacking") {
+        let Game = this.game;
+        if ((!await Do(Game.ns, "ns.singularity.isBusy", "")) && (!await Do(Game.ns, "ns.singularity.isFocused", ""))) {
+            let auglist = await Do(Game.ns, "ns.grafting.getGraftableAugmentations", "");
+            let augs = await DoAll(Game.ns, "ns.singularity.getAugmentationStats", auglist);
+            for (let aug of auglist) {
+                augs[aug].price = await Do(Game.ns, "ns.grafting.getAugmentationGraftPrice", aug);
+                augs[aug].time = await Do(Game.ns, "ns.grafting.getAugmentationGraftTime", aug);
+            }
+            let currentmoney = await Do(Game.ns, "ns.getServerMoneyAvailable", "home");
+            auglist = auglist.filter(x => augs[x].price <= currentmoney / 2);
+            if (type == "Combat")
+                auglist = auglist.sort((a, b) => augs[b].agility_exp * augs[b].agility * augs[b].defense_exp * augs[b].defense * augs[b].dexterity_exp * augs[b].dexterity * augs[b].strength_exp * augs[b].strength - augs[a].agility_exp * augs[a].agility * augs[a].defense_exp * augs[a].defense * augs[a].dexterity_exp * augs[a].dexterity * augs[a].strength_exp * augs[a].strength);
+            else
+                auglist = auglist.sort((a, b) => augs[b].hacking_grow * augs[b].hacking_speed * (augs[b].hacking ** 2) * (augs[b].hacking_exp ** 2) * (augs[b].faction_rep ** .1) - augs[a].hacking_grow * (augs[a].hacking ** 2) * (augs[a].hacking_exp ** 2) * augs[a].hacking_speed * (augs[a].faction_rep ** .1));
+            let currentaugs = await Do(Game.ns, "ns.singularity.getOwnedAugmentations", true);
+            for (let i = 0; i < auglist.length; i++) {
+                let good = true;
+                let prereqs = await Do(Game.ns, "ns.singularity.getAugmentationPrereq", auglist[i]);
+                for (let aug of prereqs) {
+                    if (!(currentaugs.includes(aug))) {
+                        good = false;
+                    }
+                }
+                if (!good) {
+                    auglist.splice(i, 1);
+                    i -= 1;
+                }
+            }
+            if ((await Do(Game.ns, "ns.grafting.getGraftableAugmentations", "")).includes("nickofolas Congruity Implant")) {
+                if ((await Do(Game.ns, "ns.grafting.getAugmentationGraftPrice", "nickofolas Congruity Implant")) < (await Do(Game.ns, "ns.getServerMoneyAvailable", "home"))) {
+                    auglist.unshift("nickofolas Congruity Implant");
+                }
+            }
+            let playerhack = await (Game.Player.hacking);
+            let ownedAugs = await Do(Game.ns, "ns.singularity.getOwnedAugmentations");
+            if (playerhack > 3000 && ownedAugs.length < 30) {
+                auglist = auglist.sort((a, b) => augs[a].time - augs[b].time);
+            }
+            if (auglist.length > 0) {
+                if (!(((await Do(Game.ns, "ns.getPlayer", "")).city) == "New Tokyo"))
+                    await Do(Game.ns, "ns.singularity.travelToCity", "New Tokyo");
+                if (playerhack < 4000 || ownedAugs.length < 30)
+                    if (await Do(Game.ns, "ns.grafting.graftAugmentation", auglist[0], false))
+                        this.log(auglist[0]);
+            }
+        }
+    }
+}
+
 export class Hacknet {
 	constructor(ns, game) {
 		this.ns = ns;
@@ -4464,6 +4525,7 @@ export class WholeGame {
 		this.ProcessList = new ProcessList(ns, this);
 		this.Augmentations = new Augmentations(ns, this);
 		this.Player = new Player(ns, this);
+		this.Grafting = new Grafting(ns, this);
 		this.Corp = new Corp(ns, this);
 		this.Jeekipedia = new Jeekipedia(ns, this);
 		this.Casino = new Casino(ns, this);
