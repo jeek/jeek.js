@@ -51,8 +51,8 @@ export class Bladeburner {
 		}
 		return false;
 	}
-	async UpgradeSkills() {
-		while (await Do(this.ns, "ns.bladeburner.upgradeSkill", "Overclock")) {
+	async UpgradeSkills(count=1) {
+		while (await Do(this.ns, "ns.bladeburner.upgradeSkill", "Overclock", count)) {
 			this.log("Upgraded Overclock");
 			return true;
 		}
@@ -91,13 +91,13 @@ export class Bladeburner {
 		    	currentrank[skill] -= 1;
     		}
 	    	upgrade = Object.entries(upgrade).sort((a, b) => -a[1] + b[1])[0][0];
-		    while (await Do(this.ns, "ns.bladeburner.upgradeSkill", upgrade)) {
+		    while (await Do(this.ns, "ns.bladeburner.upgradeSkill", upgrade, count)) {
 		    	this.log("Upgraded " + upgrade);
 			    return true;
     		}
 		}
 		upgrade = "Hyperdrive";
-		while (await Do(this.ns, "ns.bladeburner.upgradeSkill", upgrade)) {
+		while (await Do(this.ns, "ns.bladeburner.upgradeSkill", upgrade, count)) {
 			this.log("Upgraded " + upgrade);
 			return true;
 		}

@@ -5,7 +5,9 @@ export async function bn7(Game) {
     if (!await Game.Bladeburner.start())
         return false;
     Game.Bladeburner.log("Start.")
-    while (await Game.Bladeburner.UpgradeSkills());
+    let zc = 1;
+    while (await Game.Bladeburner.UpgradeSkills(zc))
+        zc += 1;
     await Game.Sleeves.bbEverybody(null, "Field analysis"); // The null is the city to travel to, not needed in this case
     await Game.Bladeburner.hardStop();
     while (((await (Game.Bladeburner.contractCount))+((await (Game.Bladeburner.operationCount)))) > 0) {
@@ -20,7 +22,7 @@ export async function bn7(Game) {
             await Game.Bladeburner.bbCity(city);
             await Game.Bladeburner.deescalate(30); // Reduces Chaos to 30 if higher
             for (let action of (await (Game.Bladeburner.opNames)).concat(await (Game.Bladeburner.contractNames))) {
-                if ((await (Game.Bladeburner.bbOpCount(action))) > 0) {
+                if ((await (Game.Bladeburner.bbActionCount(action))) > 0) {
                     let maxlevel = await (Game.Bladeburner.maxLevel(action));
                     for (let level = maxlevel; level >= 1 ; level -= Math.ceil(maxlevel/10)) {
                         let chance = await (Game.Bladeburner.getChance(action));
