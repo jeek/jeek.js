@@ -132,8 +132,8 @@ export class Bladeburner {
 		}
 		return false;
 	}
-	async UpgradeSkills() {
-		while (await Do(this.ns, "ns.bladeburner.upgradeSkill", "Overclock")) {
+	async UpgradeSkills(count=1) {
+		while (await Do(this.ns, "ns.bladeburner.upgradeSkill", "Overclock", count)) {
 			this.log("Upgraded Overclock");
 			return true;
 		}
@@ -172,13 +172,13 @@ export class Bladeburner {
 		    	currentrank[skill] -= 1;
     		}
 	    	upgrade = Object.entries(upgrade).sort((a, b) => -a[1] + b[1])[0][0];
-		    while (await Do(this.ns, "ns.bladeburner.upgradeSkill", upgrade)) {
+		    while (await Do(this.ns, "ns.bladeburner.upgradeSkill", upgrade, count)) {
 		    	this.log("Upgraded " + upgrade);
 			    return true;
     		}
 		}
 		upgrade = "Hyperdrive";
-		while (await Do(this.ns, "ns.bladeburner.upgradeSkill", upgrade)) {
+		while (await Do(this.ns, "ns.bladeburner.upgradeSkill", upgrade, count)) {
 			this.log("Upgraded " + upgrade);
 			return true;
 		}
@@ -525,7 +525,9 @@ export async function bn7(Game) {
     if (!await Game.Bladeburner.start())
         return false;
     Game.Bladeburner.log("Start.")
-    while (await Game.Bladeburner.UpgradeSkills());
+    let zc = 1;
+    while (await Game.Bladeburner.UpgradeSkills(zc))
+        zc += 1;
     await Game.Sleeves.bbEverybody(null, "Field analysis"); // The null is the city to travel to, not needed in this case
     await Game.Bladeburner.hardStop();
     while (((await (Game.Bladeburner.contractCount))+((await (Game.Bladeburner.operationCount)))) > 0) {
@@ -540,7 +542,7 @@ export async function bn7(Game) {
             await Game.Bladeburner.bbCity(city);
             await Game.Bladeburner.deescalate(30); // Reduces Chaos to 30 if higher
             for (let action of (await (Game.Bladeburner.opNames)).concat(await (Game.Bladeburner.contractNames))) {
-                if ((await (Game.Bladeburner.bbOpCount(action))) > 0) {
+                if ((await (Game.Bladeburner.bbActionCount(action))) > 0) {
                     let maxlevel = await (Game.Bladeburner.maxLevel(action));
                     for (let level = maxlevel; level >= 1 ; level -= Math.ceil(maxlevel/10)) {
                         let chance = await (Game.Bladeburner.getChance(action));
@@ -626,7 +628,7 @@ export async function bn7(Game) {
         while ((await Do(Game.ns, "ns.bladeburner.getCurrentAction")).type != "Idle" && (.6 < (await Do(Game.ns, "ns.bladeburner.getStamina")).reduce((a, b) => a / b)) && ((await Do(Game.ns, "ns.bladeburner.getActionCountRemaining", best[best.length - 1][1], best[best.length - 1][2])) > 0)) {
             for (let i = 0; i < numberOfSleeves; i++) {
                 if (null == (await Do(Game.ns, "ns.sleeve.getTask", i))) {
-                    await Game.Sleeves.bbGoHereAnd(i, null, ((await Do(Game.ns, "ns.bladeburner.getCityChaos", ((await Do(Game.ns, "ns.sleeve.getInformation", i)).city)))) < 20 ? "Infiltrate synthoids" : "Diplomacy");
+                    await Game.Sleeves.bbGoHereAnd(i, null, ((await Do(Game.ns, "ns.bladeburner.getCityChaos", ((await Do(Game.ns, "ns.sleeve.getSleeve", i)).city)))) < 20 ? "Infiltrate synthoids" : "Diplomacy");
                 }
             }
             if (best[best.length - 1][0] == "Black Op" && .2 > ((await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Black Op", nextBlackOp))[0]))
