@@ -180,6 +180,7 @@ export class Bladeburner {
 		upgrade = "Hyperdrive";
 		while (await Do(this.ns, "ns.bladeburner.upgradeSkill", upgrade, count)) {
 			this.log("Upgraded " + upgrade);
+			await (this.UpgradeSkills(count * 2));
 			return true;
 		}
 		return false;
@@ -558,7 +559,7 @@ export async function bn7(Game) {
                             }
                         }
                         await (Game.Bladeburner.setLevel(action, level));
-                        if ((await (Game.Bladeburner.getChance(action)))[0] > .95)
+                        if (bbTypes[action] == "Contract" || (await (Game.Bladeburner.getChance(action)))[0] > .95)
                             best.push([level, bbTypes[action], action, city, (await (Game.Bladeburner.bbActionCount(action)))*((await (Game.Bladeburner.getChance(action))).reduce((a, b) => (a + b) / 2) * (await (Game.Bladeburner.repGain(action, level))) / (await (Game.Bladeburner.bbActionTime(action))))]);
                     }
                     await (Game.Bladeburner.setLevel(action, maxlevel))
@@ -595,7 +596,7 @@ export async function bn7(Game) {
             await Game.Sleeves.bbEverybody(null, "Support main sleeve");
             await Do(Game.ns, "ns.bladeburner.setTeamSize", "Black Op", best[best.length - 1][2], 1000);
         }
-        Game.Bladeburner.log(best[best.length - 1].slice(0, 4).join(" "));
+        await Game.Bladeburner.log(best[best.length - 1].slice(0, 4).join(" "));
         await Do(Game.ns, "ns.bladeburner.startAction", best[best.length - 1][1], best[best.length - 1][2]);
         if (best[best.length - 1][1] != "Black Op") {
             for (let i = 0; i < numberOfSleeves; i++) {
@@ -668,7 +669,7 @@ export async function bn8(Game) {
     let shorts = false;
     let stall = {};
     let prices = [];
-    let symbols = await Game.StockMarket.symbols;
+    let symbols = await (Game.StockMarket.symbols);
     let tickPrice = 0;
     let filesize = {
         "grow.js": await Do(Game.ns, "ns.getScriptRam", "/temp/grow.js"),
@@ -893,7 +894,7 @@ export async function bn8(Game) {
         }
         tickPrice = await Do(Game.ns, "ns.stock.getPurchaseCost", 'ECP', 1, "Long");
 
-        await Game.Grafting.checkIn();
+        await (Game.Grafting.checkIn());
 
         while ((await Do(Game.ns, "ns.singularity.getUpgradeHomeRamCost")) * 2 < await Do(Game.ns, "ns.getServerMoneyAvailable", "home") && await Do(Game.ns, "ns.singularity.upgradeHomeRam", ""));
         let chances = {};
