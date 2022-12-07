@@ -2,7 +2,7 @@ export async function bn8(Game) {
     let shorts = false;
     let stall = {};
     let prices = [];
-    let symbols = await Game.StockMarket.symbols;
+    let symbols = await (Game.StockMarket.symbols);
     let tickPrice = 0;
     let filesize = {
         "grow.js": await Do(Game.ns, "ns.getScriptRam", "/temp/grow.js"),
@@ -227,7 +227,7 @@ export async function bn8(Game) {
         }
         tickPrice = await Do(Game.ns, "ns.stock.getPurchaseCost", 'ECP', 1, "Long");
 
-        await Game.Grafting.checkIn();
+        await (Game.Grafting.checkIn());
 
         while ((await Do(Game.ns, "ns.singularity.getUpgradeHomeRamCost")) * 2 < await Do(Game.ns, "ns.getServerMoneyAvailable", "home") && await Do(Game.ns, "ns.singularity.upgradeHomeRam", ""));
         let chances = {};

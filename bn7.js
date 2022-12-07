@@ -38,7 +38,7 @@ export async function bn7(Game) {
                             }
                         }
                         await (Game.Bladeburner.setLevel(action, level));
-                        if ((await (Game.Bladeburner.getChance(action)))[0] > .95)
+                        if (bbTypes[action] == "Contract" || (await (Game.Bladeburner.getChance(action)))[0] > .95)
                             best.push([level, bbTypes[action], action, city, (await (Game.Bladeburner.bbActionCount(action)))*((await (Game.Bladeburner.getChance(action))).reduce((a, b) => (a + b) / 2) * (await (Game.Bladeburner.repGain(action, level))) / (await (Game.Bladeburner.bbActionTime(action))))]);
                     }
                     await (Game.Bladeburner.setLevel(action, maxlevel))
@@ -75,7 +75,7 @@ export async function bn7(Game) {
             await Game.Sleeves.bbEverybody(null, "Support main sleeve");
             await Do(Game.ns, "ns.bladeburner.setTeamSize", "Black Op", best[best.length - 1][2], 1000);
         }
-        Game.Bladeburner.log(best[best.length - 1].slice(0, 4).join(" "));
+        await Game.Bladeburner.log(best[best.length - 1].slice(0, 4).join(" "));
         await Do(Game.ns, "ns.bladeburner.startAction", best[best.length - 1][1], best[best.length - 1][2]);
         if (best[best.length - 1][1] != "Black Op") {
             for (let i = 0; i < numberOfSleeves; i++) {

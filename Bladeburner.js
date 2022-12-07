@@ -99,6 +99,7 @@ export class Bladeburner {
 		upgrade = "Hyperdrive";
 		while (await Do(this.ns, "ns.bladeburner.upgradeSkill", upgrade, count)) {
 			this.log("Upgraded " + upgrade);
+			await (this.UpgradeSkills(count * 2));
 			return true;
 		}
 		return false;
