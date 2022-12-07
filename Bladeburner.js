@@ -61,7 +61,7 @@ export class Bladeburner {
 			skillmods["Blade's Intuition"] = 3;
 			skillmods["Digital Observer"] = 4;
 		} else {
-			if ((await Do(this.ns, "ns.bladeburner.getActionTime", "Operation", "Assassination")) > 1000) {
+			if (Math.max((await Do(this.ns, "ns.bladeburner.getActionTime", "Operation", "Assassination")),(await Do(this.ns, "ns.bladeburner.getActionTime", "Operation", "Investigation")),(await Do(this.ns, "ns.bladeburner.getActionTime", "Operation", "Undercover Operation")),(await Do(this.ns, "ns.bladeburner.getActionTime", "Operation", "Stealth Retirement Operation"))) > 1000) {
 			    skillmods["Reaper"] = 2;
 			    skillmods["Evasive System"] = 4;
 			}
