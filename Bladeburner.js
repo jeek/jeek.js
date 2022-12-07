@@ -8,10 +8,10 @@ let bbTypes = {
 	"Bounty Hunter": "Contract",
 	"Retirement": "Contract",
 	"Investigation": "Operation",
-	"Undercover": "Operation",
-	"Sting": "Operation",
+	"Undercover Operation": "Operation",
+	"Sting Operation": "Operation",
 	"Raid": "Operation",
-	"Stealth Retirement": "Operation",
+	"Stealth Retirement Operation": "Operation",
 	"Assassination": "Operation"
 }
 
