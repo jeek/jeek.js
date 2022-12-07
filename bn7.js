@@ -117,6 +117,8 @@ export async function bn7(Game) {
             await Game.Player.hospitalizeIfNeeded();
             await Game.Bladeburner.UpgradeSkills();
             await Game.Contracts.solve();
+            if (await (Game.Bladeburner.hasSimulacrum))
+                await Game.Grafting.checkIn("Combat");
             await Game.Hacknet.loop("Exchange for Bladeburner SP");
             if (.999 < await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Black Op", nextBlackOp))
                 break;
