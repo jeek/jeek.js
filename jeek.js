@@ -181,7 +181,7 @@ export class Bladeburner {
 		await Do(this.ns, "ns.bladeburner.switchCity", city);
 	}
 	async bbOpCount(operation) {
-		await Do(this.ns, "ns.bladeburner.getActionCountRemaining", "Operation", operation);
+		return await Do(this.ns, "ns.bladeburner.getActionCountRemaining", "Operation", operation);
 	}
 	async inciteViolenceEverywhere() {
 			this.log("Inciting Violence");
@@ -222,7 +222,16 @@ export class Bladeburner {
 	get contractCount() {
 		return (async () => {
 			try {
-				return ((await Do(this.ns, "ns.bladeburner.getActionCountRemaining", "Contract", "Tracking")) > 0) + ((await Do(this.ns, "ns.bladeburner.getActionCountRemaining", "Contract", "Bounty Hunter")) > 0) + ((await Do(this.ns, "ns.bladeburner.getActionCountRemaining", "Contract", "Retirement")) > 0);
+				return ((await Do(this.ns, "ns.bladeburner.getActionCountRemaining", "Contract", "Tracking"))) + ((await Do(this.ns, "ns.bladeburner.getActionCountRemaining", "Contract", "Bounty Hunter"))) + ((await Do(this.ns, "ns.bladeburner.getActionCountRemaining", "Contract", "Retirement")));
+			} catch (e) {
+				return 0;
+			}
+		})();
+	}
+	get operationCount() {
+		return (async () => {
+			try {
+				return (await(this.bbOpCount("Investigation")))+(await(this.bbOpCount("Undercover")))+(await(this.bbOpCount("Stealth Retirement")))+(await(this.bbOpCount("Assassination")));
 			} catch (e) {
 				return 0;
 			}
@@ -466,8 +475,7 @@ export class Bladeburner {
 		answer += "</TR></TABLE>";
 		this.bbWindow.update(answer);
 	}
-}
-export async function bn7(Game) {
+}export async function bn7(Game) {
     let numberOfSleeves = await (Game.Sleeves.numSleeves);
     await Game.Sleeves.bbCombatAugs();
     await Game.Player.trainCombatStatsUpTo(100, true); // The true indicates to drag sleeves along
@@ -477,7 +485,9 @@ export async function bn7(Game) {
     while (await Game.Bladeburner.UpgradeSkills());
     await Game.Sleeves.bbEverybody(null, "Field analysis"); // The null is the city to travel to, not needed in this case
     await Game.Bladeburner.hardStop();
-    while ((await (Game.Bladeburner.contractCount)) > 0) {
+    Game.Bladeburner.log(await (Game.Bladeburner.contractCount));
+    Game.Bladeburner.log(await (Game.Bladeburner.operationCount));
+    while (((await (Game.Bladeburner.contractCount))+((await (Game.Bladeburner.operationCount)))) > 0) {
         if (await Game.Player.hospitalizeIfNeeded())
             Game.Bladeburner.log("Hospitalized.."); // HP
         if (await Game.Player.joinFactionIfInvited("Bladeburners"))
@@ -490,13 +500,14 @@ export async function bn7(Game) {
             await Game.Bladeburner.deescalate(30); // Reduces Chaos to 30 if higher
             for (let operation of await (Game.Bladeburner.opNames)) {
                 if ((await (Game.Bladeburner.bbOpCount(operation))) > 0) {
-                    for (let level = 1; level <= await Do(Game.ns, "ns.bladeburner.getActionMaxLevel", "Operation", operation); level++) {
+                    let maxlevel = await Do(Game.ns, "ns.bladeburner.getActionMaxLevel", "Operation", operation)
+                    for (let level = maxlevel; level >= 1 ; level -= Math.ceil(maxlevel/10)) {
                         let chance = (await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Operation", operation));
                         if (chance[0] + .01 < chance[1]) {
                             await (Game.Bladeburner.hardStop());
                             await Do(Game.ns, "ns.bladeburner.startAction", "General", "Field Analysis");
                             for (let i = 0; i < numberOfSleeves; i++) {
-                                await Game.Sleeves.bbGoHereAnd(i, city, "Field analysis");
+                                await Game.Sleeves.bbGoHereAnd(i, city, "Field Analysis");
                             }
                             while (chance[0] + .01 < chance[1]) {
                                 await Game.ns.sleep(1000);
@@ -505,13 +516,14 @@ export async function bn7(Game) {
                         }
                         await Do(Game.ns, "ns.bladeburner.setActionLevel", "Operation", operation, level);
                         if ((await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Operation", operation))[0] > .95)
-                            best.push([level, "Operation", operation, city, (await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Operation", operation)).reduce((a, b) => (a + b) / 2) * (await Do(Game.ns, "ns.bladeburner.getActionRepGain", "Operation", operation, level)) / (await Do(Game.ns, "ns.bladeburner.getActionTime", "Operation", operation))]);
+                            best.push([level, "Operation", operation, city, (await (Game.Bladeburner.bbOpCount(operation)))*((await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Operation", operation)).reduce((a, b) => (a + b) / 2) * (await Do(Game.ns, "ns.bladeburner.getActionRepGain", "Operation", operation, level)) / (await Do(Game.ns, "ns.bladeburner.getActionTime", "Operation", operation)))]);
                     }
                 }
             }
             for (let contract of await Do(Game.ns, "ns.bladeburner.getContractNames")) {
                 if ((await Do(Game.ns, 'ns.bladeburner.getActionCountRemaining', "Contract", contract)) > 0) {
-                    for (let level = 1; level <= await Do(Game.ns, "ns.bladeburner.getActionMaxLevel", "Contract", contract); level++) {
+                    let maxlevel = await Do(Game.ns, "ns.bladeburner.getActionMaxLevel", "Contract", contract);
+                    for (let level = maxlevel; level >= 1 ; level -= Math.ceil(maxlevel/10)) {
                         let chance = (await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Contract", contract));
                         if (chance[0] + .01 < chance[1]) {
                             await (Game.Bladeburner.hardStop());
@@ -528,7 +540,7 @@ export async function bn7(Game) {
                             }
                         }
                         await Do(Game.ns, "ns.bladeburner.setActionLevel", "Contract", contract, level);
-                        best.push([level, "Contract", contract, city, (await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Contract", contract)).reduce((a, b) => (a + b) / 2) * (await Do(Game.ns, "ns.bladeburner.getActionRepGain", "Contract", contract, level)) / (await Do(Game.ns, "ns.bladeburner.getActionTime", "Contract", contract))]);
+                        best.push([level, "Contract", contract, city, (await Do(Game.ns, 'ns.bladeburner.getActionCountRemaining', "Contract", contract))*((await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Contract", contract)).reduce((a, b) => (a + b) / 2) * (await Do(Game.ns, "ns.bladeburner.getActionRepGain", "Contract", contract, level)) / (await Do(Game.ns, "ns.bladeburner.getActionTime", "Contract", contract)))]);
                     }
                 }
             }
