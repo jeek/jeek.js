@@ -40,9 +40,11 @@ export class Grafting {
                     i -= 1;
                 }
             }
-            if ((await Do(Game.ns, "ns.grafting.getGraftableAugmentations", "")).includes("nickofolas Congruity Implant")) {
-                if ((await Do(Game.ns, "ns.grafting.getAugmentationGraftPrice", "nickofolas Congruity Implant")) < (await Do(Game.ns, "ns.getServerMoneyAvailable", "home"))) {
-                    auglist.unshift("nickofolas Congruity Implant");
+            for (let special of ["Neuroreceptor Management Implant", "nickofolas Congruity Implant"]) {
+                if ((await Do(Game.ns, "ns.grafting.getGraftableAugmentations", "")).includes(special)) {
+                    if ((await Do(Game.ns, "ns.grafting.getAugmentationGraftPrice", special)) < (await Do(Game.ns, "ns.getServerMoneyAvailable", "home"))) {
+                        auglist.unshift(special);
+                    }
                 }
             }
             let playerhack = await (Game.Player.hacking);
