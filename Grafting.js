@@ -54,7 +54,8 @@ export class Grafting {
                 if (!(((await Do(Game.ns, "ns.getPlayer", "")).city) == "New Tokyo"))
                     await Do(Game.ns, "ns.singularity.travelToCity", "New Tokyo");
                 if (playerhack < 4000 || ownedAugs.length < 30)
-                    await Do(Game.ns, "ns.grafting.graftAugmentation", auglist[0], false);
+                    if (await Do(Game.ns, "ns.grafting.graftAugmentation", auglist[0], false))
+                        this.log(auglist[0]);
             }
         }
     }
