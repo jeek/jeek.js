@@ -894,7 +894,8 @@ export async function bn8(Game) {
         }
         tickPrice = await Do(Game.ns, "ns.stock.getPurchaseCost", 'ECP', 1, "Long");
 
-        await (Game.Grafting.checkIn());
+        if (8 == await (Game.Player.bitNodeN))
+            await (Game.Grafting.checkIn());
 
         while ((await Do(Game.ns, "ns.singularity.getUpgradeHomeRamCost")) * 2 < await Do(Game.ns, "ns.getServerMoneyAvailable", "home") && await Do(Game.ns, "ns.singularity.upgradeHomeRam", ""));
         let chances = {};
