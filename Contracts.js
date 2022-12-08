@@ -564,10 +564,11 @@ export class Contracts {
 		this.game = game ? game : new WholeGame(ns);
 		this.contracts = {};
 		this.times = {};
-		this.log = ns.tprint;
+		this.log = ns.tprint.bind(ns);
 		if (ns.flags(cmdlineflags)['logbox']) {
 			this.log = this.game.createSidebarItem("Contracts", "", "C").log;
-		}	}
+		}
+	}
 	async list() {
 		//		this['window'] = this['window'] || await makeNewWindow("Contracts", this.ns.ui.getTheme())
 		let files = [];

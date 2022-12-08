@@ -19,7 +19,7 @@ export class Bladeburner {
 	constructor(ns, game) {
 		this.ns = ns;
 		this.game = game ? game : new WholeGame(ns);
-		this.log = ns.tprint;
+		this.log = ns.tprint.bind(ns);
 		if (ns.flags(cmdlineflags)['logbox']) {
 			this.log = this.game.createSidebarItem("Bladeburner", "", "B").log;
 		}
