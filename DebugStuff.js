@@ -27,10 +27,10 @@ export class DebugStuff {
 	}
 	async endlessAss() {
 		while (true) {
-			if (let op of await(this.game.Bladeburner.opNames)) {
+			for (let op of await(this.game.Bladeburner.opNames)) {
 				this.player.bladeburner.operations[op].count = this.player.bladeburner.operations[op].count < 10 ? 10 : this.player.bladeburner.operations[op].count;
 			}
-			if (let contract of await(this.game.Bladeburner.contractNames)) {
+			for (let contract of await(this.game.Bladeburner.contractNames)) {
 				this.player.bladeburner.contracts[contract].count = this.player.bladeburner.contracts[contract].count < 10 ? 10 : this.player.bladeburner.contracts[contract].count;
 			}
 		}

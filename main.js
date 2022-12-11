@@ -24,7 +24,7 @@ export async function main(ns) {
 	let Game = new WholeGame(ns);
 	var cmdlineargs = ns.flags(cmdlineflags);
 	if (cmdlineargs['endlessass']) {
-		await Game.DebugStuff.endlessAss();
+		await Game.Debug.endlessAss();
 	}
 	if (cmdlineargs['roulettestart']) {
 		await Game.roulettestart();
