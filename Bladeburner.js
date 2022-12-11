@@ -139,7 +139,7 @@ export class Bladeburner {
 	}
 	async inciteViolenceEverywhere() {
 		this.log("Inciting Violence");
-		while (100 > await (this.opCount("Assassination"))) {
+		while (100 > await (this.operationCount("Assassination"))) {
 		    for (let city of CITIES) {
 			    await Do(this.ns, "ns.bladeburner.switchCity", city);
 			    await Do(this.ns, "ns.bladeburner.startAction", "General", "Incite Violence");
