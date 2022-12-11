@@ -196,7 +196,7 @@ export class Bladeburner {
 	get opNames() {
 		return (async () => {
 			try {
-				return await Do(this.ns, "ns.bladeburner.getOperationNames");
+				return await Do(this.ns, "ns.bladeburner.getOperationNames").filter(x => !["Sting Operation", "Raid"].includes(x));
 			} catch (e) {
 				return [];
 			}
@@ -343,7 +343,7 @@ export class Bladeburner {
 		answer += "<TABLE WIDTH=100% BORDER=1><TR><TH>Contracts</TH><TH>Operations</TH><TH>Black Ops</TH><TH>Skills " + (await Do(this.ns, "ns.bladeburner.getSkillPoints")).toString() + "</TH></TR>";
 		answer += "<TR VALIGN=TOP>";
 		//		answer += td((await Do(this.ns, "ns.bladeburner.getGeneralActionNames")).join("<BR>"));
-		answer += "<TD WIDTH=25%>";
+		answer += "<TD WIDTH=50%>";
 		for (let contract of await Do(this.ns, "ns.bladeburner.getContractNames")) {
 			let remainingActions = await Do(this.ns, "ns.bladeburner.getActionCountRemaining", "Contract", contract);
 			if (remainingActions <= 0) {
@@ -352,8 +352,6 @@ export class Bladeburner {
 				answer += contract + ": " + Math.floor((await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Contract", contract))[0] * 100).toString() + "% (" + remainingActions.toString() + ")<BR>";
 			}
 		}
-		answer += "</TD>";
-		answer += "<TD WIDTH=25%>";
 		for (let operation of await Do(this.ns, "ns.bladeburner.getOperationNames")) {
 			let remainingActions = await Do(this.ns, "ns.bladeburner.getActionCountRemaining", "Operation", operation);
 			if (remainingActions <= 0) {
@@ -362,7 +360,6 @@ export class Bladeburner {
 				answer += operation.replace(" Operation", "") + ": " + Math.floor((await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Operation", operation))[0] * 100).toString() + "% (" + remainingActions.toString() + ")<BR>";
 			}
 		}
-		answer += "<TD WIDTH=25%>";
 		for (let op of await Do(this.ns, "ns.bladeburner.getBlackOpNames")) {
 			if (0 == (await Do(this.ns, 'ns.bladeburner.getActionCountRemaining', "Black Op", op))) {
 				//answer += "<FONT COLOR=" + this.ns.ui.getTheme()['disabled'] + ">" + op + ": " + (await Do(this.ns, "ns.bladeburner.getBlackOpRank", op)) + " (" + (Math.floor(100 * (await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Black Op", op))[0])).toString() + "%)</FONT> " + (this.isKillOp(op) ? this.killicon : "") + (this.isStealthOp(op) ? this.stealthicon : "") + "<BR>";
@@ -374,7 +371,7 @@ export class Bladeburner {
 			}
 		}
 		answer += "</TD>"
-		answer += "<TD WIDTH=25%>";
+		answer += "<TD WIDTH=50%>";
 		for (let skill of await Do(this.ns, "ns.bladeburner.getSkillNames")) {
 			answer += skill + ": " + (await Do(this.ns, "ns.bladeburner.getSkillLevel", skill)).toString() + " (" + (await Do(this.ns, "ns.bladeburner.getSkillUpgradeCost", skill)) + ")<BR>";
 		}
