@@ -344,7 +344,7 @@ export class Bladeburner {
 		answer += "<TR VALIGN=TOP>";
 		//		answer += td((await Do(this.ns, "ns.bladeburner.getGeneralActionNames")).join("<BR>"));
 		answer += "<TD WIDTH=50%>";
-		for (let contract of await Do(this.ns, "ns.bladeburner.getContractNames")) {
+		for (let contract of await (this.contractNames)) {
 			let remainingActions = await Do(this.ns, "ns.bladeburner.getActionCountRemaining", "Contract", contract);
 			if (remainingActions <= 0) {
 				answer += "<FONT COLOR=" + this.ns.ui.getTheme()['disabled'] + ">" + contract + ": " + Math.floor((await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Contract", contract))[0] * 100).toString() + "% (" + remainingActions.toString() + ")</FONT><BR>";
@@ -352,7 +352,7 @@ export class Bladeburner {
 				answer += contract + ": " + Math.floor((await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Contract", contract))[0] * 100).toString() + "% (" + remainingActions.toString() + ")<BR>";
 			}
 		}
-		for (let operation of await Do(this.ns, "ns.bladeburner.getOperationNames")) {
+		for (let operation of await (this.opNames)) {
 			let remainingActions = await Do(this.ns, "ns.bladeburner.getActionCountRemaining", "Operation", operation);
 			if (remainingActions <= 0) {
 				answer += "<FONT COLOR=" + this.ns.ui.getTheme()['disabled'] + ">" + operation.replace(" Operation", "") + ": " + Math.floor((await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Operation", operation))[0] * 100).toString() + "% (" + remainingActions.toString() + ")</FONT><BR>";
