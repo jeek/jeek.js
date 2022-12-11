@@ -137,14 +137,14 @@ export class Bladeburner {
 	async bbActionCount(action) {
 		return await Do(this.ns, "ns.bladeburner.getActionCountRemaining", bbTypes[action], action);
 	}
-	async inciteViolenceEverywhere() {
-		this.log("Inciting Violence");
-		while (100 > await (this.operationCount("Assassination"))) {
-		    for (let city of CITIES) {
-			    await Do(this.ns, "ns.bladeburner.switchCity", city);
-			    await Do(this.ns, "ns.bladeburner.startAction", "General", "Incite Violence");
-		    	await this.ns.sleep(await Do(this.ns, "ns.bladeburner.getActionTime", "General", "Incite Violence"));
-	    	}
+	async inciteViolence() {
+		let city = Object.entries(await DoAll(this.ns, "ns.bladeburner.getCityEstimatedPopulation", CITIES)).sort((a, b) => b[1] - a[1])[0][0]
+		this.log("Inciting Violence in " + city);
+		await Do(this.ns, "ns.bladeburner.switchCity", city);
+		await this.game.Sleeves.bbEverybody("Infiltrate synthoids");
+		while (1000 > await (this.operationCount("Assassination"))) {
+		    await Do(this.ns, "ns.bladeburner.startAction", "General", "Incite Violence");
+        	await this.ns.sleep(await Do(this.ns, "ns.bladeburner.getActionTime", "General", "Incite Violence"));
 	    }
 	}
 	async recoverIfNecessary(lower = .6, upper = .9) {

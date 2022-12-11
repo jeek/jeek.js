@@ -138,5 +138,5 @@ export async function bn7(Game) {
         }
         await (Game.Bladeburner.hardStop());
     }
-    await Game.Bladeburner.inciteViolenceEverywhere();
+    await Game.Bladeburner.inciteViolence();
 }
