@@ -7,7 +7,8 @@ export class Hacknet {
 		this.game = game ? game : new WholeGame(ns);
 		this.log = ns.tprint.bind(ns);
 		if (ns.flags(cmdlineflags)['logbox']) {
-			this.log = this.game.sidebar.querySelector(".hacknetbox").log || this.game.createSidebarItem("Hacknet", "", "H", "hacknetbox").log;
+			this.log = this.game.sidebar.querySelector(".hacknetbox") || this.game.createSidebarItem("Hacknet", "", "H", "hacknetbox");
+			this.log = this.log.log;
 		}
 	}
 	async loop(goal = "Sell for Money") {

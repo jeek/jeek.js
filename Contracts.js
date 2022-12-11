@@ -566,7 +566,8 @@ export class Contracts {
 		this.times = {};
 		this.log = ns.tprint.bind(ns);
 		if (ns.flags(cmdlineflags)['logbox']) {
-			this.log = this.game.sidebar.querySelector(".contractbox").log || this.game.createSidebarItem("Contracts", "", "C", "contractbox").log;
+			this.log = this.game.sidebar.querySelector(".contractbox") || this.game.createSidebarItem("Contracts", "", "C", "contractbox");
+			this.log = this.log.log;
 		}
 	}
 	async list() {

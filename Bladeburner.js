@@ -21,7 +21,8 @@ export class Bladeburner {
 		this.game = game ? game : new WholeGame(ns);
 		this.log = ns.tprint.bind(ns);
 		if (ns.flags(cmdlineflags)['logbox']) {
-			this.log = this.game.sidebar.querySelector(".bladebox").log || this.game.createSidebarItem("Bladeburner", "", "B", "bladebox").log;
+			this.log = this.game.sidebar.querySelector(".bladebox") || this.game.createSidebarItem("Bladeburner", "", "B", "bladebox");
+			this.log = this.log.log;
 		}
 	}
 	async getChance(name) {
