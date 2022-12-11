@@ -74,7 +74,7 @@ export async function bn7(Game) {
             await Game.Sleeves.bbEverybody("Support main sleeve");
         }
         await Game.Bladeburner.log(best[best.length - 1].slice(0, 4).join(" "));
-        await Game.Bladeburner.start(best[best.length - 1][2]);
+        await Game.Bladeburner.actionStart(best[best.length - 1][2]);
         if (best[best.length - 1][1] != "Black Op") {
             await (Game.Sleeves.bbEverybody("Field Analysis"));
             let shox = await Game.Sleeves.bbCombatSort();

@@ -105,7 +105,7 @@ export class Bladeburner {
 	async setActionLevel(op, level) {
 		return await Do(this.ns, "ns.bladeburner.setActionLevel", bbTypes[op], op, level);
 	}
-	async start(op) {
+	async actionStart(op) {
 		return await Do(this.ns, "ns.bladeburner.startAction", bbTypes[op], op);
 	}
 	isKillOp(nextOp) {
