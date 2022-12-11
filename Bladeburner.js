@@ -12,12 +12,38 @@ let bbTypes = {
 	"Sting Operation": "Operation",
 	"Raid": "Operation",
 	"Stealth Retirement Operation": "Operation",
-	"Assassination": "Operation"
+	"Assassination": "Operation",
+	"Operation Typhoon": "Black Op",
+	"Operation X": "Black Op",
+	"Operation Titan": "Black Op",
+	"Operation Ares": "Black Op",
+	"Operation Archangel": "Black Op",
+	"Operation Juggernaut": "Black Op",
+	"Operation Red Dragon": "Black Op",
+	"Operation K": "Black Op",
+	"Operation Deckard": "Black Op",
+	"Operation Tyrell": "Black Op",
+	"Operation Wallace": "Black Op",
+	"Operation Hyron": "Black Op",
+	"Operation Ion Storm": "Black Op",
+	"Operation Annihilus": "Black Op",
+	"Operation Ultron": "Black Op",
+	"Operation Centurion": "Black Op",
+	"Operation Vindictus": "Black Op",
+	"Operation Daedalus": "Black Op",
+	"Operation Zero": "Black Op",
+	"Operation Shoulder of Orion": "Black Op",
+	"Operation Morpheus": "Black Op"
 }
 
 export class Bladeburner {
-	constructor(ns, game) {
+	constructor(ns, game, raid=true, sting=true, maxChaos=30, minStamina=.6, maxStamina=.9) {
 		this.ns = ns;
+		this.raid = raid;
+		this.sting = sting;
+		this.maxChaos = maxChaos;
+		this.minStamina = minStamina;
+		this.maxStamina = maxStamina;
 		this.game = game ? game : new WholeGame(ns);
 		this.log = ns.tprint.bind(ns);
 		if (ns.flags(cmdlineflags)['logbox']) {
@@ -39,6 +65,15 @@ export class Bladeburner {
 	}
 	async start() {
 		return await Do(this.ns, "ns.bladeburner.joinBladeburnerDivision");
+	}
+	async successChance(op) {
+		return await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", bbTypes[op], op);
+	}
+	async teamSize(op, size) {
+		return await Do(this.ns, "ns.bladeburner.setTeamSize", bbTypes[op], op, size);
+	}
+	async setAutoLevel(op, level) {
+		return await Do(this.ns, "ns.bladeburner.setActionAutolevel", bbTypes[op], op, level);
 	}
 	isKillOp(nextOp) {
 		if (["Operation Typhoon", "Operation X", "Operation Titan", "Operation Ares", "Operation Archangel", "Operation Juggernaut", "Operation Red Dragon", "Operation K", "Operation Deckard", "Operation Tyrell", "Operation Wallace", "Operation Hyron", "Operation Ion Storm", "Operation Annihilus", "Operation Ultron"].includes(nextOp)) {
@@ -147,7 +182,9 @@ export class Bladeburner {
         	await this.ns.sleep(await Do(this.ns, "ns.bladeburner.getActionTime", "General", "Incite Violence"));
 	    }
 	}
-	async recoverIfNecessary(lower = .6, upper = .9) {
+	async recoverIfNecessary(lower = -1, upper = -1) {
+		lower = lower == -1 ? this.minStamina : lower;
+		upper = upper == -1 ? this.maxStamina : upper;
 		if (lower > (await Do(this.ns, "ns.bladeburner.getStamina")).reduce((a, b) => a / b)) {
 			this.log("Recovering Stamina...");
 			await this.hardStop();
@@ -162,7 +199,8 @@ export class Bladeburner {
 		}
 		return false;
 	}
-	async deescalate(goal = 30) {
+	async deescalate(goal = -1) {
+		goal = goal == -1 ? this.maxChaos : goal;
 		if (goal < (await Do(this.ns, "ns.bladeburner.getCityChaos", await Do(this.ns, "ns.bladeburner.getCity")))) {
 			this.log("Deescalating " + await Do(this.ns, "ns.bladeburner.getCity"));
 			await this.hardStop();
@@ -196,7 +234,7 @@ export class Bladeburner {
 	get opNames() {
 		return (async () => {
 			try {
-				return (await Do(this.ns, "ns.bladeburner.getOperationNames")).filter(x => !["Sting Operation", "Raid"].includes(x));
+				return (await Do(this.ns, "ns.bladeburner.getOperationNames")).filter(x => this.raid ? true : x != "Raid").filter(x => this.sting ? true : x != "Sting");
 			} catch (e) {
 				return [];
 			}
@@ -219,6 +257,18 @@ export class Bladeburner {
 				return [];
 			}
 		})();
+	}
+	get rank() {
+		return (async () => {
+			try {
+				return await Do(this.ns, "ns.bladeburner.getRank");
+			} catch (e) {
+				return [];
+			}
+		})();
+	}
+	async blackOpRank(op) {
+		return await Do(this.ns, "ns.bladeburner.getBlackOpRank", op);
 	}
 	get nextBlackOp() {
 		return (async () => {

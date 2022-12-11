@@ -1,4 +1,6 @@
 export async function bn7(Game) {
+    Game.Bladeburner.raid = false;
+    Game.Bladeburner.sting = false;
     let numberOfSleeves = await (Game.Sleeves.numSleeves);
     await Game.Sleeves.bbCombatAugs();
     await Game.Player.trainCombatStatsUpTo(100, true); // The true indicates to drag sleeves along
@@ -47,19 +49,19 @@ export async function bn7(Game) {
         best = best.sort((a, b) => { if (a[2] == "Assassination" && b[2] != "Assassination") return 1; if (a[2] != "Assassination" && b[2] == "Assassination") return -1; if (a[1] == "Operation" && b[1] != "Operation") return 1; if (a[1] != "Operation" && b[1] == "Operation") return -1; return 0; });
         await Game.Sleeves.bbEverybody("Support main sleeve");
         let nextBlackOp = await (Game.Bladeburner.nextBlackOp);
-        await Do(Game.ns, "ns.bladeburner.setTeamSize", "Black Op", nextBlackOp, numberOfSleeves);
+        await Game.Bladeburner.teamSize(nextBlackOp, 1000);
 		if (nextBlackOp != "0" && nextBlackOp != 0) {
-			if ((await Do(Game.ns, "ns.bladeburner.getRank", "")) >= (await Do(Game.ns, "ns.bladeburner.getBlackOpRank", nextBlackOp))) {
-				if ((await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Black Op", "Operation Ultron"))[0] > .99) {
-					if ((await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Black Op", nextBlackOp))[0] > (["Operation Centurion", "Operation Vindictus", "Operation Daedalus"].includes(nextBlackOp) ? .2 : .99)) {
+			if ((await (Game.Bladeburner.rank)) >= (await Game.Bladeburner.blackOpRank(nextBlackOp))) {
+				if ((await Game.Bladeburner.successChance("Operation Ultron"))[0] > .99) {
+					if ((await Game.Bladeburner.successChance(nextBlackOp))[0] > (["Operation Centurion", "Operation Vindictus", "Operation Daedalus"].includes(nextBlackOp) ? .2 : .99)) {
 						best.push([0, "Black Op", nextBlackOp, "Sector-12"]);
 					}
 				}
 			}
 		}
         if (best[best.length - 1][1] != "Black Op") {
-            await Do(Game.ns, "ns.bladeburner.setActionAutolevel", best[best.length - 1][1], best[best.length - 1][2], 1e6 < (await Do(Game.ns, "ns.bladeburner.getRank", "")));
-            if (best[best.length - 1][3] != await Do(Game.ns, "ns.bladeburner.getCity")) {
+            await Game.Bladeburner.setAutoLevel(best[best.length - 1][2], 1e6 < (await (Game.Bladeburner.rank)));
+            if (best[best.length - 1][3] != await (Game.Bladeburner.city)) {
                 await Game.Bladeburner.bbCity(best[best.length - 1][3]);
             }
         }
@@ -70,7 +72,6 @@ export async function bn7(Game) {
         await (Game.Bladeburner.hardStop());
         if (best[best.length - 1][1] == "Black Op") {
             await Game.Sleeves.bbEverybody("Support main sleeve");
-            await Do(Game.ns, "ns.bladeburner.setTeamSize", "Black Op", best[best.length - 1][2], 1000);
         }
         await Game.Bladeburner.log(best[best.length - 1].slice(0, 4).join(" "));
         await Do(Game.ns, "ns.bladeburner.startAction", best[best.length - 1][1], best[best.length - 1][2]);
