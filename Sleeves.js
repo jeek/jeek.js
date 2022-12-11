@@ -79,18 +79,16 @@ export class Sleeves {
 			await Do(this.ns, "ns.sleeve.setToShockRecovery", i);
 		}
 	}
-	async bbGoHereAnd(i, city, action, contract = null) {
-		if (city != null)
-			await Do(this.ns, "ns.sleeve.travel", i, city);
+	async bbDo(i, action, contract = null) {
 		if (contract != null) {
 			await Do(this.ns, "ns.sleeve.setToBladeburnerAction", i, action, contract);
 		} else {
 			await Do(this.ns, "ns.sleeve.setToBladeburnerAction", i, action);
 		}
 	}
-	async bbEverybody(city, action, contract = null) {
+	async bbEverybody(action, contract = null) {
 		for (let i = 0; i < await (this.game.Sleeves.numSleeves); i++) {
-			await this.bbGoHereAnd(i, city, action, contract);
+			await this.bbDo(i, action, contract);
 		}
 	}
 }
