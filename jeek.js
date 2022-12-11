@@ -102,7 +102,7 @@ export class Bladeburner {
 		this.game = game ? game : new WholeGame(ns);
 		this.log = ns.tprint.bind(ns);
 		if (ns.flags(cmdlineflags)['logbox']) {
-			this.log = this.game.sb.querySelector(".bladebox") || this.game.createSidebarItem("Bladeburner", "", "B", "bladebox").log;
+			this.log = this.game.sidebar.querySelector(".bladebox") || this.game.createSidebarItem("Bladeburner", "", "B", "bladebox").log;
 		}
 	}
 	async getChance(name) {
@@ -1864,7 +1864,7 @@ export class Contracts {
 		this.times = {};
 		this.log = ns.tprint.bind(ns);
 		if (ns.flags(cmdlineflags)['logbox']) {
-			this.log = this.game.sb.querySelector(".contractbox") || this.game.createSidebarItem("Contracts", "", "C", "contractbox").log;
+			this.log = this.game.sidebar.querySelector(".contractbox") || this.game.createSidebarItem("Contracts", "", "C", "contractbox").log;
 		}
 	}
 	async list() {
@@ -3160,7 +3160,7 @@ export class Gang {
         this.game = game ? game : new WholeGame(ns);
         this.log = ns.tprint.bind(ns);
         if (ns.flags(cmdlineflags)['logbox']) {
-            this.log = this.game.sb.querySelector(".gangbox") || this.game.createSidebarItem("Gang", "", "G", "gangbox").log;
+            this.log = this.game.sidebar.querySelector(".gangbox") || this.game.createSidebarItem("Gang", "", "G", "gangbox").log;
         }
     }
     async loop() {
@@ -3378,7 +3378,7 @@ export class Grafting {
         this.game = game ? game : new WholeGame(ns);
         this.log = ns.tprint.bind(ns);
         if (ns.flags(cmdlineflags)['logbox']) {
-            this.log = this.game.sb.querySelector(".graftbox") || this.game.createSidebarItem("Grafting", "", "G", "graftbox").log;
+            this.log = this.game.sidebar.querySelector(".graftbox") || this.game.createSidebarItem("Grafting", "", "G", "graftbox").log;
         }
     }
     async checkIn(type = "Hacking") {
@@ -3439,7 +3439,7 @@ export class Hacknet {
 		this.game = game ? game : new WholeGame(ns);
 		this.log = ns.tprint.bind(ns);
 		if (ns.flags(cmdlineflags)['logbox']) {
-			this.log = this.game.sb.querySelector(".hacknetbox") || this.game.createSidebarItem("Hacknet", "", "H", "hacknetbox").log;
+			this.log = this.game.sidebar.querySelector(".hacknetbox") || this.game.createSidebarItem("Hacknet", "", "H", "hacknetbox").log;
 		}
 	}
 	async loop(goal = "Sell for Money") {
