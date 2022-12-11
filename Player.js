@@ -26,10 +26,7 @@ export class Player {
 	async hospitalizeIfNeeded() {
 		let hp = (await Do(this.ns, "ns.getPlayer")).hp;
 		if (hp.current / hp.max < 1) {
-			while (hp.current / hp.max < 1) {
-				await Do(this.ns, "ns.singularity.hospitalize");
-				hp = (await Do(this.ns, "ns.getPlayer")).hp;
-			}
+			await Do(this.ns, "ns.singularity.hospitalize");
 			return true;
 		}
 		return false;
