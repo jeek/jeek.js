@@ -97,7 +97,8 @@ export class Bladeburner {
 		return await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", bbTypes[op], op);
 	}
 	async teamSize(op, size) {
-		return await Do(this.ns, "ns.bladeburner.setTeamSize", bbTypes[op], op, size);
+		if (op != 0 && op != "")
+		    return await Do(this.ns, "ns.bladeburner.setTeamSize", bbTypes[op], op, size);
 	}
 	async setAutoLevel(op, level) {
 		return await Do(this.ns, "ns.bladeburner.setActionAutolevel", bbTypes[op], op, level);
