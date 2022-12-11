@@ -138,12 +138,14 @@ export class Bladeburner {
 		return await Do(this.ns, "ns.bladeburner.getActionCountRemaining", bbTypes[action], action);
 	}
 	async inciteViolenceEverywhere() {
-			this.log("Inciting Violence");
-		for (let city of CITIES) {
-			await Do(this.ns, "ns.bladeburner.switchCity", city);
-			await Do(this.ns, "ns.bladeburner.startAction", "General", "Incite Violence");
-			await this.ns.sleep(await Do(this.ns, "ns.bladeburner.getActionTime", "General", "Incite Violence"));
-		}
+		this.log("Inciting Violence");
+		while (100 > await (this.opCount("Assassination"))) {
+		    for (let city of CITIES) {
+			    await Do(this.ns, "ns.bladeburner.switchCity", city);
+			    await Do(this.ns, "ns.bladeburner.startAction", "General", "Incite Violence");
+		    	await this.ns.sleep(await Do(this.ns, "ns.bladeburner.getActionTime", "General", "Incite Violence"));
+	    	}
+	    }
 	}
 	async recoverIfNecessary(lower = .6, upper = .9) {
 		if (lower > (await Do(this.ns, "ns.bladeburner.getStamina")).reduce((a, b) => a / b)) {
