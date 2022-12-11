@@ -223,7 +223,7 @@ export class Bladeburner {
 		this.log("Inciting Violence in " + city);
 		await Do(this.ns, "ns.bladeburner.switchCity", city);
 		await this.game.Sleeves.bbEverybody("Infiltrate synthoids");
-		while (1000 > await (this.operationCount)) {
+		while (500 > await (this.operationCount)) {
 		    await Do(this.ns, "ns.bladeburner.startAction", "General", "Incite Violence");
         	await this.ns.sleep(await Do(this.ns, "ns.bladeburner.getActionTime", "General", "Incite Violence"));
 	    }
