@@ -67,32 +67,32 @@ export async function bn7(Game) {
         }
         await Game.Bladeburner.deescalate();
         if (best[best.length - 1][1] != "Black Op") {
-            await Do(Game.ns, "ns.bladeburner.setActionLevel", best[best.length - 1][1], best[best.length - 1][2], best[best.length - 1][0]);
+            await Game.Bladeburner.setActionLevel(best[best.length - 1][2], best[best.length - 1][0]);
         }
         await (Game.Bladeburner.hardStop());
         if (best[best.length - 1][1] == "Black Op") {
             await Game.Sleeves.bbEverybody("Support main sleeve");
         }
         await Game.Bladeburner.log(best[best.length - 1].slice(0, 4).join(" "));
-        await Do(Game.ns, "ns.bladeburner.startAction", best[best.length - 1][1], best[best.length - 1][2]);
+        await Game.Bladeburner.start(best[best.length - 1][2]);
         if (best[best.length - 1][1] != "Black Op") {
             await (Game.Sleeves.bbEverybody("Field Analysis"));
             let shox = await Game.Sleeves.bbCombatSort();
             let cur = 0;
-            if ((await Do(Game.ns, "ns.bladeburner.getActionCountRemaining", "Contract", "Retirement")) >= 30) {
+            if ((await Game.Bladeburner.actionCount("Retirement")) >= 30) {
                 await Game.Sleeves.bbDo(shox[cur], "Take on contracts", best.filter(x => x[2] == "Retirement").reverse()[0][2]);
                 cur += 1;
             }
-            if ((await Do(Game.ns, "ns.bladeburner.getActionCountRemaining", "Contract", "Bounty Hunter")) >= 30) {
+            if ((await  Game.Bladeburner.actionCount("Bounty Hunter")) >= 30) {
                 await Game.Sleeves.bbDo(shox[cur], "Take on contracts", best.filter(x => x[2] == "Bounty Hunter").reverse()[0][2]);
                 cur += 1;
             }
-            if ((await Do(Game.ns, "ns.bladeburner.getActionCountRemaining", "Contract", "Tracking")) >= 100) {
+            if ((await  Game.Bladeburner.actionCount("Tracking")) >= 100) {
                 await Game.Sleeves.bbDo(shox[cur], "Take on contracts", best.filter(x => x[2] == "Tracking").reverse()[0][2]);
                 cur += 1;
             }
             if (shox.length > cur) {
-                let cityChaos = await Do(Game.ns, "ns.bladeburner.getCityChaos", await (Game.Bladeburner.city));
+                let cityChaos = await (Game.Bladeburner.chaosHere);
                 await Game.Sleeves.bbDo(shox[cur], "Infiltrate synthoids");
                 let ii = 0;
                 for (let i = cur + 1; i < shox.length; i++) {
@@ -101,13 +101,8 @@ export async function bn7(Game) {
                 }
             }
         }
-        while ((await Do(Game.ns, "ns.bladeburner.getCurrentAction")).type != "Idle" && (.6 < (await Do(Game.ns, "ns.bladeburner.getStamina")).reduce((a, b) => a / b)) && ((await Do(Game.ns, "ns.bladeburner.getActionCountRemaining", best[best.length - 1][1], best[best.length - 1][2])) > 0)) {
-            for (let i = 0; i < numberOfSleeves; i++) {
-                if (null == (await Do(Game.ns, "ns.sleeve.getTask", i))) {
-                    await Game.Sleeves.bbDo(i, ((await Do(Game.ns, "ns.bladeburner.getCityChaos", await (Game.Bladeburner.city)))) < 20 ? "Infiltrate synthoids" : "Diplomacy");
-                }
-            }
-            if (best[best.length - 1][0] == "Black Op" && .2 > ((await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Black Op", nextBlackOp))[0]))
+        while ((await (Game.Bladeburner.currentAction)).type != "Idle" && (Game.Bladeburner.minStamina < (await (Game.Bladeburner.stamina)).reduce((a, b) => a / b)) && ((await Game.Bladeburner.actionCount(best[best.length - 1][2])) > 0)) {
+            if (best[best.length - 1][0] == "Black Op" && .2 > ((await Game.Bladeburner.successChance(nextBlackOp))[0]))
                 break;
             await Game.Sleeves.bbCombatAugs();
             await Game.Player.hospitalizeIfNeeded();
@@ -115,21 +110,21 @@ export async function bn7(Game) {
             await Game.Contracts.solve();
             if (await (Game.Bladeburner.hasSimulacrum))
                 await Game.Grafting.checkIn("Combat");
-            await Game.Hacknet.loop(1000 > (await Do(Game.ns, "ns.bladeburner.getSkillPoints")) ? "Exchange for Bladeburner SP" : "Generate Coding Contract");
-            if (.999 < await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Black Op", nextBlackOp))
+            await Game.Hacknet.loop(1000 > (await (Game.Bladeburner.skillPoints)) ? "Exchange for Bladeburner SP" : "Generate Coding Contract");
+            if (.999 < await Game.Bladeburner.successChance(nextBlackOp))
                 break;
-            if (best[best.length - 1][0] < await Do(Game.ns, "ns.bladeburner.getActionMaxLevel", best[best.length - 1][1], best[best.length - 1][2])) {
-                if (1 == (await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", best[best.length - 1][1], best[best.length - 1][2]))[0]) {
+            if (best[best.length - 1][0] < await Game.Bladeburner.actionMaxLevel(best[best.length - 1][2])) {
+                if (1 == (await Game.Bladeburner.successChance(best[best.length - 1][2]))[0]) {
                     best[best.length - 1][0] += 1;
-                    await Do(Game.ns, "ns.bladeburner.setActionLevel", best[best.length - 1][1], best[best.length - 1][2], best[best.length - 1][0]);
+                    await Game.Bladeburner.setActionLevel(best[best.length - 1][2], best[best.length - 1][0]);
                 }
             }
             if (best[best.length - 1][1] == "Operation") {
-                if (.94 > (((await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Operation", best[best.length - 1][2])))[0])) {
+                if (.94 > (((await Game.Bladeburner.successChance(best[best.length - 1][2])))[0])) {
                     break;
                 }
             }
-            if (10 + this.cityChaos <= await Do(Game.ns, "ns.bladeburner.getCityChaos", await Do(Game.ns, "ns.bladeburner.getCity")))
+            if (10 + this.cityChaos <= await (Game.Bladeburner.chaosHere))
                 break;
             await Game.ns.sleep(1000);
         }

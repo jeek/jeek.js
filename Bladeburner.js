@@ -51,6 +51,33 @@ export class Bladeburner {
 			this.log = this.log.log;
 		}
 	}
+	get chaosHere() {
+		return (async () => {
+			try {
+				return await Do(this.ns, "ns.bladeburner.getCityChaos", await (this.city));
+			} catch (e) {
+				return [];
+			}
+		})();
+	}
+	get stamina() {
+		return (async () => {
+			try {
+				return await Do(this.ns, "ns.bladeburner.getStamina");
+			} catch (e) {
+				return [];
+			}
+		})();
+	}
+	get currentAction() {
+		return (async () => {
+			try {
+				return await Do(this.ns, "ns.bladeburner.getCurrentAction");
+			} catch (e) {
+				return [];
+			}
+		})();
+	}
 	async getChance(name) {
 		return await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", bbTypes[name], name);
 	}
@@ -74,6 +101,12 @@ export class Bladeburner {
 	}
 	async setAutoLevel(op, level) {
 		return await Do(this.ns, "ns.bladeburner.setActionAutolevel", bbTypes[op], op, level);
+	}
+	async setActionLevel(op, level) {
+		return await Do(this.ns, "ns.bladeburner.setActionLevel", bbTypes[op], op, level);
+	}
+	async start(op) {
+		return await Do(this.ns, "ns.bladeburner.startAction", bbTypes[op], op);
 	}
 	isKillOp(nextOp) {
 		if (["Operation Typhoon", "Operation X", "Operation Titan", "Operation Ares", "Operation Archangel", "Operation Juggernaut", "Operation Red Dragon", "Operation K", "Operation Deckard", "Operation Tyrell", "Operation Wallace", "Operation Hyron", "Operation Ion Storm", "Operation Annihilus", "Operation Ultron"].includes(nextOp)) {
@@ -222,6 +255,9 @@ export class Bladeburner {
 			}
 		})();
 	}
+	async actionCount(op) {
+		return await Do(this.ns, "ns.bladeburner.getActionCountRemaining", bbTypes[op], op);
+	}
 	get operationCount() {
 		return (async () => {
 			try {
@@ -244,6 +280,15 @@ export class Bladeburner {
 		return (async () => {
 			try {
 				return await Do(this.ns, "ns.bladeburner.getCity");
+			} catch (e) {
+				return [];
+			}
+		})();
+	}
+	get skillPoints() {
+		return (async () => {
+			try {
+				return await Do(this.ns, "ns.bladeburner.getSkillPoints");
 			} catch (e) {
 				return [];
 			}
@@ -278,6 +323,9 @@ export class Bladeburner {
 				return 0;
 			}
 		})();
+	}
+	async actionMaxLevel(op) {
+		return await Do(this.ns, "ns.bladeburner.getActionMaxLevel", bbTypes[op], op);
 	}
 	async createDisplay() {
 		this.bbWindow = await makeNewWindow("Bladeburner", this.ns.ui.getTheme());
