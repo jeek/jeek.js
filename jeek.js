@@ -102,7 +102,8 @@ export class Bladeburner {
 		this.game = game ? game : new WholeGame(ns);
 		this.log = ns.tprint.bind(ns);
 		if (ns.flags(cmdlineflags)['logbox']) {
-			this.log = this.game.sidebar.querySelector(".bladebox").log || this.game.createSidebarItem("Bladeburner", "", "B", "bladebox").log;
+			this.log = this.game.sidebar.querySelector(".bladebox") || this.game.createSidebarItem("Bladeburner", "", "B", "bladebox");
+			this.log = this.log.log;
 		}
 	}
 	async getChance(name) {
@@ -218,12 +219,14 @@ export class Bladeburner {
 		return await Do(this.ns, "ns.bladeburner.getActionCountRemaining", bbTypes[action], action);
 	}
 	async inciteViolenceEverywhere() {
-			this.log("Inciting Violence");
-		for (let city of CITIES) {
-			await Do(this.ns, "ns.bladeburner.switchCity", city);
-			await Do(this.ns, "ns.bladeburner.startAction", "General", "Incite Violence");
-			await this.ns.sleep(await Do(this.ns, "ns.bladeburner.getActionTime", "General", "Incite Violence"));
-		}
+		this.log("Inciting Violence");
+		while (100 > await (this.opCount("Assassination"))) {
+		    for (let city of CITIES) {
+			    await Do(this.ns, "ns.bladeburner.switchCity", city);
+			    await Do(this.ns, "ns.bladeburner.startAction", "General", "Incite Violence");
+		    	await this.ns.sleep(await Do(this.ns, "ns.bladeburner.getActionTime", "General", "Incite Violence"));
+	    	}
+	    }
 	}
 	async recoverIfNecessary(lower = .6, upper = .9) {
 		if (lower > (await Do(this.ns, "ns.bladeburner.getStamina")).reduce((a, b) => a / b)) {
@@ -1872,7 +1875,8 @@ export class Contracts {
 		this.times = {};
 		this.log = ns.tprint.bind(ns);
 		if (ns.flags(cmdlineflags)['logbox']) {
-			this.log = this.game.sidebar.querySelector(".contractbox").log || this.game.createSidebarItem("Contracts", "", "C", "contractbox").log;
+			this.log = this.game.sidebar.querySelector(".contractbox") || this.game.createSidebarItem("Contracts", "", "C", "contractbox");
+			this.log = this.log.log;
 		}
 	}
 	async list() {
@@ -2905,6 +2909,16 @@ export class DebugStuff {
 	startCorp(corpName) {
 		this.player.startCorporation(corpName);
 	}
+	async endlessAss() {
+		while (true) {
+			for (let op of await(this.game.Bladeburner.opNames)) {
+				this.player.bladeburner.operations[op].count = this.player.bladeburner.operations[op].count < 10 ? 10 : this.player.bladeburner.operations[op].count;
+			}
+			for (let contract of await(this.game.Bladeburner.contractNames)) {
+				this.player.bladeburner.contracts[contract].count = this.player.bladeburner.contracts[contract].count < 10 ? 10 : this.player.bladeburner.contracts[contract].count;
+			}
+		}
+	}
 }
 
 export class Division {
@@ -3168,7 +3182,8 @@ export class Gang {
         this.game = game ? game : new WholeGame(ns);
         this.log = ns.tprint.bind(ns);
         if (ns.flags(cmdlineflags)['logbox']) {
-            this.log = this.game.sidebar.querySelector(".gangbox").log || this.game.createSidebarItem("Gang", "", "G", "gangbox").log;
+            this.log = this.game.sidebar.querySelector(".gangbox") || this.game.createSidebarItem("Gang", "", "G", "gangbox");
+            this.log = this.log.log;
         }
     }
     async loop() {
@@ -3386,7 +3401,8 @@ export class Grafting {
         this.game = game ? game : new WholeGame(ns);
         this.log = ns.tprint.bind(ns);
         if (ns.flags(cmdlineflags)['logbox']) {
-            this.log = this.game.sidebar.querySelector(".graftbox").log || this.game.createSidebarItem("Grafting", "", "G", "graftbox").log;
+            this.log = this.game.sidebar.querySelector(".graftbox") || this.game.createSidebarItem("Grafting", "", "G", "graftbox");
+            this.log = this.log.log;
         }
     }
     async checkIn(type = "Hacking") {
@@ -3447,7 +3463,8 @@ export class Hacknet {
 		this.game = game ? game : new WholeGame(ns);
 		this.log = ns.tprint.bind(ns);
 		if (ns.flags(cmdlineflags)['logbox']) {
-			this.log = this.game.sidebar.querySelector(".hacknetbox").log || this.game.createSidebarItem("Hacknet", "", "H", "hacknetbox").log;
+			this.log = this.game.sidebar.querySelector(".hacknetbox") || this.game.createSidebarItem("Hacknet", "", "H", "hacknetbox");
+			this.log = this.log.log;
 		}
 	}
 	async loop(goal = "Sell for Money") {
@@ -3677,7 +3694,8 @@ const cmdlineflags = [
 	["stockfilter", false], // Only show owned stocks
 	["ps", false],  // Process List
 	["augs", false], // Augmentations
-	["popemall", false] // Get access to all possible servers
+	["popemall", false], // Get access to all possible servers
+	["endlessass", false], // Endless Assassinations (CHEAT)
 ];
 
 
@@ -3685,6 +3703,9 @@ const cmdlineflags = [
 export async function main(ns) {
 	let Game = new WholeGame(ns);
 	var cmdlineargs = ns.flags(cmdlineflags);
+	if (cmdlineargs['endlessass']) {
+		await Game.Debug.endlessAss();
+	}
 	if (cmdlineargs['roulettestart']) {
 		await Game.roulettestart();
 	}
@@ -4489,7 +4510,8 @@ export class StockMarket {
 		this.game = game ? game : new WholeGame(ns);
 		this.log = ns.tprint.bind(ns);
         if (ns.flags(cmdlineflags)['logbox']) {
-            this.log = this.game.sidebar.querySelector(".stockbox").log || this.game.createSidebarItem("Stocks", "", "S", "stockbox").log;
+            this.log = this.game.sidebar.querySelector(".stockbox") || this.game.createSidebarItem("Stocks", "", "S", "stockbox");
+			this.log = this.log.log;
         }
 	}
 	get symbols() {
