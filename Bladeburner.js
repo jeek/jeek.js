@@ -187,7 +187,7 @@ export class Bladeburner {
 	get operationCount() {
 		return (async () => {
 			try {
-				return (await(this.bbOpCount("Investigation")))+(await(this.bbOpCount("Undercover")))+(await(this.bbOpCount("Stealth Retirement")))+(await(this.bbOpCount("Assassination")));
+				return (await(this.bbOpCount("Investigation")))+(await(this.bbOpCount("Undercover Operation")))+(await(this.bbOpCount("Stealth Retirement Operation")))+(await(this.bbOpCount("Assassination")));
 			} catch (e) {
 				return 0;
 			}
