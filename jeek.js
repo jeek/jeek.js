@@ -93,12 +93,38 @@ let bbTypes = {
 	"Sting Operation": "Operation",
 	"Raid": "Operation",
 	"Stealth Retirement Operation": "Operation",
-	"Assassination": "Operation"
+	"Assassination": "Operation",
+	"Operation Typhoon": "Black Op",
+	"Operation X": "Black Op",
+	"Operation Titan": "Black Op",
+	"Operation Ares": "Black Op",
+	"Operation Archangel": "Black Op",
+	"Operation Juggernaut": "Black Op",
+	"Operation Red Dragon": "Black Op",
+	"Operation K": "Black Op",
+	"Operation Deckard": "Black Op",
+	"Operation Tyrell": "Black Op",
+	"Operation Wallace": "Black Op",
+	"Operation Hyron": "Black Op",
+	"Operation Ion Storm": "Black Op",
+	"Operation Annihilus": "Black Op",
+	"Operation Ultron": "Black Op",
+	"Operation Centurion": "Black Op",
+	"Operation Vindictus": "Black Op",
+	"Operation Daedalus": "Black Op",
+	"Operation Zero": "Black Op",
+	"Operation Shoulder of Orion": "Black Op",
+	"Operation Morpheus": "Black Op"
 }
 
 export class Bladeburner {
-	constructor(ns, game) {
+	constructor(ns, game, raid=true, sting=true, maxChaos=30, minStamina=.6, maxStamina=.9) {
 		this.ns = ns;
+		this.raid = raid;
+		this.sting = sting;
+		this.maxChaos = maxChaos;
+		this.minStamina = minStamina;
+		this.maxStamina = maxStamina;
 		this.game = game ? game : new WholeGame(ns);
 		this.log = ns.tprint.bind(ns);
 		if (ns.flags(cmdlineflags)['logbox']) {
@@ -120,6 +146,15 @@ export class Bladeburner {
 	}
 	async start() {
 		return await Do(this.ns, "ns.bladeburner.joinBladeburnerDivision");
+	}
+	async successChance(op) {
+		return await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", bbTypes[op], op);
+	}
+	async teamSize(op, size) {
+		return await Do(this.ns, "ns.bladeburner.setTeamSize", bbTypes[op], op, size);
+	}
+	async setAutoLevel(op, level) {
+		return await Do(this.ns, "ns.bladeburner.setActionAutolevel", bbTypes[op], op, level);
 	}
 	isKillOp(nextOp) {
 		if (["Operation Typhoon", "Operation X", "Operation Titan", "Operation Ares", "Operation Archangel", "Operation Juggernaut", "Operation Red Dragon", "Operation K", "Operation Deckard", "Operation Tyrell", "Operation Wallace", "Operation Hyron", "Operation Ion Storm", "Operation Annihilus", "Operation Ultron"].includes(nextOp)) {
@@ -228,7 +263,9 @@ export class Bladeburner {
         	await this.ns.sleep(await Do(this.ns, "ns.bladeburner.getActionTime", "General", "Incite Violence"));
 	    }
 	}
-	async recoverIfNecessary(lower = .6, upper = .9) {
+	async recoverIfNecessary(lower = -1, upper = -1) {
+		lower = lower == -1 ? this.minStamina : lower;
+		upper = upper == -1 ? this.maxStamina : upper;
 		if (lower > (await Do(this.ns, "ns.bladeburner.getStamina")).reduce((a, b) => a / b)) {
 			this.log("Recovering Stamina...");
 			await this.hardStop();
@@ -243,7 +280,8 @@ export class Bladeburner {
 		}
 		return false;
 	}
-	async deescalate(goal = 30) {
+	async deescalate(goal = -1) {
+		goal = goal == -1 ? this.maxChaos : goal;
 		if (goal < (await Do(this.ns, "ns.bladeburner.getCityChaos", await Do(this.ns, "ns.bladeburner.getCity")))) {
 			this.log("Deescalating " + await Do(this.ns, "ns.bladeburner.getCity"));
 			await this.hardStop();
@@ -277,7 +315,7 @@ export class Bladeburner {
 	get opNames() {
 		return (async () => {
 			try {
-				return await Do(this.ns, "ns.bladeburner.getOperationNames");
+				return (await Do(this.ns, "ns.bladeburner.getOperationNames")).filter(x => this.raid ? true : x != "Raid").filter(x => this.sting ? true : x != "Sting");
 			} catch (e) {
 				return [];
 			}
@@ -300,6 +338,18 @@ export class Bladeburner {
 				return [];
 			}
 		})();
+	}
+	get rank() {
+		return (async () => {
+			try {
+				return await Do(this.ns, "ns.bladeburner.getRank");
+			} catch (e) {
+				return [];
+			}
+		})();
+	}
+	async blackOpRank(op) {
+		return await Do(this.ns, "ns.bladeburner.getBlackOpRank", op);
 	}
 	get nextBlackOp() {
 		return (async () => {
@@ -421,11 +471,11 @@ export class Bladeburner {
 			//			this.ns.tprint("<TD WIDTH=" + Math.floor(percentage).toString() + "% BGCOLOR=" + this.ns.ui.getTheme()['success'] + ">&nbsp;</TD><TD BGCOLOR=" + this.ns.ui.getTheme()['info'] + ">&nbsp;</TD>");
 			answer += "</TR></TABLE>";
 		}
-		answer += "<TABLE WIDTH=100% BORDER=1><TR><TH>Contracts</TH><TH>Operations</TH><TH>Black Ops</TH><TH>Skills " + (await Do(this.ns, "ns.bladeburner.getSkillPoints")).toString() + "</TH></TR>";
+		answer += "<TABLE WIDTH=100% BORDER=1><TR><TH>Jobs</TH><TH>Skills " + (await Do(this.ns, "ns.bladeburner.getSkillPoints")).toString() + "</TH></TR>";
 		answer += "<TR VALIGN=TOP>";
 		//		answer += td((await Do(this.ns, "ns.bladeburner.getGeneralActionNames")).join("<BR>"));
-		answer += "<TD WIDTH=25%>";
-		for (let contract of await Do(this.ns, "ns.bladeburner.getContractNames")) {
+		answer += "<TD WIDTH=50%>";
+		for (let contract of await (this.contractNames)) {
 			let remainingActions = await Do(this.ns, "ns.bladeburner.getActionCountRemaining", "Contract", contract);
 			if (remainingActions <= 0) {
 				answer += "<FONT COLOR=" + this.ns.ui.getTheme()['disabled'] + ">" + contract + ": " + Math.floor((await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Contract", contract))[0] * 100).toString() + "% (" + remainingActions.toString() + ")</FONT><BR>";
@@ -433,9 +483,7 @@ export class Bladeburner {
 				answer += contract + ": " + Math.floor((await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Contract", contract))[0] * 100).toString() + "% (" + remainingActions.toString() + ")<BR>";
 			}
 		}
-		answer += "</TD>";
-		answer += "<TD WIDTH=25%>";
-		for (let operation of await Do(this.ns, "ns.bladeburner.getOperationNames")) {
+		for (let operation of await (this.opNames)) {
 			let remainingActions = await Do(this.ns, "ns.bladeburner.getActionCountRemaining", "Operation", operation);
 			if (remainingActions <= 0) {
 				answer += "<FONT COLOR=" + this.ns.ui.getTheme()['disabled'] + ">" + operation.replace(" Operation", "") + ": " + Math.floor((await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Operation", operation))[0] * 100).toString() + "% (" + remainingActions.toString() + ")</FONT><BR>";
@@ -443,7 +491,6 @@ export class Bladeburner {
 				answer += operation.replace(" Operation", "") + ": " + Math.floor((await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Operation", operation))[0] * 100).toString() + "% (" + remainingActions.toString() + ")<BR>";
 			}
 		}
-		answer += "<TD WIDTH=25%>";
 		for (let op of await Do(this.ns, "ns.bladeburner.getBlackOpNames")) {
 			if (0 == (await Do(this.ns, 'ns.bladeburner.getActionCountRemaining', "Black Op", op))) {
 				//answer += "<FONT COLOR=" + this.ns.ui.getTheme()['disabled'] + ">" + op + ": " + (await Do(this.ns, "ns.bladeburner.getBlackOpRank", op)) + " (" + (Math.floor(100 * (await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Black Op", op))[0])).toString() + "%)</FONT> " + (this.isKillOp(op) ? this.killicon : "") + (this.isStealthOp(op) ? this.stealthicon : "") + "<BR>";
@@ -455,9 +502,16 @@ export class Bladeburner {
 			}
 		}
 		answer += "</TD>"
-		answer += "<TD WIDTH=25%>";
+		answer += "<TD WIDTH=50%>";
 		for (let skill of await Do(this.ns, "ns.bladeburner.getSkillNames")) {
-			answer += skill + ": " + (await Do(this.ns, "ns.bladeburner.getSkillLevel", skill)).toString() + " (" + (await Do(this.ns, "ns.bladeburner.getSkillUpgradeCost", skill)) + ")<BR>";
+			if ((await Do(this.ns, "ns.bladeburner.getSkillLevel", skill)) > 0) {
+			    answer += skill + ": " + (await Do(this.ns, "ns.bladeburner.getSkillLevel", skill)).toString() + " (" + (await Do(this.ns, "ns.bladeburner.getSkillUpgradeCost", skill)) + ")<BR>";
+			}
+		}
+		for (let skill of await Do(this.ns, "ns.bladeburner.getSkillNames")) {
+			if ((await Do(this.ns, "ns.bladeburner.getSkillLevel", skill)) == 0) {
+			    answer += skill + ": " + (await Do(this.ns, "ns.bladeburner.getSkillLevel", skill)).toString() + " (" + (await Do(this.ns, "ns.bladeburner.getSkillUpgradeCost", skill)) + ")<BR>";
+			}
 		}
 		answer += "</TD>"
 		answer += "</TR></TABLE>";
@@ -465,6 +519,8 @@ export class Bladeburner {
 	}
 }
 export async function bn7(Game) {
+    Game.Bladeburner.raid = false;
+    Game.Bladeburner.sting = false;
     let numberOfSleeves = await (Game.Sleeves.numSleeves);
     await Game.Sleeves.bbCombatAugs();
     await Game.Player.trainCombatStatsUpTo(100, true); // The true indicates to drag sleeves along
@@ -509,24 +565,23 @@ export async function bn7(Game) {
                 }
             }
         }
-        best = best.filter(x => !["Sting Operation", "Raid"].includes(x[2]));
         best = best.sort((a, b) => a[4] - b[4]);
         best = best.sort((a, b) => { if (a[2] == "Assassination" && b[2] != "Assassination") return 1; if (a[2] != "Assassination" && b[2] == "Assassination") return -1; if (a[1] == "Operation" && b[1] != "Operation") return 1; if (a[1] != "Operation" && b[1] == "Operation") return -1; return 0; });
         await Game.Sleeves.bbEverybody("Support main sleeve");
         let nextBlackOp = await (Game.Bladeburner.nextBlackOp);
-        await Do(Game.ns, "ns.bladeburner.setTeamSize", "Black Op", nextBlackOp, numberOfSleeves);
+        await Game.Bladeburner.teamSize(nextBlackOp, 1000);
 		if (nextBlackOp != "0" && nextBlackOp != 0) {
-			if ((await Do(Game.ns, "ns.bladeburner.getRank", "")) >= (await Do(Game.ns, "ns.bladeburner.getBlackOpRank", nextBlackOp))) {
-				if ((await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Black Op", "Operation Ultron"))[0] > .99) {
-					if ((await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Black Op", nextBlackOp))[0] > (["Operation Centurion", "Operation Vindictus", "Operation Daedalus"].includes(nextBlackOp) ? .2 : .99)) {
+			if ((await (Game.Bladeburner.rank)) >= (await Game.Bladeburner.blackOpRank(nextBlackOp))) {
+				if ((await Game.Bladeburner.successChance("Operation Ultron"))[0] > .99) {
+					if ((await Game.Bladeburner.successChance(nextBlackOp))[0] > (["Operation Centurion", "Operation Vindictus", "Operation Daedalus"].includes(nextBlackOp) ? .2 : .99)) {
 						best.push([0, "Black Op", nextBlackOp, "Sector-12"]);
 					}
 				}
 			}
 		}
         if (best[best.length - 1][1] != "Black Op") {
-            await Do(Game.ns, "ns.bladeburner.setActionAutolevel", best[best.length - 1][1], best[best.length - 1][2], 1e6 < (await Do(Game.ns, "ns.bladeburner.getRank", "")));
-            if (best[best.length - 1][3] != await Do(Game.ns, "ns.bladeburner.getCity")) {
+            await Game.Bladeburner.setAutoLevel(best[best.length - 1][2], 1e6 < (await (Game.Bladeburner.rank)));
+            if (best[best.length - 1][3] != await (Game.Bladeburner.city)) {
                 await Game.Bladeburner.bbCity(best[best.length - 1][3]);
             }
         }
@@ -537,7 +592,6 @@ export async function bn7(Game) {
         await (Game.Bladeburner.hardStop());
         if (best[best.length - 1][1] == "Black Op") {
             await Game.Sleeves.bbEverybody("Support main sleeve");
-            await Do(Game.ns, "ns.bladeburner.setTeamSize", "Black Op", best[best.length - 1][2], 1000);
         }
         await Game.Bladeburner.log(best[best.length - 1].slice(0, 4).join(" "));
         await Do(Game.ns, "ns.bladeburner.startAction", best[best.length - 1][1], best[best.length - 1][2]);
@@ -558,7 +612,7 @@ export async function bn7(Game) {
                 cur += 1;
             }
             if (shox.length > cur) {
-                let cityChaos = (await DoAll(Game.ns, "ns.bladeburner.getCityChaos", CITIES))[await (Game.Bladeburner.city)];
+                let cityChaos = await Do(Game.ns, "ns.bladeburner.getCityChaos", await (Game.Bladeburner.city));
                 await Game.Sleeves.bbDo(shox[cur], "Infiltrate synthoids");
                 let ii = 0;
                 for (let i = cur + 1; i < shox.length; i++) {
@@ -4691,7 +4745,7 @@ export class WholeGame {
 		this.Corp = new Corp(ns, this);
 		this.Jeekipedia = new Jeekipedia(ns, this);
 		this.Casino = new Casino(ns, this);
-		this.Bladeburner = new Bladeburner(ns, this);
+		this.Bladeburner = new Bladeburner(ns, this, raid=false, sting=false);
 		this.Sleeves = new Sleeves(ns, this);
 	}
 	css = `body{--prilt:#fd0;--pri:#fd0;--pridk:#fd0;--successlt:#ce5;--success:#ce5;--successdk:#ce5;--errlt:#c04;--err:#c04;--errdk:#c04;--seclt:#28c;--sec:#28c;--secdk:#28c;--warnlt:#f70;--warn:#f70;--warndk:#f70;--infolt:#3ef;--info:#3ef;--infodk:#3ef;--welllt:#146;--well:#222;--white:#fff;--black:#000;--hp:#c04;--money:#fc7;--hack:#ce5;--combat:#f70;--cha:#b8f;--int:#3ef;--rep:#b8f;--disabled:#888;--bgpri:#000;--bgsec:#111;--button:#146;--ff:"Lucida Console";overflow:hidden;display:flex}#root{flex:1 1 calc(100vw - 400px);overflow:scroll}.sb{font:12px var(--ff);color:var(--pri);background:var(--bgsec);overflow:hidden scroll;width:399px;min-height:100%;border-left:1px solid var(--welllt)}.sb *{vertical-align:middle;margin:0;font:inherit}.sb.c{width:45px}.sb.t, .sb.t>div{transition:height 200ms, width 200ms, color 200ms}.sbitem,.box{overflow:hidden;min-height:28px;max-height:90%}.sbitem{border-top:1px solid var(--welllt);resize:vertical;width:unset !important}.sbitem.c{color:var(--sec)}.box{position:fixed;width:min-content;min-width:min-content;resize:both;background:var(--bgsec)}.box.c{height:unset !important;width:unset !important;background:none}.head{display:flex;white-space:pre;font-weight:bold;user-select:none;height:28px;align-items:center}:is(.sb,.sbitem)>.head{direction:rtl;cursor:pointer;padding:3px 0px}.box>.head{background:var(--pri);color:var(--bgpri);padding:0px 3px;cursor:move}.body{font-size:12px;flex-direction:column;height:calc(100% - 31px)}.flex,:not(.noflex)>.body{display:flex}.flex>*,.body>*{flex:1 1 auto}.box>.body{border:1px solid var(--welllt)}.sb .title{margin:0 auto;font-size:14px;line-height:}.sbitem .close{display:none}.c:not(.sb),.c>.sbitem{height:28px !important;resize:none}.box.c>.body{display:none}.box.prompt{box-shadow:0 0 0 10000px #0007;min-width:400px}.box.prompt>.head>.icon{display:none}.sb .contextMenu{opacity:0.95;resize:none;background:var(--bgpri)}.sb .contextMenu .head{display:none}.sb .contextMenu .body{height:unset;border-radius:5px}.sb .icon{cursor:pointer;font:25px "codicon";line-height:0.9;display:flex;align-items:center}.sb .icon span{display:inline-block;font:25px -ff;width:25px;text-align:center}.sb .icon svg{height:21px;width:21px;margin:2px}:is(.sb,.sbitem)>.head>.icon{padding:0px 10px}.c>.head>.collapser{transform:rotate(180deg)}.sb :is(input,select,button,textarea){color:var(--pri);outline:none;border:none;white-space:pre}.sb :is(textarea,.log){white-space:pre-wrap;background:none;padding:0px;overflow-y:scroll}.sb :is(input,select){padding:3px;background:var(--well);border-bottom:1px solid var(--prilt);transition:border-bottom 250ms}.sb input:hover{border-bottom:1px solid var(--black)}.sb input:focus{border-bottom:1px solid var(--prilt)}.sb :is(button,input[type=checkbox]){background:var(--button);transition:background 250ms;border:1px solid var(--well)}.sb :is(button,input[type=checkbox]):hover{background:var(--bgsec)}.sb :is(button,input[type=checkbox]):focus, .sb select{border:1px solid var(--sec)}.sb button{padding:3px 6px;user-select:none}.sb .ts{color:var(--infolt)}.sb input[type=checkbox]{appearance:none;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px}.sb input[type=checkbox]:checked::after{font:22px codicon;content:""}.g2{display:grid;grid:auto-flow auto / auto auto;gap:6px;margin:5px;place-items:center}.g2>.l{justify-self:start}.g2>.r{justify-self:end}.g2>.f{grid-column:1 / span 2;text-align:center}.hidden, .tooltip{display:none}*:hover>.tooltip{display:block;position:absolute;left:-5px;bottom:calc(100% + 5px);border:1px solid var(--welllt);background:var(--bgsec);color:var(--pri);font:14px var(--ff);padding:5px;white-space:pre}.nogrow{flex:0 1 auto !important}`;
