@@ -135,7 +135,7 @@ export class Bladeburner {
 	}
 	async UpgradeSkills(count=1) {
 		while (await Do(this.ns, "ns.bladeburner.upgradeSkill", "Overclock", count)) {
-			this.log("Upgraded Overclock");
+			this.log("Upgraded Overclock" + " " + count.toString());
 			return true;
 		}
 		let skillmods = { };
@@ -174,13 +174,13 @@ export class Bladeburner {
     		}
 	    	upgrade = Object.entries(upgrade).sort((a, b) => -a[1] + b[1])[0][0];
 		    while (await Do(this.ns, "ns.bladeburner.upgradeSkill", upgrade, count)) {
-		    	this.log("Upgraded " + upgrade);
+		    	this.log("Upgraded " + upgrade + " " + count.toString());
 			    return true;
     		}
 		}
 		upgrade = "Hyperdrive";
 		while (await Do(this.ns, "ns.bladeburner.upgradeSkill", upgrade, count)) {
-			this.log("Upgraded " + upgrade);
+			this.log("Upgraded " + upgrade + " " + count.toString());
 			await (this.UpgradeSkills(count * 2));
 			return true;
 		}
@@ -218,14 +218,14 @@ export class Bladeburner {
 	async bbActionCount(action) {
 		return await Do(this.ns, "ns.bladeburner.getActionCountRemaining", bbTypes[action], action);
 	}
-	async inciteViolenceEverywhere() {
-		this.log("Inciting Violence");
-		while (100 > await (this.operationCount("Assassination"))) {
-		    for (let city of CITIES) {
-			    await Do(this.ns, "ns.bladeburner.switchCity", city);
-			    await Do(this.ns, "ns.bladeburner.startAction", "General", "Incite Violence");
-		    	await this.ns.sleep(await Do(this.ns, "ns.bladeburner.getActionTime", "General", "Incite Violence"));
-	    	}
+	async inciteViolence() {
+		let city = Object.entries(await DoAll(this.ns, "ns.bladeburner.getCityEstimatedPopulation", CITIES)).sort((a, b) => b[1] - a[1])[0][0]
+		this.log("Inciting Violence in " + city);
+		await Do(this.ns, "ns.bladeburner.switchCity", city);
+		await this.game.Sleeves.bbEverybody("Infiltrate synthoids");
+		while (1000 > await (this.operationCount("Assassination"))) {
+		    await Do(this.ns, "ns.bladeburner.startAction", "General", "Incite Violence");
+        	await this.ns.sleep(await Do(this.ns, "ns.bladeburner.getActionTime", "General", "Incite Violence"));
 	    }
 	}
 	async recoverIfNecessary(lower = .6, upper = .9) {
@@ -604,7 +604,7 @@ export async function bn7(Game) {
         }
         await (Game.Bladeburner.hardStop());
     }
-    await Game.Bladeburner.inciteViolenceEverywhere();
+    await Game.Bladeburner.inciteViolence();
 }
 export async function bn8(Game) {
     let shorts = false;
@@ -3792,10 +3792,7 @@ export class Player {
 	async hospitalizeIfNeeded() {
 		let hp = (await Do(this.ns, "ns.getPlayer")).hp;
 		if (hp.current / hp.max < 1) {
-			while (hp.current / hp.max < 1) {
-				await Do(this.ns, "ns.singularity.hospitalize");
-				hp = (await Do(this.ns, "ns.getPlayer")).hp;
-			}
+			await Do(this.ns, "ns.singularity.hospitalize");
 			return true;
 		}
 		return false;
