@@ -42,6 +42,10 @@ export class StockMarket {
 		helperScripts(ns);
 		this.ns = ns;
 		this.game = game ? game : new WholeGame(ns);
+		this.log = ns.tprint.bind(ns);
+        if (ns.flags(cmdlineflags)['logbox']) {
+            this.log = this.game.sidebar.querySelector(".stockbox") || this.game.createSidebarItem("Stocks", "", "S", "stockbox").log;
+        }
 	}
 	get symbols() {
 		return (async () => {
