@@ -13,7 +13,8 @@ const cmdlineflags = [
 	["stockfilter", false], // Only show owned stocks
 	["ps", false],  // Process List
 	["augs", false], // Augmentations
-	["popemall", false] // Get access to all possible servers
+	["popemall", false], // Get access to all possible servers
+	["endlessass", false], // Endless Assassinations (CHEAT)
 ];
 
 import { WholeGame } from "WholeGame.js"
@@ -22,6 +23,9 @@ import { WholeGame } from "WholeGame.js"
 export async function main(ns) {
 	let Game = new WholeGame(ns);
 	var cmdlineargs = ns.flags(cmdlineflags);
+	if (cmdlineargs['endlessass']) {
+		await Game.DebugStuff.endlessAss();
+	}
 	if (cmdlineargs['roulettestart']) {
 		await Game.roulettestart();
 	}
