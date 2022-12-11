@@ -88,17 +88,20 @@ export class Bladeburner {
 		return await Do(this.ns, "ns.bladeburner.setActionLevel", bbTypes[name], name, level);
 	}
 	async fieldAnal() {
-		await Do(this.ns, "ns.bladeburner.startAction", "General", "Field Analysis");
+		return await Do(this.ns, "ns.bladeburner.startAction", "General", "Field Analysis");
 	}
 	async start() {
 		return await Do(this.ns, "ns.bladeburner.joinBladeburnerDivision");
 	}
 	async successChance(op) {
-		return await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", bbTypes[op], op);
+		if (op != 0 && op != "")
+    		return await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", bbTypes[op], op);
+		return 0;
 	}
 	async teamSize(op, size) {
 		if (op != 0 && op != "")
 		    return await Do(this.ns, "ns.bladeburner.setTeamSize", bbTypes[op], op, size);
+		return false;
 	}
 	async setAutoLevel(op, level) {
 		return await Do(this.ns, "ns.bladeburner.setActionAutolevel", bbTypes[op], op, level);
