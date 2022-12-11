@@ -8,7 +8,7 @@ let CLASH_TARGET = .5; // Don't go to war until you have this much of a chance a
 let ASC = 1.06;
 
 /** @param {NS} ns **/
-import { Do } from "Do.js";
+import { Do, DoAll } from "Do.js";
 import { WholeGame } from "WholeGame.js";
 
 export class Gang {
@@ -17,7 +17,7 @@ export class Gang {
         this.game = game ? game : new WholeGame(ns);
         this.log = ns.tprint.bind(ns);
         if (ns.flags(cmdlineflags)['logbox']) {
-            this.log = this.game.sidebar.querySelector(".gangbox") || this.game.createSidebarItem("Gang", "", "G", "gangbox").log;
+            this.log = this.game.sidebar.querySelector(".gangbox").log || this.game.createSidebarItem("Gang", "", "G", "gangbox").log;
         }
     }
     async loop() {
