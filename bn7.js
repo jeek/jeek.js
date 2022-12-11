@@ -109,7 +109,9 @@ export async function bn7(Game) {
             while (await Game.Bladeburner.UpgradeSkills());
             await Game.Contracts.solve();
             if (await (Game.Bladeburner.hasSimulacrum))
-                await Game.Grafting.checkIn("Combat");
+                await Game.Grafting.checkIn("Combat", true);
+                if (await (Game.Bladeburner.hasSimulacrum))
+                await Game.Grafting.checkIn("Charisma", true);
             await Game.Hacknet.loop(1000 > (await (Game.Bladeburner.skillPoints)) ? "Exchange for Bladeburner SP" : "Generate Coding Contract");
             if (.999 < await Game.Bladeburner.successChance(nextBlackOp))
                 break;
@@ -124,7 +126,7 @@ export async function bn7(Game) {
                     break;
                 }
             }
-            if (10 + this.cityChaos <= await (Game.Bladeburner.chaosHere))
+            if (10 + (await (Game.Bladeburner.cityChaos)) <= await (Game.Bladeburner.chaosHere))
                 break;
             await Game.ns.sleep(1000);
         }
