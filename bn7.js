@@ -92,7 +92,7 @@ export async function bn7(Game) {
                 cur += 1;
             }
             if (shox.length > cur) {
-                let cityChaos = await DoAll(Game.ns, "ns.bladeburner.getCityChaos", CITIES)[await (Game.Bladeburner.city)];
+                let cityChaos = (await DoAll(Game.ns, "ns.bladeburner.getCityChaos", CITIES))[await (Game.Bladeburner.city)];
                 await Game.Sleeves.bbDo(shox[cur], "Infiltrate synthoids");
                 let ii = 0;
                 for (let i = cur + 1; i < shox.length; i++) {
