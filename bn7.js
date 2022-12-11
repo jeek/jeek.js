@@ -76,7 +76,7 @@ export async function bn7(Game) {
         await Game.Bladeburner.log(best[best.length - 1].slice(0, 4).join(" "));
         await Do(Game.ns, "ns.bladeburner.startAction", best[best.length - 1][1], best[best.length - 1][2]);
         if (best[best.length - 1][1] != "Black Op") {
-            await (Game.Bladeburner.bbEverybody("Field Analysis"));
+            await (Game.Sleeves.bbEverybody("Field Analysis"));
             let shox = await Game.Sleeves.bbCombatSort();
             let cur = 0;
             if ((await Do(Game.ns, "ns.bladeburner.getActionCountRemaining", "Contract", "Retirement")) >= 30) {
