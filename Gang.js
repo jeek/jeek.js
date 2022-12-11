@@ -17,7 +17,7 @@ export class Gang {
         this.game = game ? game : new WholeGame(ns);
         this.log = ns.tprint.bind(ns);
         if (ns.flags(cmdlineflags)['logbox']) {
-            this.log = this.game.sb.querySelector(".gangbox") || this.game.createSidebarItem("Gang", "", "G", "gangbox").log;
+            this.log = this.game.sidebar.querySelector(".gangbox") || this.game.createSidebarItem("Gang", "", "G", "gangbox").log;
         }
     }
     async loop() {
