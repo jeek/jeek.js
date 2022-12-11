@@ -169,16 +169,20 @@ export class Bladeburner {
 		return await Do(this.ns, "ns.bladeburner.setActionLevel", bbTypes[name], name, level);
 	}
 	async fieldAnal() {
-		await Do(this.ns, "ns.bladeburner.startAction", "General", "Field Analysis");
+		return await Do(this.ns, "ns.bladeburner.startAction", "General", "Field Analysis");
 	}
 	async start() {
 		return await Do(this.ns, "ns.bladeburner.joinBladeburnerDivision");
 	}
 	async successChance(op) {
-		return await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", bbTypes[op], op);
+		if (op != 0 && op != "")
+    		return await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", bbTypes[op], op);
+		return 0;
 	}
 	async teamSize(op, size) {
-		return await Do(this.ns, "ns.bladeburner.setTeamSize", bbTypes[op], op, size);
+		if (op != 0 && op != "")
+		    return await Do(this.ns, "ns.bladeburner.setTeamSize", bbTypes[op], op, size);
+		return false;
 	}
 	async setAutoLevel(op, level) {
 		return await Do(this.ns, "ns.bladeburner.setActionAutolevel", bbTypes[op], op, level);
@@ -677,7 +681,9 @@ export async function bn7(Game) {
             while (await Game.Bladeburner.UpgradeSkills());
             await Game.Contracts.solve();
             if (await (Game.Bladeburner.hasSimulacrum))
-                await Game.Grafting.checkIn("Combat");
+                await Game.Grafting.checkIn("Combat", true);
+                if (await (Game.Bladeburner.hasSimulacrum))
+                await Game.Grafting.checkIn("Charisma", true);
             await Game.Hacknet.loop(1000 > (await (Game.Bladeburner.skillPoints)) ? "Exchange for Bladeburner SP" : "Generate Coding Contract");
             if (.999 < await Game.Bladeburner.successChance(nextBlackOp))
                 break;
@@ -692,7 +698,7 @@ export async function bn7(Game) {
                     break;
                 }
             }
-            if (10 + this.cityChaos <= await (Game.Bladeburner.chaosHere))
+            if (10 + (await (Game.Bladeburner.cityChaos)) <= await (Game.Bladeburner.chaosHere))
                 break;
             await Game.ns.sleep(1000);
         }
@@ -3437,7 +3443,7 @@ export class Grafting {
             this.log = this.log.log;
         }
     }
-    async checkIn(type = "Hacking") {
+    async checkIn(type = "Hacking", force=false) {
         let Game = await(this.game);
         if ((!await Do(this.ns, "ns.singularity.isBusy", "")) && (!await Do(this.ns, "ns.singularity.isFocused", ""))) {
             let auglist = await Do(this.ns, "ns.grafting.getGraftableAugmentations", "");
@@ -3448,10 +3454,17 @@ export class Grafting {
             }
             let currentmoney = await Do(this.ns, "ns.getServerMoneyAvailable", "home");
             auglist = auglist.filter(x => augs[x].price <= currentmoney / 2);
-            if (type == "Combat")
-                auglist = auglist.sort((a, b) => augs[b].agility_exp * augs[b].agility * augs[b].defense_exp * augs[b].defense * augs[b].dexterity_exp * augs[b].dexterity * augs[b].strength_exp * augs[b].strength - augs[a].agility_exp * augs[a].agility * augs[a].defense_exp * augs[a].defense * augs[a].dexterity_exp * augs[a].dexterity * augs[a].strength_exp * augs[a].strength);
-            else
-                auglist = auglist.sort((a, b) => augs[b].hacking_grow * augs[b].hacking_speed * (augs[b].hacking ** 2) * (augs[b].hacking_exp ** 2) * (augs[b].faction_rep ** .1) - augs[a].hacking_grow * (augs[a].hacking ** 2) * (augs[a].hacking_exp ** 2) * augs[a].hacking_speed * (augs[a].faction_rep ** .1));
+            switch(type) {
+                case "Combat":
+                    auglist = auglist.sort((a, b) => augs[b].agility_exp * augs[b].agility * augs[b].defense_exp * augs[b].defense * augs[b].dexterity_exp * augs[b].dexterity * augs[b].strength_exp * augs[b].strength - augs[a].agility_exp * augs[a].agility * augs[a].defense_exp * augs[a].defense * augs[a].dexterity_exp * augs[a].dexterity * augs[a].strength_exp * augs[a].strength);
+                    break;
+                case "Charisma":
+                    auglist = auglist.sort((a, b) => augs[b].charisma_exp * augs[b].charisma - augs[a].charisma_exp * augs[a].charisma);
+                    break;
+                case "Hacking":
+                    auglist = auglist.sort((a, b) => augs[b].hacking_grow * augs[b].hacking_speed * (augs[b].hacking ** 2) * (augs[b].hacking_exp ** 2) * (augs[b].faction_rep ** .1) - augs[a].hacking_grow * (augs[a].hacking ** 2) * (augs[a].hacking_exp ** 2) * augs[a].hacking_speed * (augs[a].faction_rep ** .1));
+                    break;
+            }
             let currentaugs = await Do(this.ns, "ns.singularity.getOwnedAugmentations", true);
             for (let i = 0; i < auglist.length; i++) {
                 let good = true;
@@ -3481,7 +3494,7 @@ export class Grafting {
             if (auglist.length > 0) {
                 if (!(((await Do(this.ns, "ns.getPlayer", "")).city) == "New Tokyo"))
                     await Do(this.ns, "ns.singularity.travelToCity", "New Tokyo");
-                if (playerhack < 4000 || ownedAugs.length < 30)
+                if (playerhack < 4000 || ownedAugs.length < 30 || force)
                     if (await Do(this.ns, "ns.grafting.graftAugmentation", auglist[0], false))
                         this.log(auglist[0]);
             }
