@@ -132,6 +132,33 @@ export class Bladeburner {
 			this.log = this.log.log;
 		}
 	}
+	get chaosHere() {
+		return (async () => {
+			try {
+				return await Do(this.ns, "ns.bladeburner.getCityChaos", await (this.city));
+			} catch (e) {
+				return [];
+			}
+		})();
+	}
+	get stamina() {
+		return (async () => {
+			try {
+				return await Do(this.ns, "ns.bladeburner.getStamina");
+			} catch (e) {
+				return [];
+			}
+		})();
+	}
+	get currentAction() {
+		return (async () => {
+			try {
+				return await Do(this.ns, "ns.bladeburner.getCurrentAction");
+			} catch (e) {
+				return [];
+			}
+		})();
+	}
 	async getChance(name) {
 		return await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", bbTypes[name], name);
 	}
@@ -155,6 +182,12 @@ export class Bladeburner {
 	}
 	async setAutoLevel(op, level) {
 		return await Do(this.ns, "ns.bladeburner.setActionAutolevel", bbTypes[op], op, level);
+	}
+	async setActionLevel(op, level) {
+		return await Do(this.ns, "ns.bladeburner.setActionLevel", bbTypes[op], op, level);
+	}
+	async actionStart(op) {
+		return await Do(this.ns, "ns.bladeburner.startAction", bbTypes[op], op);
 	}
 	isKillOp(nextOp) {
 		if (["Operation Typhoon", "Operation X", "Operation Titan", "Operation Ares", "Operation Archangel", "Operation Juggernaut", "Operation Red Dragon", "Operation K", "Operation Deckard", "Operation Tyrell", "Operation Wallace", "Operation Hyron", "Operation Ion Storm", "Operation Annihilus", "Operation Ultron"].includes(nextOp)) {
@@ -303,6 +336,9 @@ export class Bladeburner {
 			}
 		})();
 	}
+	async actionCount(op) {
+		return await Do(this.ns, "ns.bladeburner.getActionCountRemaining", bbTypes[op], op);
+	}
 	get operationCount() {
 		return (async () => {
 			try {
@@ -315,7 +351,7 @@ export class Bladeburner {
 	get opNames() {
 		return (async () => {
 			try {
-				return (await Do(this.ns, "ns.bladeburner.getOperationNames")).filter(x => this.raid ? true : x != "Raid").filter(x => this.sting ? true : x != "Sting");
+				return (await Do(this.ns, "ns.bladeburner.getOperationNames")).filter(x => this.raid ? true : x != "Raid").filter(x => this.sting ? true : x != "Sting Operation");
 			} catch (e) {
 				return [];
 			}
@@ -325,6 +361,15 @@ export class Bladeburner {
 		return (async () => {
 			try {
 				return await Do(this.ns, "ns.bladeburner.getCity");
+			} catch (e) {
+				return [];
+			}
+		})();
+	}
+	get skillPoints() {
+		return (async () => {
+			try {
+				return await Do(this.ns, "ns.bladeburner.getSkillPoints");
 			} catch (e) {
 				return [];
 			}
@@ -359,6 +404,9 @@ export class Bladeburner {
 				return 0;
 			}
 		})();
+	}
+	async actionMaxLevel(op) {
+		return await Do(this.ns, "ns.bladeburner.getActionMaxLevel", bbTypes[op], op);
 	}
 	async createDisplay() {
 		this.bbWindow = await makeNewWindow("Bladeburner", this.ns.ui.getTheme());
@@ -587,32 +635,32 @@ export async function bn7(Game) {
         }
         await Game.Bladeburner.deescalate();
         if (best[best.length - 1][1] != "Black Op") {
-            await Do(Game.ns, "ns.bladeburner.setActionLevel", best[best.length - 1][1], best[best.length - 1][2], best[best.length - 1][0]);
+            await Game.Bladeburner.setActionLevel(best[best.length - 1][2], best[best.length - 1][0]);
         }
         await (Game.Bladeburner.hardStop());
         if (best[best.length - 1][1] == "Black Op") {
             await Game.Sleeves.bbEverybody("Support main sleeve");
         }
         await Game.Bladeburner.log(best[best.length - 1].slice(0, 4).join(" "));
-        await Do(Game.ns, "ns.bladeburner.startAction", best[best.length - 1][1], best[best.length - 1][2]);
+        await Game.Bladeburner.actionStart(best[best.length - 1][2]);
         if (best[best.length - 1][1] != "Black Op") {
             await (Game.Sleeves.bbEverybody("Field Analysis"));
             let shox = await Game.Sleeves.bbCombatSort();
             let cur = 0;
-            if ((await Do(Game.ns, "ns.bladeburner.getActionCountRemaining", "Contract", "Retirement")) >= 30) {
+            if ((await Game.Bladeburner.actionCount("Retirement")) >= 30) {
                 await Game.Sleeves.bbDo(shox[cur], "Take on contracts", best.filter(x => x[2] == "Retirement").reverse()[0][2]);
                 cur += 1;
             }
-            if ((await Do(Game.ns, "ns.bladeburner.getActionCountRemaining", "Contract", "Bounty Hunter")) >= 30) {
+            if ((await  Game.Bladeburner.actionCount("Bounty Hunter")) >= 30) {
                 await Game.Sleeves.bbDo(shox[cur], "Take on contracts", best.filter(x => x[2] == "Bounty Hunter").reverse()[0][2]);
                 cur += 1;
             }
-            if ((await Do(Game.ns, "ns.bladeburner.getActionCountRemaining", "Contract", "Tracking")) >= 100) {
+            if ((await  Game.Bladeburner.actionCount("Tracking")) >= 100) {
                 await Game.Sleeves.bbDo(shox[cur], "Take on contracts", best.filter(x => x[2] == "Tracking").reverse()[0][2]);
                 cur += 1;
             }
             if (shox.length > cur) {
-                let cityChaos = await Do(Game.ns, "ns.bladeburner.getCityChaos", await (Game.Bladeburner.city));
+                let cityChaos = await (Game.Bladeburner.chaosHere);
                 await Game.Sleeves.bbDo(shox[cur], "Infiltrate synthoids");
                 let ii = 0;
                 for (let i = cur + 1; i < shox.length; i++) {
@@ -621,13 +669,8 @@ export async function bn7(Game) {
                 }
             }
         }
-        while ((await Do(Game.ns, "ns.bladeburner.getCurrentAction")).type != "Idle" && (.6 < (await Do(Game.ns, "ns.bladeburner.getStamina")).reduce((a, b) => a / b)) && ((await Do(Game.ns, "ns.bladeburner.getActionCountRemaining", best[best.length - 1][1], best[best.length - 1][2])) > 0)) {
-            for (let i = 0; i < numberOfSleeves; i++) {
-                if (null == (await Do(Game.ns, "ns.sleeve.getTask", i))) {
-                    await Game.Sleeves.bbDo(i, ((await Do(Game.ns, "ns.bladeburner.getCityChaos", await (Game.Bladeburner.city)))) < 20 ? "Infiltrate synthoids" : "Diplomacy");
-                }
-            }
-            if (best[best.length - 1][0] == "Black Op" && .2 > ((await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Black Op", nextBlackOp))[0]))
+        while ((await (Game.Bladeburner.currentAction)).type != "Idle" && (Game.Bladeburner.minStamina < (await (Game.Bladeburner.stamina)).reduce((a, b) => a / b)) && ((await Game.Bladeburner.actionCount(best[best.length - 1][2])) > 0)) {
+            if (best[best.length - 1][0] == "Black Op" && .2 > ((await Game.Bladeburner.successChance(nextBlackOp))[0]))
                 break;
             await Game.Sleeves.bbCombatAugs();
             await Game.Player.hospitalizeIfNeeded();
@@ -635,24 +678,21 @@ export async function bn7(Game) {
             await Game.Contracts.solve();
             if (await (Game.Bladeburner.hasSimulacrum))
                 await Game.Grafting.checkIn("Combat");
-            await Game.Hacknet.loop(1000 > (await Do(Game.ns, "ns.bladeburner.getSkillPoints")) ? "Exchange for Bladeburner SP" : "Generate Coding Contract");
-            if (.999 < await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Black Op", nextBlackOp))
+            await Game.Hacknet.loop(1000 > (await (Game.Bladeburner.skillPoints)) ? "Exchange for Bladeburner SP" : "Generate Coding Contract");
+            if (.999 < await Game.Bladeburner.successChance(nextBlackOp))
                 break;
-            if (best[best.length - 1][0] < await Do(Game.ns, "ns.bladeburner.getActionMaxLevel", best[best.length - 1][1], best[best.length - 1][2])) {
-                if (1 == (await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", best[best.length - 1][1], best[best.length - 1][2]))[0]) {
+            if (best[best.length - 1][0] < await Game.Bladeburner.actionMaxLevel(best[best.length - 1][2])) {
+                if (1 == (await Game.Bladeburner.successChance(best[best.length - 1][2]))[0]) {
                     best[best.length - 1][0] += 1;
-                    await Do(Game.ns, "ns.bladeburner.setActionLevel", best[best.length - 1][1], best[best.length - 1][2], best[best.length - 1][0]);
+                    await Game.Bladeburner.setActionLevel(best[best.length - 1][2], best[best.length - 1][0]);
                 }
             }
             if (best[best.length - 1][1] == "Operation") {
-                if (.94 > (((await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Operation", best[best.length - 1][2])))[0])) {
+                if (.94 > (((await Game.Bladeburner.successChance(best[best.length - 1][2])))[0])) {
                     break;
-                    best[best.length - 1][0] -= 1;
-                    if (best[best.length - 1][0] == 0) break;
-                    await Do(Game.ns, "ns.bladeburner.setActionLevel", best[best.length - 1][1], best[best.length - 1][2], best[best.length - 1][0]);
                 }
             }
-            if (40 <= await Do(Game.ns, "ns.bladeburner.getCityChaos", await Do(Game.ns, "ns.bladeburner.getCity")))
+            if (10 + this.cityChaos <= await (Game.Bladeburner.chaosHere))
                 break;
             await Game.ns.sleep(1000);
         }
@@ -4745,7 +4785,7 @@ export class WholeGame {
 		this.Corp = new Corp(ns, this);
 		this.Jeekipedia = new Jeekipedia(ns, this);
 		this.Casino = new Casino(ns, this);
-		this.Bladeburner = new Bladeburner(ns, this, raid=false, sting=false);
+		this.Bladeburner = new Bladeburner(ns, this); this.Bladeburner.raid=false; this.Bladeburner.sting=false;
 		this.Sleeves = new Sleeves(ns, this);
 	}
 	css = `body{--prilt:#fd0;--pri:#fd0;--pridk:#fd0;--successlt:#ce5;--success:#ce5;--successdk:#ce5;--errlt:#c04;--err:#c04;--errdk:#c04;--seclt:#28c;--sec:#28c;--secdk:#28c;--warnlt:#f70;--warn:#f70;--warndk:#f70;--infolt:#3ef;--info:#3ef;--infodk:#3ef;--welllt:#146;--well:#222;--white:#fff;--black:#000;--hp:#c04;--money:#fc7;--hack:#ce5;--combat:#f70;--cha:#b8f;--int:#3ef;--rep:#b8f;--disabled:#888;--bgpri:#000;--bgsec:#111;--button:#146;--ff:"Lucida Console";overflow:hidden;display:flex}#root{flex:1 1 calc(100vw - 400px);overflow:scroll}.sb{font:12px var(--ff);color:var(--pri);background:var(--bgsec);overflow:hidden scroll;width:399px;min-height:100%;border-left:1px solid var(--welllt)}.sb *{vertical-align:middle;margin:0;font:inherit}.sb.c{width:45px}.sb.t, .sb.t>div{transition:height 200ms, width 200ms, color 200ms}.sbitem,.box{overflow:hidden;min-height:28px;max-height:90%}.sbitem{border-top:1px solid var(--welllt);resize:vertical;width:unset !important}.sbitem.c{color:var(--sec)}.box{position:fixed;width:min-content;min-width:min-content;resize:both;background:var(--bgsec)}.box.c{height:unset !important;width:unset !important;background:none}.head{display:flex;white-space:pre;font-weight:bold;user-select:none;height:28px;align-items:center}:is(.sb,.sbitem)>.head{direction:rtl;cursor:pointer;padding:3px 0px}.box>.head{background:var(--pri);color:var(--bgpri);padding:0px 3px;cursor:move}.body{font-size:12px;flex-direction:column;height:calc(100% - 31px)}.flex,:not(.noflex)>.body{display:flex}.flex>*,.body>*{flex:1 1 auto}.box>.body{border:1px solid var(--welllt)}.sb .title{margin:0 auto;font-size:14px;line-height:}.sbitem .close{display:none}.c:not(.sb),.c>.sbitem{height:28px !important;resize:none}.box.c>.body{display:none}.box.prompt{box-shadow:0 0 0 10000px #0007;min-width:400px}.box.prompt>.head>.icon{display:none}.sb .contextMenu{opacity:0.95;resize:none;background:var(--bgpri)}.sb .contextMenu .head{display:none}.sb .contextMenu .body{height:unset;border-radius:5px}.sb .icon{cursor:pointer;font:25px "codicon";line-height:0.9;display:flex;align-items:center}.sb .icon span{display:inline-block;font:25px -ff;width:25px;text-align:center}.sb .icon svg{height:21px;width:21px;margin:2px}:is(.sb,.sbitem)>.head>.icon{padding:0px 10px}.c>.head>.collapser{transform:rotate(180deg)}.sb :is(input,select,button,textarea){color:var(--pri);outline:none;border:none;white-space:pre}.sb :is(textarea,.log){white-space:pre-wrap;background:none;padding:0px;overflow-y:scroll}.sb :is(input,select){padding:3px;background:var(--well);border-bottom:1px solid var(--prilt);transition:border-bottom 250ms}.sb input:hover{border-bottom:1px solid var(--black)}.sb input:focus{border-bottom:1px solid var(--prilt)}.sb :is(button,input[type=checkbox]){background:var(--button);transition:background 250ms;border:1px solid var(--well)}.sb :is(button,input[type=checkbox]):hover{background:var(--bgsec)}.sb :is(button,input[type=checkbox]):focus, .sb select{border:1px solid var(--sec)}.sb button{padding:3px 6px;user-select:none}.sb .ts{color:var(--infolt)}.sb input[type=checkbox]{appearance:none;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px}.sb input[type=checkbox]:checked::after{font:22px codicon;content:""}.g2{display:grid;grid:auto-flow auto / auto auto;gap:6px;margin:5px;place-items:center}.g2>.l{justify-self:start}.g2>.r{justify-self:end}.g2>.f{grid-column:1 / span 2;text-align:center}.hidden, .tooltip{display:none}*:hover>.tooltip{display:block;position:absolute;left:-5px;bottom:calc(100% + 5px);border:1px solid var(--welllt);background:var(--bgsec);color:var(--pri);font:14px var(--ff);padding:5px;white-space:pre}.nogrow{flex:0 1 auto !important}`;
