@@ -43,7 +43,6 @@ export async function bn7(Game) {
                 }
             }
         }
-        best = best.filter(x => !["Sting Operation", "Raid"].includes(x[2]));
         best = best.sort((a, b) => a[4] - b[4]);
         best = best.sort((a, b) => { if (a[2] == "Assassination" && b[2] != "Assassination") return 1; if (a[2] != "Assassination" && b[2] == "Assassination") return -1; if (a[1] == "Operation" && b[1] != "Operation") return 1; if (a[1] != "Operation" && b[1] == "Operation") return -1; return 0; });
         await Game.Sleeves.bbEverybody("Support main sleeve");
