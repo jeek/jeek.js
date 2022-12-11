@@ -645,7 +645,7 @@ export class Contracts {
 						} else {
 							this.log("Failed at " + types[0]);
 							this.log("Failed at " + types[0], " ", types[1](this.contracts[contract].data, this.ns));
-							this.ns.exit();
+							//this.ns.exit();
 						}
 						this.times[types[0]].push(Date.now() - starttime);
 						this.log(types[0] + " average time: " + (this.times[types[0]].reduce((a, b) => a + b) / this.times[types[0]].length).toString());
