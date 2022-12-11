@@ -340,7 +340,7 @@ export class Bladeburner {
 			//			this.ns.tprint("<TD WIDTH=" + Math.floor(percentage).toString() + "% BGCOLOR=" + this.ns.ui.getTheme()['success'] + ">&nbsp;</TD><TD BGCOLOR=" + this.ns.ui.getTheme()['info'] + ">&nbsp;</TD>");
 			answer += "</TR></TABLE>";
 		}
-		answer += "<TABLE WIDTH=100% BORDER=1><TR><TH>Contracts</TH><TH>Operations</TH><TH>Black Ops</TH><TH>Skills " + (await Do(this.ns, "ns.bladeburner.getSkillPoints")).toString() + "</TH></TR>";
+		answer += "<TABLE WIDTH=100% BORDER=1><TR><TH>Jobs</TH><TH>Skills " + (await Do(this.ns, "ns.bladeburner.getSkillPoints")).toString() + "</TH></TR>";
 		answer += "<TR VALIGN=TOP>";
 		//		answer += td((await Do(this.ns, "ns.bladeburner.getGeneralActionNames")).join("<BR>"));
 		answer += "<TD WIDTH=50%>";
