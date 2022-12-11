@@ -8,7 +8,7 @@ export class Grafting {
         this.game = game ? game : new WholeGame(ns);
         this.log = ns.tprint.bind(ns);
         if (ns.flags(cmdlineflags)['logbox']) {
-            this.log = this.game.createSidebarItem("Grafting", "", "G").log;
+            this.log = this.game.sb.querySelector(".graftbox") || this.game.createSidebarItem("Grafting", "", "G", "graftbox").log;
         }
     }
     async checkIn(type = "Hacking") {
