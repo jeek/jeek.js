@@ -101,7 +101,6 @@ export async function bn7(Game) {
                 }
             }
         }
-        await Game.Bladeburner.log("Sleeves handled.");
         while ((await Do(Game.ns, "ns.bladeburner.getCurrentAction")).type != "Idle" && (.6 < (await Do(Game.ns, "ns.bladeburner.getStamina")).reduce((a, b) => a / b)) && ((await Do(Game.ns, "ns.bladeburner.getActionCountRemaining", best[best.length - 1][1], best[best.length - 1][2])) > 0)) {
             for (let i = 0; i < numberOfSleeves; i++) {
                 if (null == (await Do(Game.ns, "ns.sleeve.getTask", i))) {
