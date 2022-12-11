@@ -377,6 +377,11 @@ export class Bladeburner {
 			    answer += skill + ": " + (await Do(this.ns, "ns.bladeburner.getSkillLevel", skill)).toString() + " (" + (await Do(this.ns, "ns.bladeburner.getSkillUpgradeCost", skill)) + ")<BR>";
 			}
 		}
+		for (let skill of await Do(this.ns, "ns.bladeburner.getSkillNames")) {
+			if ((await Do(this.ns, "ns.bladeburner.getSkillLevel", skill)) == 0) {
+			    answer += skill + ": " + (await Do(this.ns, "ns.bladeburner.getSkillLevel", skill)).toString() + " (" + (await Do(this.ns, "ns.bladeburner.getSkillUpgradeCost", skill)) + ")<BR>";
+			}
+		}
 		answer += "</TD>"
 		answer += "</TR></TABLE>";
 		this.bbWindow.update(answer);
