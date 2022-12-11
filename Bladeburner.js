@@ -234,7 +234,7 @@ export class Bladeburner {
 	get opNames() {
 		return (async () => {
 			try {
-				return (await Do(this.ns, "ns.bladeburner.getOperationNames")).filter(x => this.raid ? true : x != "Raid").filter(x => this.sting ? true : x != "Sting");
+				return (await Do(this.ns, "ns.bladeburner.getOperationNames")).filter(x => this.raid ? true : x != "Raid").filter(x => this.sting ? true : x != "Sting Operation");
 			} catch (e) {
 				return [];
 			}

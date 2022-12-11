@@ -127,12 +127,9 @@ export async function bn7(Game) {
             if (best[best.length - 1][1] == "Operation") {
                 if (.94 > (((await Do(Game.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Operation", best[best.length - 1][2])))[0])) {
                     break;
-                    best[best.length - 1][0] -= 1;
-                    if (best[best.length - 1][0] == 0) break;
-                    await Do(Game.ns, "ns.bladeburner.setActionLevel", best[best.length - 1][1], best[best.length - 1][2], best[best.length - 1][0]);
                 }
             }
-            if (40 <= await Do(Game.ns, "ns.bladeburner.getCityChaos", await Do(Game.ns, "ns.bladeburner.getCity")))
+            if (10 + this.cityChaos <= await Do(Game.ns, "ns.bladeburner.getCityChaos", await Do(Game.ns, "ns.bladeburner.getCity")))
                 break;
             await Game.ns.sleep(1000);
         }
