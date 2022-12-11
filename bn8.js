@@ -140,7 +140,7 @@ export async function bn8(Game) {
             let data = await Game.StockMarket.position(stock);
             if ((scores[stock] > .5 || z < 20) && data[2] > 0) {
                 await Do(Game.ns, "ns.stock.sellShort", stock, data[2]);
-                Game.StockMarket.log("Unshorted " + data[2].toString() + " of " + stock);
+                if (data[2] > 0) Game.StockMarket.log("Unshorted " + data[2].toString() + " of " + stock);
                 data[2] = 0;
             }
             if (prices.length > 20) {
@@ -150,7 +150,7 @@ export async function bn8(Game) {
                         while ((shares * (await Do(Game.ns, "ns.stock.getBidPrice", stock)) > 200000) && (!await Do(Game.ns, "ns.stock.buyStock", stock, shares))) {
                             shares = Math.floor(shares * .9);
                         }
-                        Game.StockMarket.log("Bought " + shares.toString() + " of " + stock);
+                        if (shares > 0) Game.StockMarket.log("Bought " + shares.toString() + " of " + stock);
                         if (shares > 10) {
                             stall[stock] = 21;
                         }
@@ -158,7 +158,7 @@ export async function bn8(Game) {
                 } else {
                     if (data[0] > 0 && stall[stock] <= 0) {
                         await Do(Game.ns, "ns.stock.sellStock", stock, data[0]);
-                        Game.StockMarket.log("Sold " + data[0].toString() + " of " + stock);
+                        if (data[0] > 0) Game.StockMarket.log("Sold " + data[0].toString() + " of " + stock);
                     }
                 }
             }
@@ -171,7 +171,7 @@ export async function bn8(Game) {
                     while ((shares * (await Do(Game.ns, "ns.stock.getBidPrice", stock)) > 200000) && (!await Do(Game.ns, "ns.stock.buyShort", stock, shares))) {
                         shares *= .99;
                     }
-                    Game.StockMarket.log("Shorted " + shares.toString() + " of " + stock);
+                    if (shares > 0) Game.StockMarket.log("Shorted " + shares.toString() + " of " + stock);
                 }
             }
             totalfunds += data[2] * (2 * data[3] - (await Do(Game.ns, "ns.stock.getAskPrice", stock)));
@@ -254,11 +254,11 @@ export async function bn8(Game) {
                     while ((shares * (await Do(Game.ns, "ns.stock.getBidPrice", stock)) > 200000) && (!await Do(Game.ns, "ns.stock.buyStock", stock, shares))) {
                         shares *= .99;
                     }
-                    Game.StockMarket.log("Bought " + shares.toString() + " of " + stock);
+                    if (shares > 0) Game.StockMarket.log("Bought " + shares.toString() + " of " + stock);
                 } else {
                     if (data[0] > 0) {
                         await Do(Game.ns, "ns.stock.sellStock", stock, data[0]);
-                        Game.StockMarket.log("Sold " + data[0].toString() + " of " + stock);
+                        if (data[0] > 0) Game.StockMarket.log("Sold " + data[0].toString() + " of " + stock);
                     }
                 }
             }
@@ -278,12 +278,12 @@ export async function bn8(Game) {
                     while ((shares * (await Do(Game.ns, "ns.stock.getBidPrice", stock)) > 200000) && (!await Do(Game.ns, "ns.stock.buyShort", stock, shares))) {
                         shares *= .99;
                     }
-                    Game.StockMarket.log("Shorted " + shares.toString() + " of " + stock);
+                    if (shares > 0) Game.StockMarket.log("Shorted " + shares.toString() + " of " + stock);
                 } else {
                     if (data[2] > 0) {
                         //							ns.toast("Unshorting " + stock);
                         await Do(Game.ns, "ns.stock.sellShort", stock, data[2]);
-                        Game.StockMarket.log("Unshorted " + data[2].toString() + " of " + stock);
+                        if (data[2] > 0) Game.StockMarket.log("Unshorted " + data[2].toString() + " of " + stock);
                     }
                 }
             }
