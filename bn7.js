@@ -67,7 +67,7 @@ export async function bn7(Game) {
         }
         await Game.Bladeburner.deescalate();
         if (best[best.length - 1][1] != "Black Op") {
-            await Game.Bladeburner.setActionLevel(best[best.length - 1][2], best[best.length - 1][0]);
+            await Game.Bladeburner.setLevel(best[best.length - 1][2], best[best.length - 1][0]);
         }
         await (Game.Bladeburner.hardStop());
         if (best[best.length - 1][1] == "Black Op") {
@@ -118,7 +118,7 @@ export async function bn7(Game) {
             if (best[best.length - 1][0] < await Game.Bladeburner.actionMaxLevel(best[best.length - 1][2])) {
                 if (1 == (await Game.Bladeburner.successChance(best[best.length - 1][2]))[0]) {
                     best[best.length - 1][0] += 1;
-                    await Game.Bladeburner.setActionLevel(best[best.length - 1][2], best[best.length - 1][0]);
+                    await Game.Bladeburner.setLevel(best[best.length - 1][2], best[best.length - 1][0]);
                 }
             }
             if (best[best.length - 1][1] == "Operation") {

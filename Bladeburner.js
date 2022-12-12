@@ -106,9 +106,6 @@ export class Bladeburner {
 	async setAutoLevel(op, level) {
 		return await Do(this.ns, "ns.bladeburner.setActionAutolevel", bbTypes[op], op, level);
 	}
-	async setActionLevel(op, level) {
-		return await Do(this.ns, "ns.bladeburner.setActionLevel", bbTypes[op], op, level);
-	}
 	async actionStart(op) {
 		return await Do(this.ns, "ns.bladeburner.startAction", bbTypes[op], op);
 	}
