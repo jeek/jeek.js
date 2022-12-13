@@ -44,18 +44,18 @@ export async function Do(ns, command, ...args) {
 	let procid = progname + uniqueID(JSON.stringify(...args), true) + ".txt";
 	writeIfNotSame(ns, progname + ".js", `export async function main(ns) { ns.write(ns.args.shift(), JSON.stringify(` + command + `(...JSON.parse(ns.args[0]))), 'w'); }`);
 	while (0 == ns.run(progname + ".js", 1, procid, JSON.stringify(args))) {
-		await ns.sleep(0);
+		await ns.asleep(0);
 	}
 	let answer = ns.read(procid);
 	let good = false;
 	while (!good) {
-		await ns.sleep(0);
+		await ns.asleep(0);
 		try {
 			answer = JSON.parse(ns.read(procid));
 			good = true;
 		} catch { }
 	}
-	while (0 == ns.run('/temp/rm.js', 1, procid)) { await ns.sleep(0) };
+	while (0 == ns.run('/temp/rm.js', 1, procid)) { await ns.asleep(0) };
 	return answer;
 }
 
@@ -66,10 +66,10 @@ export async function DoVoid(ns, command, ...args) {
 	let pid = ns.run(progname + ".js", 1, JSON.stringify(args));
 	while (0 == pid) {
 		pid = ns.run(progname + ".js", 1, JSON.stringify(args));
-		await ns.sleep(0);
+		await ns.asleep(0);
 	}
 	while (await Do(ns, "ns.isRunning", pid))
-		await ns.sleep(0);
+		await ns.asleep(0);
 	return null;
 }
 
@@ -80,18 +80,18 @@ export async function DoAll(ns, command, args) {
 	let procid = progname + uniqueID(JSON.stringify(args), true) + ".txt";
 	writeIfNotSame(ns, progname + ".js", `export async function main(ns) { let parsed = JSON.parse(ns.args[1]); let answer = {}; for (let i = 0; i < parsed.length ; i++) {answer[parsed[i]] = await ` + command + `(parsed[i]);}; ns.write(ns.args.shift(), JSON.stringify(answer), 'w'); }`);
 	while (0 == ns.run(progname + ".js", 1, procid, JSON.stringify(args))) {
-		await ns.sleep(0);
+		await ns.asleep(0);
 	}
 	let answer = ns.read(procid);
 	let good = false;
 	while (!good) {
-		await ns.sleep(0);
+		await ns.asleep(0);
 		try {
 			answer = JSON.parse(ns.read(procid));
 			good = true;
 		} catch { }
 	}
-	while (0 == ns.run('/temp/rm.js', 1, procid)) { await ns.sleep(0) };
+	while (0 == ns.run('/temp/rm.js', 1, procid)) { await ns.asleep(0) };
 	return answer;
 }
 
@@ -102,17 +102,17 @@ export async function DoAllComplex(ns, command, args) {
 	let procid = progname + uniqueID(JSON.stringify(args), true) + ".txt";
 	writeIfNotSame(ns, progname + ".js", `export async function main(ns) { let parsed = JSON.parse(ns.args[1]); let answer = {}; for (let i = 0; i < parsed.length ; i++) {answer[parsed[i]] = await ` + command + `(...parsed[i]);}; ns.write(ns.args.shift(), JSON.stringify(answer), 'w'); }`);
 	while (0 == ns.run(progname + ".js", 1, procid, JSON.stringify(args))) {
-		await ns.sleep(0);
+		await ns.asleep(0);
 	}
 	let answer = ns.read(procid);
 	let good = false;
 	while (!good) {
-		await ns.sleep(0);
+		await ns.asleep(0);
 		try {
 			answer = JSON.parse(ns.read(procid));
 			good = true;
 		} catch { }
 	}
-	while (0 == ns.run('/temp/rm.js', 1, procid)) { await ns.sleep(0) };
+	while (0 == ns.run('/temp/rm.js', 1, procid)) { await ns.asleep(0) };
 	return answer;
 }
