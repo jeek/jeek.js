@@ -4,6 +4,7 @@ export let makeNewWindow = async (title = "Default Window Title", theme) => {
 	let win = open("main.bundle.js", title.replaceAll(" ", "_"), "popup=yes,height=200,width=500,left=100,top=100,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,directories=no,status=no");
   let good = false;
   while (!good) {
+    good = true;
     await slp(1000);
     try {
     let doc = win["document"];
@@ -69,8 +70,9 @@ export let makeNewWindow = async (title = "Default Window Title", theme) => {
   </style>`;
   doc.body.innerHTML = `<div class=title>${title}</div><div class=logs><p></p></div>`;
 	let logs = doc.body.querySelector(".logs");
-  good = true;
-  } catch {}
+  } catch {
+    good = false;
+  }
   }
 	win.update = (content) => {
 		logs.innerHTML = content;
