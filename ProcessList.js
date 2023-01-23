@@ -42,6 +42,6 @@ export class ProcessList {
 		}
 		update += "</TABLE>";
 		this.psWindow.update(update);
-		await this.ns.sleep(0);
+		await this.ns.asleep(0);
 	}
 }

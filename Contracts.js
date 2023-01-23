@@ -635,7 +635,7 @@ export class Contracts {
 				if (!done) {
 					if (this.contracts[contract].type === types[0]) {
 						this.log("Starting " + types[0] + " on " + this.contracts[contract].server);
-						await this.ns.sleep(0);
+						await this.ns.asleep(0);
 						let starttime = Date.now();
 						let success = await Do(this.ns, "ns.codingcontract.attempt", types[1](this.contracts[contract].data, this.ns), contract, this.contracts[contract].server);
 						if (success.length > 0) {

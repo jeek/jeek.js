@@ -213,7 +213,7 @@ export class Bladeburner {
 		await this.game.Sleeves.bbEverybody("Infiltrate synthoids");
 		while (500 > await (this.operationCount)) {
 		    await Do(this.ns, "ns.bladeburner.startAction", "General", "Incite Violence");
-        	await this.ns.sleep(await Do(this.ns, "ns.bladeburner.getActionTime", "General", "Incite Violence"));
+        	await this.ns.asleep(await Do(this.ns, "ns.bladeburner.getActionTime", "General", "Incite Violence"));
 	    }
 	}
 	async recoverIfNecessary(lower = -1, upper = -1) {
@@ -225,7 +225,7 @@ export class Bladeburner {
 			await Do(this.ns, "ns.bladeburner.startAction", "General", "Hyperbolic Regeneration Chamber");
 			await this.game.Sleeves.bbEverybody("Hyperbolic Regeneration Chamber")
 			while (upper > (await Do(this.ns, "ns.bladeburner.getStamina")).reduce((a, b) => a / b)) {
-				await this.ns.sleep(1000);
+				await this.ns.asleep(1000);
 			}
 			await this.hardStop();
 			this.log("...done");
@@ -241,7 +241,7 @@ export class Bladeburner {
 			await Do(this.ns, "ns.bladeburner.startAction", "General", "Diplomacy");
 			await this.game.Sleeves.bbEverybody("Diplomacy");
 			while (goal < (await Do(this.ns, "ns.bladeburner.getCityChaos", await Do(this.ns, "ns.bladeburner.getCity")))) {
-				await this.ns.sleep(1000);
+				await this.ns.asleep(1000);
 			}
 			return true;
 		}

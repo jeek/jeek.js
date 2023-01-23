@@ -7,10 +7,10 @@ export async function bn7(Game) {
     if (!await Game.Bladeburner.start())
         return false;
     Game.Bladeburner.log("Start.")
-    let zc = 1;
+    while (true) {
+        let zc = 1;
     while (await Game.Bladeburner.UpgradeSkills(zc))
         zc += 1;
-        while (true) {
             await Game.Sleeves.bbEverybody("Field analysis");
     await Game.Bladeburner.hardStop();
     while (((await (Game.Bladeburner.contractCount))+((await (Game.Bladeburner.operationCount)))) > 0) {
@@ -34,7 +34,7 @@ export async function bn7(Game) {
                             await (Game.Bladeburner.fieldAnal());
                             await (Game.Sleeves.bbEverybody("Field Analysis"));
                             while (chance[0] + .01 < chance[1]) {
-                                await Game.ns.sleep(1000);
+                                await Game.ns.asleep(1000);
                                 chance = await (Game.Bladeburner.getChance(action));
                             }
                         }
@@ -129,7 +129,7 @@ export async function bn7(Game) {
             }
             if (10 + (await (Game.Bladeburner.cityChaos)) <= await (Game.Bladeburner.chaosHere))
                 break;
-            await Game.ns.sleep(1000);
+            await Game.ns.asleep(1000);
         }
         await (Game.Bladeburner.hardStop());
     }

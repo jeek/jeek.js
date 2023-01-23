@@ -18,11 +18,11 @@ export async function roulettestart(Game) {
 			if (!(await Do(Game.ns, "ns.getPlayer")).factions.includes(city)) {
 				await Do(Game.ns, "ns.singularity.travelToCity", city);
 				while (!(await Do(Game.ns, "ns.singularity.checkFactionInvitations")).includes(city))
-					await Game.ns.sleep(0);
+					await Game.ns.asleep(0);
 			}
 			if (city == "Chongqing")
 				while ((await (Game.Player.hacking)) >= 50 && !(await Do(Game.ns, "ns.singularity.checkFactionInvitations")).includes("Tian Di Hui")) {
-					await Game.ns.sleep(0);
+					await Game.ns.asleep(0);
 				}
 		}
 	}
@@ -79,7 +79,7 @@ export class Casino {
 		while (!((await Do(this.ns, "ns.getPlayer")).city == "Aevum" || (await Do(this.ns, "ns.singularity.travelToCity", 'Aevum')))) {
 			if ((!await Do(this.ns, "ns.singularity.isBusy")) && (await Do(this.ns, "ns.getPlayer")).cash < 200000)
 				await Do(this.ns, "ns.singularity.commitCrime", "Mug");
-			await this.ns.sleep(0);
+			await this.ns.asleep(0);
 		}
 
 		let initseed = Date.now();
@@ -93,7 +93,7 @@ export class Casino {
 		let z = 0;
 		let doc = eval('document');
 		while (!doc.body.innerText.includes("1 to 12")) {
-			await this.ns.sleep(1); // Sleep until you find a libertarian's ideal dating partner
+			await this.ns.asleep(1); // Sleep until you find a libertarian's ideal dating partner
 		}
 		let buttons = Array.from(doc.evaluate("//button[text()='Stop playing']", doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.parentElement.children[6].getElementsByTagName('button')).map(x => [parseInt(x.innerText), x]).filter(x => x[0].toString() == x[1].innerText).sort((a, b) => { return a[0] - b[0] });
 		let wheels = [];
@@ -114,7 +114,7 @@ export class Casino {
 				let wagerField = doc.evaluate("//button[text()='Stop playing']", doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.parentElement.children[4].firstChild.firstChild;
 				Object.getOwnPropertyDescriptor(eval('window').HTMLInputElement.prototype, "value").set.call(wagerField, '10000000')
 				wagerField.dispatchEvent(new Event('input', { bubbles: true }));
-				await this.ns.sleep(0);
+				await this.ns.asleep(0);
 				//				return;
 			}
 			let wheels2 = wheels.filter(x => levenshteinDistance(x.slice(0, seen.length - 1), seen.slice(0, seen.length - 1)) < Math.max(5, seen.length / 2));
@@ -140,12 +140,12 @@ export class Casino {
 				return;
 			};
 			z = z + 1;
-			await this.ns.sleep(5000);
+			await this.ns.asleep(5000);
 			seen.push(parseInt(doc.evaluate("//button[text()='Stop playing']", doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.parentElement.children[3].innerText));
 		}
 		let endgame = doc.evaluate("//button[contains(text(),'Stop playing')]", doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 		endgame[Object.keys(endgame)[1]].onClick({ isTrusted: true });
-		await this.ns.sleep(0);
+		await this.ns.asleep(0);
 		endgame = doc.evaluate("//button[contains(text(),'Return to World')]", doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 		endgame[Object.keys(endgame)[1]].onClick({ isTrusted: true });
 		killModal();

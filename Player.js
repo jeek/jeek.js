@@ -132,7 +132,7 @@ export class Player {
 			}
 			while (goal > ((await Do(this.ns, "ns.getPlayer")).skills[stat.toLowerCase()]))
 				didSomething = true;
-			await this.ns.sleep(1000);
+			await this.ns.asleep(1000);
 		}
 		if (withSleeves) {
 			await this.game.Sleeves.deShock();

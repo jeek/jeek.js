@@ -23,7 +23,7 @@ export async function bn8(Game) {
     let report = {};
     while ((!await Do(Game.ns, "ns.stock.has4SData", "")) || (!await Do(Game.ns, "ns.stock.has4SDataTIXAPI", ""))) {
         while (tickPrice == await Do(Game.ns, "ns.stock.getPurchaseCost", 'ECP', 1, "Long")) {
-            await Game.ns.sleep(0);
+            await Game.ns.asleep(0);
         }
         tickPrice = await Do(Game.ns, "ns.stock.getPurchaseCost", 'ECP', 1, "Long");
         prices.push({});
@@ -187,7 +187,7 @@ export async function bn8(Game) {
                 await Do(Game.ns, "ns.stock.purchase4SMarketDataTixApi", "");
             } catch { }
         }
-        await Game.ns.sleep(0);
+        await Game.ns.asleep(0);
     }
     let z = 0;
     while (true) {
@@ -204,7 +204,6 @@ export async function bn8(Game) {
                 }
             }
         }
-        Game.ns.run("jeek.js", 1, "--bn8b");
         let files = await Do(Game.ns, "ns.ls", "home");
         let zz = 0;
         if (files.includes("BruteSSH.exe")) {
@@ -223,11 +222,10 @@ export async function bn8(Game) {
             zz += 1;
         }
         if (zz >= 5 && ((await (Game.Player.hacking)) > 3000) && (await Do(Game.ns, "ns.singularity.getOwnedAugmentations")).includes("The Red Pill")) {
-            await Do(Game.ns, "ns.kill", "jeek.js", "home", "--bn8b");
             await Game.winGame();
         }
         while (tickPrice == await Do(Game.ns, "ns.stock.getPurchaseCost", 'ECP', 1, "Long")) {
-            await Game.ns.sleep(0);
+            await Game.ns.asleep(0);
         }
         tickPrice = await Do(Game.ns, "ns.stock.getPurchaseCost", 'ECP', 1, "Long");
 
@@ -297,7 +295,7 @@ export async function bn8(Game) {
         if (8 == await (Game.Player.bitNodeN)) {
             if (playerhack > 3000 && ownedAugs.length >= 30 && !ownedAugs.includes("The Red Pill")) {
                 while (((await (Game.Player.money)) > 100e9) && (!((await Do(Game.ns, "ns.singularity.checkFactionInvitations")).includes("Daedalus"))) && (!((await Do(Game.ns, "ns.getPlayer")).factions.includes("Daedalus")))) {
-                    await Game.ns.sleep(1000);
+                    await Game.ns.asleep(1000);
                 }
                 if ((await Do(Game.ns, "ns.singularity.checkFactionInvitations")).includes("Daedalus")) {
                     await Do(Game.ns, "ns.singularity.joinFaction", "Daedalus");
@@ -372,11 +370,11 @@ export async function bn8hackloop(Game) {
                     let threads = Math.max(1, Math.floor(((await Do(Game.ns, "ns.getServerMaxRam", "home")) - (await Do(Game.ns, "ns.getServerUsedRam", "home")) - buffer) / filesize["weaken.js"]));
                     let pid = Game.ns.run("/temp/weaken.js", threads, stockMapping[i]);
                     while (pid == 0 && threads > 1) {
-                        await Game.ns.sleep(0);
+                        await Game.ns.asleep(0);
                         threads -= 1;
                         pid = Game.ns.run("/temp/weaken.js", threads, stockMapping[i]);
                     }
-                    while (await Do(Game.ns, "ns.isRunning", pid)) { await Game.ns.sleep(0); }
+                    while (await Do(Game.ns, "ns.isRunning", pid)) { await Game.ns.asleep(0); }
                 }
                 //Game.ns.tprint(((await Do(Game.ns, "ns.stock.getForecast", i)) > .5 ? "Grow " : "Hack ") + i + " " + stockMapping[i], " ", (await Do(Game.ns, "ns.stock.getForecast", i)));
                 while ((await Do(Game.ns, "ns.getServerMoneyAvailable", stockMapping[i])) * 4 / 3 > (await Do(Game.ns, "ns.getServerMaxMoney", stockMapping[i]))) {
@@ -384,56 +382,56 @@ export async function bn8hackloop(Game) {
                     if (threads > 0) {
                         let pid = Game.ns.run((await Do(Game.ns, "ns.stock.getForecast", i)) > .5 ? "/temp/hack.js" : "/temp/hackstock.js", threads, stockMapping[i]);
                         while (pid == 0 && threads > 0) {
-                            await Game.ns.sleep(0);
+                            await Game.ns.asleep(0);
                             threads -= 1;
                             pid = Game.ns.run((await Do(Game.ns, "ns.stock.getForecast", i)) > .5 ? "/temp/hack.js" : "/temp/hackstock.js", threads, stockMapping[i]);
                         }
-                        while (await Do(Game.ns, "ns.isRunning", pid)) { await Game.ns.sleep(0); }
+                        while (await Do(Game.ns, "ns.isRunning", pid)) { await Game.ns.asleep(0); }
                     }
                     while ((await Do(Game.ns, "ns.getServerMinSecurityLevel", stockMapping[i])) < (await Do(Game.ns, "ns.getServerSecurityLevel", stockMapping[i]))) {
                         //            ns.tprint("Weaken " + i + " " + mapping[i], " ", ns.stock.getForecast(i));
                         let threads = Math.floor(((await Do(Game.ns, "ns.getServerMaxRam", "home")) - (await Do(Game.ns, "ns.getServerUsedRam", "home")) - buffer) / filesize["weaken.js"]);
                         let pid = Game.ns.run("/temp/weaken.js", threads, stockMapping[i]);
                         while (pid == 0 && threads > 1) {
-                            await Game.ns.sleep(0);
+                            await Game.ns.asleep(0);
                             threads -= 1;
                             pid = Game.ns.run("/temp/weaken.js", threads, stockMapping[i]);
                         }
-                        while (await Do(Game.ns, "ns.isRunning", pid)) { await Game.ns.sleep(0); }
+                        while (await Do(Game.ns, "ns.isRunning", pid)) { await Game.ns.asleep(0); }
                     }
                 }
                 while ((await Do(Game.ns, "ns.getServerMoneyAvailable", stockMapping[i])) < (await Do(Game.ns, "ns.getServerMaxMoney", stockMapping[i]))) {
                     let threads = Math.floor(((await Do(Game.ns, "ns.getServerMaxRam", "home")) - (await Do(Game.ns, "ns.getServerUsedRam", "home")) - buffer) / filesize["growstock.js"]);
                     let pid = threads > 0 ? Game.ns.run((await Do(Game.ns, "ns.stock.getForecast", i)) > .5 ? "/temp/growstock.js" : "/temp/grow.js", threads, stockMapping[i]) : 0;
                     while (pid == 0 && threads > 0) {
-                        await Game.ns.sleep(0);
+                        await Game.ns.asleep(0);
                         threads -= 1;
                         pid = Game.ns.run((await Do(Game.ns, "ns.stock.getForecast", i)) > .5 ? "/temp/growstock.js" : "/temp/grow.js", threads, stockMapping[i]);
                     }
-                    while (await Do(Game.ns, "ns.isRunning", pid)) { await Game.ns.sleep(0); }
+                    while (await Do(Game.ns, "ns.isRunning", pid)) { await Game.ns.asleep(0); }
                     while ((await Do(Game.ns, "ns.getServerMinSecurityLevel", stockMapping[i])) < (await Do(Game.ns, "ns.getServerSecurityLevel", stockMapping[i]))) {
                         //                     ns.tprint("Weaken " + i + " " + mapping[i], " ", ns.stock.getForecast(i));
                         let threads = Math.floor(((await Do(Game.ns, "ns.getServerMaxRam", "home")) - (await Do(Game.ns, "ns.getServerUsedRam", "home")) - buffer) / filesize["weaken.js"]);
                         let pid = Game.ns.run("/temp/weaken.js", threads, stockMapping[i]);
                         while (pid == 0 && threads > 1) {
-                            await Game.ns.sleep(0);
+                            await Game.ns.asleep(0);
                             threads -= 1;
                             pid = Game.ns.run("/temp/weaken.js", threads, stockMapping[i]);
                         }
-                        while (await Do(Game.ns, "ns.isRunning", pid)) { await Game.ns.sleep(0); }
+                        while (await Do(Game.ns, "ns.isRunning", pid)) { await Game.ns.asleep(0); }
                     }
                 }
                 while ((await Do(Game.ns, "ns.getServerMinSecurityLevel", stockMapping[i])) < (await Do(Game.ns, "ns.getServerSecurityLevel", stockMapping[i]))) {
                     let threads = Math.floor(((await Do(Game.ns, "ns.getServerMaxRam", "home")) - (await Do(Game.ns, "ns.getServerUsedRam", "home")) - buffer) / filesize["weaken.js"]);
                     let pid = Game.ns.run("/temp/weaken.js", threads, stockMapping[i]);
                     while (pid == 0 && threads > 1) {
-                        await Game.ns.sleep(0);
+                        await Game.ns.asleep(0);
                         threads -= 1;
                         pid = Game.ns.run("/temp/weaken.js", threads, stockMapping[i]);
                     }
-                    while (await Do(Game.ns, "ns.isRunning", pid)) { await Game.ns.sleep(0); }
+                    while (await Do(Game.ns, "ns.isRunning", pid)) { await Game.ns.asleep(0); }
                 }
-                await Game.ns.sleep(0);
+                await Game.ns.asleep(0);
             }
         }
     }

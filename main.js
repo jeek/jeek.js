@@ -52,8 +52,6 @@ export async function main(ns) {
 	}
 	if (cmdlineargs['bn8']) {
 		promises.push(Game.bn8());
-	}
-	if (cmdlineargs['bn8b']) {
 		promises.push(Game.bn8hackloop());
 	}
 	let displays = [];
