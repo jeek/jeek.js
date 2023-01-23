@@ -4,6 +4,7 @@ export class DebugStuff {
 	constructor(ns, game) {
 		this.ns = ns;
 		this.game = game ? game : new WholeGame(ns);
+		/*
 		const objects = [];
 		const payload_id = "payload" + String(Math.trunc(performance.now()));
 		globalThis.webpackJsonp.push([payload_id, {
@@ -21,8 +22,9 @@ export class DebugStuff {
 				break;
 			}
 		}
+		*/
 	}
-	startCorp(corpName) {
+/*	startCorp(corpName) {
 		this.player.startCorporation(corpName);
 	}
 	async endlessAss() {
@@ -35,4 +37,5 @@ export class DebugStuff {
 			}
 		}
 	}
+*/
 }
