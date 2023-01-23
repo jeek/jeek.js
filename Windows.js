@@ -2,12 +2,11 @@
 let slp = ms => new Promise(r => setTimeout(r, ms));
 export let makeNewWindow = async (title = "Default Window Title", theme) => {
 	let win = open("main.bundle.js", title.replaceAll(" ", "_"), "popup=yes,height=200,width=500,left=100,top=100,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,directories=no,status=no");
-  while (typeof doc == 'undefined') {
+  let good = false;
+  while (!good) {
     await slp(1000);
     try {
     let doc = win["document"];
-    } catch {}
-  }
 	doc.head.innerHTML = `
   <title>${title}</title>
   <style>
@@ -68,7 +67,9 @@ export let makeNewWindow = async (title = "Default Window Title", theme) => {
       background:` + theme['primary'] + `;
     }
   </style>`
-	doc.body.innerHTML = `<div class=title>${title}</div><div class=logs><p></p></div>`;
+  } catch {}
+  }
+  doc.body.innerHTML = `<div class=title>${title}</div><div class=logs><p></p></div>`;
 	let logs = doc.body.querySelector(".logs");
 	win.update = (content) => {
 		logs.innerHTML = content;
