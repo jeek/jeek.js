@@ -19,34 +19,42 @@ const cmdlineflags = [
 
 import { WholeGame } from "WholeGame.js"
 
+async function displayloop(displays) {
+	while (true) {
+		for (let i = 0 ; i < displays.length ; i++) {
+			await (displays[i].updateDisplay());
+		}
+	}
+}
+
 /** @param {NS} ns */
 export async function main(ns) {
 	let Game = new WholeGame(ns);
 	var cmdlineargs = ns.flags(cmdlineflags);
+	let promises = [];
 	if (cmdlineargs['endlessass']) {
-		await Game.Debug.endlessAss();
+		promises.push(Game.Debug.endlessAss());
 	}
 	if (cmdlineargs['roulettestart']) {
-		await Game.roulettestart();
+		promises.push(Game.roulettestart());
 	}
 	if (cmdlineargs['popemall']) {
-		await Game.Servers.pop_them_all();
+		promises.push(Game.Servers.pop_them_all());
 	}
 	if (cmdlineargs['roulette']) {
-		await Game.Casino.roulette();
+		promises.push(Game.Casino.roulette());
 	}
 	if (cmdlineargs['contracts']) {
-		await Game.Contracts.solve();
+		promises.push(Game.Contracts.solve());
 	}
 	if (cmdlineargs['bn7']) {
-		while (true)
-			await Game.bn7();
+		promises.push(Game.bn7());
 	}
 	if (cmdlineargs['bn8']) {
-		await Game.bn8();
+		promises.push(Game.bn8());
 	}
 	if (cmdlineargs['bn8b']) {
-		await Game.bn8hackloop();
+		promises.push(Game.bn8hackloop());
 	}
 	let displays = [];
 	if (cmdlineargs['stockdisplay']) {
@@ -66,10 +74,7 @@ export async function main(ns) {
 		await (displays[displays.length - 1].createDisplay());
 	}
 	if (displays.length > 0) {
-		while (true) {
-			for (let i = 0; i < displays.length; i++) {
-				await (displays[i].updateDisplay());
-			}
-		}
+		promises.push(displayloop(displays));
 	}
+	await Promise.race(promises);
 }

@@ -10,7 +10,8 @@ export async function bn7(Game) {
     let zc = 1;
     while (await Game.Bladeburner.UpgradeSkills(zc))
         zc += 1;
-    await Game.Sleeves.bbEverybody("Field analysis");
+        while (true) {
+            await Game.Sleeves.bbEverybody("Field analysis");
     await Game.Bladeburner.hardStop();
     while (((await (Game.Bladeburner.contractCount))+((await (Game.Bladeburner.operationCount)))) > 0) {
         if (await Game.Player.hospitalizeIfNeeded())
@@ -133,4 +134,5 @@ export async function bn7(Game) {
         await (Game.Bladeburner.hardStop());
     }
     await Game.Bladeburner.inciteViolence();
+}
 }
