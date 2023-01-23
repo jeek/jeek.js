@@ -3,7 +3,7 @@ import { Bladeburner } from "Bladeburner.js";
 import { CacheServer } from "CacheServer.js";
 import { Casino, roulettestart } from "Casino.js";
 import { Contracts } from "Contracts.js";
-import { Corp } from "Corp.js";
+// import { Corp } from "Corp.js";
 import { DebugStuff } from "DebugStuff.js";
 import { Grafting } from "Grafting.js";
 import { Hacknet } from "Hacknet.js";
