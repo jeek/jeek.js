@@ -47,7 +47,7 @@ export class WholeGame {
 		this.Augmentations = new Augmentations(ns, this);
 		this.Player = new Player(ns, this);
 		this.Grafting = new Grafting(ns, this);
-		this.Corp = new Corp(ns, this);
+		// this.Corp = new Corp(ns, this);
 		this.Jeekipedia = new Jeekipedia(ns, this);
 		this.Casino = new Casino(ns, this);
 		this.Bladeburner = new Bladeburner(ns, this); this.Bladeburner.raid=false; this.Bladeburner.sting=false;
