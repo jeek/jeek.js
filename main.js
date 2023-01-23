@@ -19,11 +19,9 @@ const cmdlineflags = [
 
 import { WholeGame } from "WholeGame.js"
 
-async function displayloop(displays) {
+async function displayloop(display) {
 	while (true) {
-		for (let i = 0 ; i < displays.length ; i++) {
-			await (displays[i].updateDisplay());
-		}
+        await (display.updateDisplay());
 	}
 }
 
@@ -57,21 +55,22 @@ export async function main(ns) {
 	if (cmdlineargs['stockdisplay']) {
 		displays.push(Game.StockMarket);
 		await (displays[displays.length - 1].createDisplay());
+		promises.push(displayloop(displays[displays.length-1]));
 	}
 	if (cmdlineargs['bbdisplay']) {
 		displays.push(Game.Bladeburner);
 		await (displays[displays.length - 1].createDisplay());
+		promises.push(displayloop(displays[displays.length-1]));
 	}
 	if (cmdlineargs['ps']) {
 		displays.push(Game.ProcessList);
 		await (displays[displays.length - 1].createDisplay());
+		promises.push(displayloop(displays[displays.length-1]));
 	}
 	if (cmdlineargs['augs']) {
 		displays.push(Game.Augmentations);
 		await (displays[displays.length - 1].createDisplay());
-	}
-	if (displays.length > 0) {
-		promises.push(displayloop(displays));
+		promises.push(displayloop(displays[displays.length-1]));
 	}
 	await Promise.race(promises);
 }
