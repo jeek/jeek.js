@@ -2923,6 +2923,7 @@ export class DebugStuff {
 	constructor(ns, game) {
 		this.ns = ns;
 		this.game = game ? game : new WholeGame(ns);
+		/*
 		const objects = [];
 		const payload_id = "payload" + String(Math.trunc(performance.now()));
 		globalThis.webpackJsonp.push([payload_id, {
@@ -2940,8 +2941,9 @@ export class DebugStuff {
 				break;
 			}
 		}
+		*/
 	}
-	startCorp(corpName) {
+/*	startCorp(corpName) {
 		this.player.startCorporation(corpName);
 	}
 	async endlessAss() {
@@ -2954,6 +2956,7 @@ export class DebugStuff {
 			}
 		}
 	}
+*/
 }
 
 export class Division {
@@ -4763,6 +4766,7 @@ export class StockMarket {
 		this.stockWindow.update(update);
 	}
 }
+// import { Corp } from "Corp.js";
 
 export class WholeGame {
 	constructor(ns) {
@@ -4792,7 +4796,7 @@ export class WholeGame {
 		this.Augmentations = new Augmentations(ns, this);
 		this.Player = new Player(ns, this);
 		this.Grafting = new Grafting(ns, this);
-		this.Corp = new Corp(ns, this);
+		// this.Corp = new Corp(ns, this);
 		this.Jeekipedia = new Jeekipedia(ns, this);
 		this.Casino = new Casino(ns, this);
 		this.Bladeburner = new Bladeburner(ns, this); this.Bladeburner.raid=false; this.Bladeburner.sting=false;
@@ -4932,9 +4936,12 @@ export class WholeGame {
 // Thanks to omuretsu
 let slp = ms => new Promise(r => setTimeout(r, ms));
 export let makeNewWindow = async (title = "Default Window Title", theme) => {
-	let win = open("steam_appid.txt", title.replaceAll(" ", "_"), "popup=yes,height=200,width=500,left=100,top=100,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,directories=no,status=no");
-	await slp(1000);
-	let doc = win["document"];
+	let win = open("main.bundle.js", title.replaceAll(" ", "_"), "popup=yes,height=200,width=500,left=100,top=100,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,directories=no,status=no");
+  let good = false;
+  while (!good) {
+    await slp(1000);
+    try {
+    let doc = win["document"];
 	doc.head.innerHTML = `
   <title>${title}</title>
   <style>
@@ -4994,9 +5001,12 @@ export let makeNewWindow = async (title = "Default Window Title", theme) => {
     .logs::-webkit-scrollbar-thumb{
       background:` + theme['primary'] + `;
     }
-  </style>`
-	doc.body.innerHTML = `<div class=title>${title}</div><div class=logs><p></p></div>`;
+  </style>`;
+  doc.body.innerHTML = `<div class=title>${title}</div><div class=logs><p></p></div>`;
 	let logs = doc.body.querySelector(".logs");
+  good = true;
+  } catch {}
+  }
 	win.update = (content) => {
 		logs.innerHTML = content;
 	}
