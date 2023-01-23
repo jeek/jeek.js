@@ -67,11 +67,11 @@ export let makeNewWindow = async (title = "Default Window Title", theme) => {
       background:` + theme['primary'] + `;
     }
   </style>`;
+  doc.body.innerHTML = `<div class=title>${title}</div><div class=logs><p></p></div>`;
+	let logs = doc.body.querySelector(".logs");
   good = true;
   } catch {}
   }
-  doc.body.innerHTML = `<div class=title>${title}</div><div class=logs><p></p></div>`;
-	let logs = doc.body.querySelector(".logs");
 	win.update = (content) => {
 		logs.innerHTML = content;
 	}
