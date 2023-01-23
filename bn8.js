@@ -189,6 +189,7 @@ export async function bn8(Game) {
         }
         await Game.ns.asleep(0);
     }
+    Game.bn8hackloop();
     let z = 0;
     while (true) {
         for (let program of [
