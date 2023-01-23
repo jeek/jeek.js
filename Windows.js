@@ -66,7 +66,8 @@ export let makeNewWindow = async (title = "Default Window Title", theme) => {
     .logs::-webkit-scrollbar-thumb{
       background:` + theme['primary'] + `;
     }
-  </style>`
+  </style>`;
+  good = true;
   } catch {}
   }
   doc.body.innerHTML = `<div class=title>${title}</div><div class=logs><p></p></div>`;
