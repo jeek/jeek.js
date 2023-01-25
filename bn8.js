@@ -150,9 +150,11 @@ export async function bn8(Game) {
                         while ((shares * (await Do(Game.ns, "ns.stock.getBidPrice", stock)) > 200000) && (!await Do(Game.ns, "ns.stock.buyStock", stock, shares))) {
                             shares = Math.floor(shares * .9);
                         }
-                        if (shares > 0) Game.StockMarket.log("Bought " + shares.toString() + " of " + stock);
-                        if (shares > 10) {
-                            stall[stock] = 21;
+                        if (shares * (await Do(Game.ns, "ns.stock.getBidPrice", stock)) > 200000) {
+                            if (shares > 0) Game.StockMarket.log("Bought " + shares.toString() + " of " + stock);
+                            if (shares > 10) {
+                                stall[stock] = 21;
+                            }
                         }
                     }
                 } else {
@@ -251,9 +253,11 @@ export async function bn8(Game) {
                     //							ns.toast("Trying to buy " + shares.toString() + " of " + stock);
                     //						}
                     while ((shares * (await Do(Game.ns, "ns.stock.getBidPrice", stock)) > 200000) && (!await Do(Game.ns, "ns.stock.buyStock", stock, shares))) {
-                        shares *= .99;
+                        shares = Math.floor(shares * .99);
                     }
-                    if (shares > 0) Game.StockMarket.log("Bought " + shares.toString() + " of " + stock);
+                    if (shares * (await Do(Game.ns, "ns.stock.getBidPrice", stock)) > 200000) {
+                        if (shares > 0) Game.StockMarket.log("Bought " + shares.toString() + " of " + stock);
+                    }
                 } else {
                     if (data[0] > 0) {
                         await Do(Game.ns, "ns.stock.sellStock", stock, data[0]);
