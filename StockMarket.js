@@ -268,7 +268,7 @@ export class StockMarket {
 			update += anUpdate[1];
 		}
 		update += "</TABLE>";
-		update = "<H1>Holdings: " + jFormat(await this.portfolioValue, "$") + (totalProfit < 0 ? "<FONT COLOR='" + this.ns.ui.getTheme()['error'] + "'>" : "<FONT>") + " (Profit: " + jFormat(totalProfit, "$") + ")</FONT></H1> " + "<a href=\"#\" onClick='window.opener.listenUp(\"this.liquidate=!this.liquidate\")'>" + (this.liquidate ? "Liquidating" : "<FONT COLOR=" + this.ns.ui.getTheme()['error'] + ">Click to liquidate</FONT>") + "</A>" + "<BR>" + update;
+		update = "<H1>Holdings: " + jFormat(await this.portfolioValue, "$") + (totalProfit < 0 ? "<FONT COLOR='" + this.ns.ui.getTheme()['error'] + "'>" : "<FONT>") + " (Profit: " + jFormat(totalProfit, "$") + ")</FONT></H1> " + "<a href=\"#\" onClick='window.opener.listenUp(\"this.liquidate=!this.liquidate\")'>" + (this.liquidate ? "Liquidating" : "<FONT COLOR='" + this.ns.ui.getTheme()['error'] + "'>Click to liquidate</FONT>") + "</A>" + "<BR>" + update;
 		this.stockWindow.update(update);
 	}
 }
