@@ -42,6 +42,7 @@ export class StockMarket {
 		helperScripts(ns);
 		this.ns = ns;
 		this.game = game ? game : new WholeGame(ns);
+		this.liquidate = false;
 		this.log = ns.tprint.bind(ns);
         if (ns.flags(cmdlineflags)['logbox']) {
             this.log = this.game.sidebar.querySelector(".stockbox") || this.game.createSidebarItem("Stocks", "", "S", "stockbox");
@@ -184,6 +185,17 @@ export class StockMarket {
 			try { await eval(cmd) } catch (e) { this.ns.tprint(e) }
 		}
 		let bn = (await Do(this.ns, "ns.getPlayer")).bitNodeN;
+		if (this.liquidate) {
+			let data = await this.market;
+			for (let stock of Object.keys(data)) {
+				if (data[stock]['position'][0] > 0) {
+					await Do(Game.ns, "ns.stock.sellStock", stock, data[stock]['position'][0]);
+				}
+				if (data[stock]['position'][2] > 0) {
+					await Do(Game.ns, "ns.stock.sellShort", stock, data[stock]['position'][2]);
+				}
+			}
+		}
 		let sourcefiles = [];
 		let servermoneyavailable = await DoAll(this.ns, "ns.getServerMoneyAvailable", Object.values(stockMapping));
 		let servermaxmoney = await DoAll(this.ns, "ns.getServerMaxMoney", Object.values(stockMapping));
@@ -256,7 +268,7 @@ export class StockMarket {
 			update += anUpdate[1];
 		}
 		update += "</TABLE>";
-		update = "<H1>Holdings: " + jFormat(await this.portfolioValue, "$") + (totalProfit < 0 ? "<FONT COLOR='" + this.ns.ui.getTheme()['error'] + "'>" : "<FONT>") + " (Profit: " + jFormat(totalProfit, "$") + ")</FONT></H1><BR>" + update;
+		update = "<H1>Holdings: " + jFormat(await this.portfolioValue, "$") + (totalProfit < 0 ? "<FONT COLOR='" + this.ns.ui.getTheme()['error'] + "'>" : "<FONT>") + " (Profit: " + jFormat(totalProfit, "$") + ")</FONT></H1> " + "<a href=\"#\" onClick='window.opener.listenUp(\"this.liquidate=!this.liquidate\")'>" + (this.liquidate ? "Liquidating" : "<FONT COLOR=" + this.ns.ui.getTheme()['error'] + ">Click to liquidate</FONT>") + "</A>" + "<BR>" + update;
 		this.stockWindow.update(update);
 	}
 }

@@ -143,7 +143,7 @@ export async function bn8(Game) {
                 if (data[2] > 0) Game.StockMarket.log("Unshorted " + data[2].toString() + " of " + stock);
                 data[2] = 0;
             }
-            if (prices.length > 20) {
+            if (prices.length > 20 && !Game.StockMarket.liquidate) {
                 if (z < 5) {
                     let shares = Math.floor((-100000 + await Do(Game.ns, "ns.getServerMoneyAvailable", 'home')) / (await Do(Game.ns, "ns.stock.getAskPrice", stock)) / [2, 1, 1, 1, 1][z] / (shorts ? 2 : 1));
                     if (shares * (prices[prices.length - 1][stock][0] - prices[prices.length - 11][stock][0]) / 10 * 75 > 200000) {
@@ -167,7 +167,7 @@ export async function bn8(Game) {
             z += 1;
             data = await Do(Game.ns, "ns.stock.getPosition", stock);
             totalfunds += data[0] * await Do(Game.ns, "ns.stock.getBidPrice", stock);
-            if (prices.length > 20) {
+            if (prices.length > 20 && !Game.StockMarket.liquidate) {
                 if (shorts && (z + 1 == Object.keys(scores).length)) {
                     let shares = Math.floor((-100000 + await Do(Game.ns, "ns.getServerMoneyAvailable", 'home')) / (await Do(Game.ns, "ns.stock.getAskPrice", stock)));
                     while ((shares * (await Do(Game.ns, "ns.stock.getBidPrice", stock)) > 200000) && (!await Do(Game.ns, "ns.stock.buyShort", stock, shares))) {
@@ -246,7 +246,7 @@ export async function bn8(Game) {
         symbols = symbols.sort((a, b) => { return chances[b] - chances[a] });
         z = 1 - z;
         for (let stock of symbols) {
-            if (z == 1) {
+            if (z == 1 && !Game.StockMarket.liquidate) {
                 let data = await Do(Game.ns, "ns.stock.getPosition", stock);
                 if (chances[stock] > 0) {
                     let shares = Math.floor((-100000 + await Do(Game.ns, "ns.getServerMoneyAvailable", 'home')) / (await Do(Game.ns, "ns.stock.getAskPrice", stock)));
@@ -272,7 +272,7 @@ export async function bn8(Game) {
         }
         symbols = symbols.reverse();
         for (let stock of symbols) {
-            if (0 == z) {
+            if (0 == z && !Game.StockMarket.liquidate) {
                 let data = await Do(Game.ns, "ns.stock.getPosition", stock);
                 if (chances[stock] < 0) {
                     let shares = Math.floor((-100000 + await Do(Game.ns, "ns.getServerMoneyAvailable", 'home')) / (await Do(Game.ns, "ns.stock.getAskPrice", stock)));
