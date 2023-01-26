@@ -14,7 +14,14 @@ export class Hacknet {
 	}
 	async loop() {
 		while (true) {
-			// Pay for yourself, Hacknet
+			if (this.goal == "Sell for Money") {
+				await Do(this.ns, "ns.hacknet.spendHashes", this.goal, "", Math.floor((await Do(this.ns, 'ns.hacknet.numHashes', '')) / 4));
+				this.log("Spent hashes for cash")
+			} else {
+				while (await Do(this.ns, "ns.hacknet.spendHashes", this.goal))
+					this.log("Spent hashes on " + this.goal);
+			}
+		// Pay for yourself, Hacknet
 			if ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses < -1e9) {
 				if (0 > ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet) + ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses)) {
 					if (4 <= (await Do(this.ns, 'ns.hacknet.numHashes', ''))) {
@@ -27,13 +34,6 @@ export class Hacknet {
 				//		while ((4 <= (await Do(this.ns, 'ns.hacknet.numHashes', ''))) && ((await (this.game.Player.money)) < 1000000 * Math.floor((await Do(this.ns, 'ns.hacknet.numHashes', '')) / 4))) {
 				//			await Do(this.ns, "ns.hacknet.spendHashes", "Sell for Money");
 				//		}
-				if (this.goal == "Sell for Money") {
-					await Do(this.ns, "ns.hacknet.spendHashes", this.goal, "", Math.floor((await Do(this.ns, 'ns.hacknet.numHashes', '')) / 4));
-					this.log("Spent hashes for cash")
-				} else {
-					while (await Do(this.ns, "ns.hacknet.spendHashes", this.goal))
-						this.log("Spent hashes on " + this.goal);
-				}
 				let didSomething = true;
 				let mults = (await Do(this.ns, "ns.getPlayer", "")).mults.hacknet_node_money;
 				while (didSomething) {
