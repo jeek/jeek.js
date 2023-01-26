@@ -595,6 +595,12 @@ export class Contracts {
 		//		this['window'].update(output);
 		return this.contracts;
 	}
+	async loop() {
+		while (true) {
+    		await this.solve();
+    		await this.ns.sleep(60000);
+		}
+	}
 	async solve() {
 		await this.list();
 		for (let contract of Object.keys(this.contracts)) {

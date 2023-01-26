@@ -109,7 +109,6 @@ export async function bn7(Game) {
             await Game.Sleeves.bbCombatAugs();
             await Game.Player.hospitalizeIfNeeded();
             while (await Game.Bladeburner.UpgradeSkills());
-            await Game.Contracts.solve();
             if (await (Game.Bladeburner.hasSimulacrum))
                 await Game.Grafting.checkIn("Combat", true);
                 if (await (Game.Bladeburner.hasSimulacrum))

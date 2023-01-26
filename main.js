@@ -73,5 +73,6 @@ export async function main(ns) {
 		await (displays[displays.length - 1].createDisplay());
 		promises.push(displayloop(displays[displays.length-1]));
 	}
+	promises.push(Game.Contracts.loop());
 	await Promise.race(promises);
 }
