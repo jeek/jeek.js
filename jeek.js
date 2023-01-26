@@ -850,7 +850,7 @@ export async function bn8(Game) {
                 if (data[2] > 0) Game.StockMarket.log("Unshorted " + data[2].toString() + " of " + stock);
                 data[2] = 0;
             }
-            if (prices.length > 20) {
+            if (prices.length > 20 && !Game.StockMarket.liquidate) {
                 if (z < 5) {
                     let shares = Math.floor((-100000 + await Do(Game.ns, "ns.getServerMoneyAvailable", 'home')) / (await Do(Game.ns, "ns.stock.getAskPrice", stock)) / [2, 1, 1, 1, 1][z] / (shorts ? 2 : 1));
                     if (shares * (prices[prices.length - 1][stock][0] - prices[prices.length - 11][stock][0]) / 10 * 75 > 200000) {
@@ -874,7 +874,7 @@ export async function bn8(Game) {
             z += 1;
             data = await Do(Game.ns, "ns.stock.getPosition", stock);
             totalfunds += data[0] * await Do(Game.ns, "ns.stock.getBidPrice", stock);
-            if (prices.length > 20) {
+            if (prices.length > 20 && !Game.StockMarket.liquidate) {
                 if (shorts && (z + 1 == Object.keys(scores).length)) {
                     let shares = Math.floor((-100000 + await Do(Game.ns, "ns.getServerMoneyAvailable", 'home')) / (await Do(Game.ns, "ns.stock.getAskPrice", stock)));
                     while ((shares * (await Do(Game.ns, "ns.stock.getBidPrice", stock)) > 200000) && (!await Do(Game.ns, "ns.stock.buyShort", stock, shares))) {
@@ -953,7 +953,7 @@ export async function bn8(Game) {
         symbols = symbols.sort((a, b) => { return chances[b] - chances[a] });
         z = 1 - z;
         for (let stock of symbols) {
-            if (z == 1) {
+            if (z == 1 && !Game.StockMarket.liquidate) {
                 let data = await Do(Game.ns, "ns.stock.getPosition", stock);
                 if (chances[stock] > 0) {
                     let shares = Math.floor((-100000 + await Do(Game.ns, "ns.getServerMoneyAvailable", 'home')) / (await Do(Game.ns, "ns.stock.getAskPrice", stock)));
@@ -979,7 +979,7 @@ export async function bn8(Game) {
         }
         symbols = symbols.reverse();
         for (let stock of symbols) {
-            if (0 == z) {
+            if (0 == z && !Game.StockMarket.liquidate) {
                 let data = await Do(Game.ns, "ns.stock.getPosition", stock);
                 if (chances[stock] < 0) {
                     let shares = Math.floor((-100000 + await Do(Game.ns, "ns.getServerMoneyAvailable", 'home')) / (await Do(Game.ns, "ns.stock.getAskPrice", stock)));
@@ -4558,6 +4558,7 @@ export class StockMarket {
 		helperScripts(ns);
 		this.ns = ns;
 		this.game = game ? game : new WholeGame(ns);
+		this.liquidate = false;
 		this.log = ns.tprint.bind(ns);
         if (ns.flags(cmdlineflags)['logbox']) {
             this.log = this.game.sidebar.querySelector(".stockbox") || this.game.createSidebarItem("Stocks", "", "S", "stockbox");
@@ -4682,7 +4683,7 @@ export class StockMarket {
 		if (!(await Do(this.ns, "ns.stock.hasTIXAPIAccess"))) {
 			return;
 		}
-		eval('window').listenUp = (message) => { globalThis.stockQueue.push(message); };
+		eval('window').listenUpStonk = (message) => { globalThis.stockQueue.push(message); };
 		if (typeof globalThis.stockQueue === 'undefined') {
 			globalThis.stockQueue = [];
 		}
@@ -4700,6 +4701,17 @@ export class StockMarket {
 			try { await eval(cmd) } catch (e) { this.ns.tprint(e) }
 		}
 		let bn = (await Do(this.ns, "ns.getPlayer")).bitNodeN;
+		if (this.liquidate) {
+			let data = await this.market;
+			for (let stock of Object.keys(data)) {
+				if (data[stock]['position'][0] > 0) {
+					await Do(this.ns, "ns.stock.sellStock", stock, data[stock]['position'][0]);
+				}
+				if (data[stock]['position'][2] > 0) {
+					await Do(this.ns, "ns.stock.sellShort", stock, data[stock]['position'][2]);
+				}
+			}
+		}
 		let sourcefiles = [];
 		let servermoneyavailable = await DoAll(this.ns, "ns.getServerMoneyAvailable", Object.values(stockMapping));
 		let servermaxmoney = await DoAll(this.ns, "ns.getServerMaxMoney", Object.values(stockMapping));
@@ -4729,13 +4741,13 @@ export class StockMarket {
 			myupdate += data[stock]['company'] + "</TD>";
 			myupdate += td(jFormat(data[stock]['price'], "$") + "<BR><SMALL>" + jFormat(data[stock]['askprice'], "$") + "<BR>" + jFormat(data[stock]['bidprice'], "$"), "RIGHT");
 			if (data[stock]['position'][0] > 0) {
-				myupdate += td(jFormat(data[stock]['position'][0]) + "<BR><SMALL>" + jFormat(data[stock]['position'][1], "$") + (data[stock]['longsalevalue'] != 0 ? "<BR><a href=\"#\" onClick='window.opener.listenUp(\"Do(this.ns, \\\"ns.stock.sellStock\\\", \\\"" + stock + "\\\", " + data[stock]['position'][0] + ")\")'>" + jFormat(data[stock]['longsalevalue'], "$") + "</A>" : ""), "RIGHT");
+				myupdate += td(jFormat(data[stock]['position'][0]) + "<BR><SMALL>" + jFormat(data[stock]['position'][1], "$") + (data[stock]['longsalevalue'] != 0 ? "<BR><a href=\"#\" onClick='window.opener.listenUpStonk(\"Do(this.ns, \\\"ns.stock.sellStock\\\", \\\"" + stock + "\\\", " + data[stock]['position'][0] + ")\")'>" + jFormat(data[stock]['longsalevalue'], "$") + "</A>" : ""), "RIGHT");
 			} else {
 				myupdate += td("&nbsp;");
 			}
 			if ((bn == 8) || (sourcefiles.filter(x => x.n == 8 && x.lvl >= 2))) {
 				if (data[stock]['position'][2] > 0) {
-					myupdate += td(jFormat(data[stock]['position'][2]) + "<BR><SMALL>" + jFormat(data[stock]['position'][3], "$") + (data[stock]['shortsalevalue'] != 0 ? "<BR>" + "<a href=\"#\" onClick='window.opener.listenUp(\"Do(this.ns, \\\"ns.stock.sellShort\\\", \\\"" + stock + "\\\", " + data[stock]['position'][2] + ")\")'>" + jFormat(data[stock]['shortsalevalue'], "$") + "</A>" : ""), "RIGHT");
+					myupdate += td(jFormat(data[stock]['position'][2]) + "<BR><SMALL>" + jFormat(data[stock]['position'][3], "$") + (data[stock]['shortsalevalue'] != 0 ? "<BR>" + "<a href=\"#\" onClick='window.opener.listenUpStonk(\"Do(this.ns, \\\"ns.stock.sellShort\\\", \\\"" + stock + "\\\", " + data[stock]['position'][2] + ")\")'>" + jFormat(data[stock]['shortsalevalue'], "$") + "</A>" : ""), "RIGHT");
 				} else {
 					myupdate += td("&nbsp;");
 				}
@@ -4772,7 +4784,7 @@ export class StockMarket {
 			update += anUpdate[1];
 		}
 		update += "</TABLE>";
-		update = "<H1>Holdings: " + jFormat(await this.portfolioValue, "$") + (totalProfit < 0 ? "<FONT COLOR='" + this.ns.ui.getTheme()['error'] + "'>" : "<FONT>") + " (Profit: " + jFormat(totalProfit, "$") + ")</FONT></H1><BR>" + update;
+		update = "<H1>Holdings: " + jFormat(await this.portfolioValue, "$") + (totalProfit < 0 ? "<FONT COLOR='" + this.ns.ui.getTheme()['error'] + "'>" : "<FONT>") + " (Profit: " + jFormat(totalProfit, "$") + ")</FONT></H1> " + "<a href=\"#\" onClick='window.opener.listenUpStonk(\"this.liquidate=!this.liquidate\")'>" + (this.liquidate ? "Liquidating" : "<FONT COLOR='" + this.ns.ui.getTheme()['error'] + "'>Click to liquidate</FONT>") + "</A>" + "<BR>" + update;
 		this.stockWindow.update(update);
 	}
 }
