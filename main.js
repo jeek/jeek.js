@@ -48,11 +48,12 @@ export async function main(ns) {
 	if (cmdlineargs['bn7']) {
 		promises.push(Game.bn7());
 		promises.push(Game.Hacknet.loop());
-		promises.push(Game.Contracts.loop());
 	}
 	if (cmdlineargs['bn8']) {
 		promises.push(Game.bn8());
-		promises.push(Game.Contracts.loop());
+	}
+	if (cmdlineargs['bn7'] || cmdlineargs['bn8']) {
+    	promises.push(Game.Contracts.loop());
 	}
 	let displays = [];
 	if (cmdlineargs['stockdisplay']) {
@@ -75,5 +76,5 @@ export async function main(ns) {
 		await (displays[displays.length - 1].createDisplay());
 		promises.push(displayloop(displays[displays.length-1]));
 	}
-	await Promise.race(promises);
+	ns.tprint(await Promise.race(promises));
 }
