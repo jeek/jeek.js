@@ -12,6 +12,12 @@ export class Hacknet {
 		}
 	}
 	async loop(goal = "Sell for Money") {
+		// Pay for yourself, Hacknet
+		while (((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses < -1e9) && 0>((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet)+((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses) && (4 <= (await Do(this.ns, 'ns.hacknet.numHashes', '')))) {
+			await Do(this.ns, "ns.hacknet.spendHashes", "Sell for Money");
+		}
+			
+			ns.getMoneySources().sinceInstall.hacknet+ns.getMoneySources().sinceInstall.hacknet_expenses)
 //		while ((4 <= (await Do(this.ns, 'ns.hacknet.numHashes', ''))) && ((await (this.game.Player.money)) < 1000000 * Math.floor((await Do(this.ns, 'ns.hacknet.numHashes', '')) / 4))) {
 //			await Do(this.ns, "ns.hacknet.spendHashes", "Sell for Money");
 //		}
