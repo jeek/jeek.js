@@ -2,17 +2,20 @@ import { Do } from "Do.js";
 import { WholeGame } from "WholeGame.js";
 
 export class Hacknet {
-	constructor(ns, game, goal = "Sell for Money") {
+	constructor(ns, game, goal = "") {
 		this.ns = ns;
 		this.game = game ? game : new WholeGame(ns);
 		this.log = ns.tprint.bind(ns);
 		this.goal = goal;
+		this.start = Date.now();
 		if (ns.flags(cmdlineflags)['logbox']) {
 			this.log = this.game.sidebar.querySelector(".hacknetbox") || this.game.createSidebarItem("Hacknet", "", "H", "hacknetbox");
 			this.log = this.log.log;
 		}
 	}
 	async loop() {
+		while (this.goal == "" && (Date.now() - 60000 < this.start))
+		    await this.ns.asleep(1000);
 		while (true) {
 			if (this.goal == "Sell for Money") {
 				await Do(this.ns, "ns.hacknet.spendHashes", this.goal, "", Math.floor((await Do(this.ns, 'ns.hacknet.numHashes', '')) / 4));
