@@ -880,7 +880,9 @@ export async function bn8(Game) {
                     while ((shares * (await Do(Game.ns, "ns.stock.getBidPrice", stock)) > 200000) && (!await Do(Game.ns, "ns.stock.buyShort", stock, shares))) {
                         shares *= .99;
                     }
-                    if (shares > 0) Game.StockMarket.log("Shorted " + shares.toString() + " of " + stock);
+                    if (shares * (await Do(Game.ns, "ns.stock.getBidPrice", stock)) > 200000) {
+                        if (shares > 0) Game.StockMarket.log("Shorted " + shares.toString() + " of " + stock);
+                    }
                 }
             }
             totalfunds += data[2] * (2 * data[3] - (await Do(Game.ns, "ns.stock.getAskPrice", stock)));
@@ -988,7 +990,9 @@ export async function bn8(Game) {
                     while ((shares * (await Do(Game.ns, "ns.stock.getBidPrice", stock)) > 200000) && (!await Do(Game.ns, "ns.stock.buyShort", stock, shares))) {
                         shares *= .99;
                     }
-                    if (shares > 0) Game.StockMarket.log("Shorted " + shares.toString() + " of " + stock);
+                    if (shares * (await Do(Game.ns, "ns.stock.getBidPrice", stock)) > 200000) {
+                        if (shares > 0) Game.StockMarket.log("Shorted " + shares.toString() + " of " + stock);
+                    }
                 } else {
                     if (data[2] > 0) {
                         //							ns.toast("Unshorting " + stock);
