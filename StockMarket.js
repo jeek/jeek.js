@@ -167,7 +167,7 @@ export class StockMarket {
 		if (!(await Do(this.ns, "ns.stock.hasTIXAPIAccess"))) {
 			return;
 		}
-		eval('window').listenUp = (message) => { globalThis.stockQueue.push(message); };
+		eval('window').listenUpStonk = (message) => { globalThis.stockQueue.push(message); };
 		if (typeof globalThis.stockQueue === 'undefined') {
 			globalThis.stockQueue = [];
 		}
@@ -189,10 +189,10 @@ export class StockMarket {
 			let data = await this.market;
 			for (let stock of Object.keys(data)) {
 				if (data[stock]['position'][0] > 0) {
-					await Do(Game.ns, "ns.stock.sellStock", stock, data[stock]['position'][0]);
+					await Do(this.ns, "ns.stock.sellStock", stock, data[stock]['position'][0]);
 				}
 				if (data[stock]['position'][2] > 0) {
-					await Do(Game.ns, "ns.stock.sellShort", stock, data[stock]['position'][2]);
+					await Do(this.ns, "ns.stock.sellShort", stock, data[stock]['position'][2]);
 				}
 			}
 		}
@@ -225,13 +225,13 @@ export class StockMarket {
 			myupdate += data[stock]['company'] + "</TD>";
 			myupdate += td(jFormat(data[stock]['price'], "$") + "<BR><SMALL>" + jFormat(data[stock]['askprice'], "$") + "<BR>" + jFormat(data[stock]['bidprice'], "$"), "RIGHT");
 			if (data[stock]['position'][0] > 0) {
-				myupdate += td(jFormat(data[stock]['position'][0]) + "<BR><SMALL>" + jFormat(data[stock]['position'][1], "$") + (data[stock]['longsalevalue'] != 0 ? "<BR><a href=\"#\" onClick='window.opener.listenUp(\"Do(this.ns, \\\"ns.stock.sellStock\\\", \\\"" + stock + "\\\", " + data[stock]['position'][0] + ")\")'>" + jFormat(data[stock]['longsalevalue'], "$") + "</A>" : ""), "RIGHT");
+				myupdate += td(jFormat(data[stock]['position'][0]) + "<BR><SMALL>" + jFormat(data[stock]['position'][1], "$") + (data[stock]['longsalevalue'] != 0 ? "<BR><a href=\"#\" onClick='window.opener.listenUpStonk(\"Do(this.ns, \\\"ns.stock.sellStock\\\", \\\"" + stock + "\\\", " + data[stock]['position'][0] + ")\")'>" + jFormat(data[stock]['longsalevalue'], "$") + "</A>" : ""), "RIGHT");
 			} else {
 				myupdate += td("&nbsp;");
 			}
 			if ((bn == 8) || (sourcefiles.filter(x => x.n == 8 && x.lvl >= 2))) {
 				if (data[stock]['position'][2] > 0) {
-					myupdate += td(jFormat(data[stock]['position'][2]) + "<BR><SMALL>" + jFormat(data[stock]['position'][3], "$") + (data[stock]['shortsalevalue'] != 0 ? "<BR>" + "<a href=\"#\" onClick='window.opener.listenUp(\"Do(this.ns, \\\"ns.stock.sellShort\\\", \\\"" + stock + "\\\", " + data[stock]['position'][2] + ")\")'>" + jFormat(data[stock]['shortsalevalue'], "$") + "</A>" : ""), "RIGHT");
+					myupdate += td(jFormat(data[stock]['position'][2]) + "<BR><SMALL>" + jFormat(data[stock]['position'][3], "$") + (data[stock]['shortsalevalue'] != 0 ? "<BR>" + "<a href=\"#\" onClick='window.opener.listenUpStonk(\"Do(this.ns, \\\"ns.stock.sellShort\\\", \\\"" + stock + "\\\", " + data[stock]['position'][2] + ")\")'>" + jFormat(data[stock]['shortsalevalue'], "$") + "</A>" : ""), "RIGHT");
 				} else {
 					myupdate += td("&nbsp;");
 				}
@@ -268,7 +268,7 @@ export class StockMarket {
 			update += anUpdate[1];
 		}
 		update += "</TABLE>";
-		update = "<H1>Holdings: " + jFormat(await this.portfolioValue, "$") + (totalProfit < 0 ? "<FONT COLOR='" + this.ns.ui.getTheme()['error'] + "'>" : "<FONT>") + " (Profit: " + jFormat(totalProfit, "$") + ")</FONT></H1> " + "<a href=\"#\" onClick='window.opener.listenUp(\"this.liquidate=!this.liquidate\")'>" + (this.liquidate ? "Liquidating" : "<FONT COLOR='" + this.ns.ui.getTheme()['error'] + "'>Click to liquidate</FONT>") + "</A>" + "<BR>" + update;
+		update = "<H1>Holdings: " + jFormat(await this.portfolioValue, "$") + (totalProfit < 0 ? "<FONT COLOR='" + this.ns.ui.getTheme()['error'] + "'>" : "<FONT>") + " (Profit: " + jFormat(totalProfit, "$") + ")</FONT></H1> " + "<a href=\"#\" onClick='window.opener.listenUpStonk(\"this.liquidate=!this.liquidate\")'>" + (this.liquidate ? "Liquidating" : "<FONT COLOR='" + this.ns.ui.getTheme()['error'] + "'>Click to liquidate</FONT>") + "</A>" + "<BR>" + update;
 		this.stockWindow.update(update);
 	}
 }
