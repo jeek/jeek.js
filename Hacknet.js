@@ -21,7 +21,6 @@ export class Hacknet {
 						let poof = Math.floor((await Do(this.ns, 'ns.hacknet.numHashes', '')) / 4);
 						await Do(this.ns, "ns.hacknet.spendHashes", "Sell for Money", "", poof);
 					}
-					return;
 				}
 			}
 			//		while ((4 <= (await Do(this.ns, 'ns.hacknet.numHashes', ''))) && ((await (this.game.Player.money)) < 1000000 * Math.floor((await Do(this.ns, 'ns.hacknet.numHashes', '')) / 4))) {
