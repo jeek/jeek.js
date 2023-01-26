@@ -238,7 +238,7 @@ export function lzcompression(data, ns) {
 	queue[1][data.length] = queue[1][data.length].sort((a, b) => { return a.length - b.length; });
 	queue[2][data.length] = queue[2][data.length].sort((a, b) => { return a.length - b.length; });
 	ns.tprint(queue[1][data.length], " ", queue[2][data.length]);
-	ns.exit();
+//	ns.exit();
 }
 
 export function stonks1(data) {
@@ -598,7 +598,7 @@ export class Contracts {
 	async loop() {
 		while (true) {
     		await this.solve();
-    		await this.ns.sleep(60000);
+    		await this.ns.asleep(60000);
 		}
 	}
 	async solve() {
