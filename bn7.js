@@ -14,6 +14,7 @@ export async function bn7(Game) {
             await Game.Sleeves.bbEverybody("Field analysis");
     await Game.Bladeburner.hardStop();
     while (((await (Game.Bladeburner.contractCount))+((await (Game.Bladeburner.operationCount)))) > 0) {
+        Game.Hacknet.goal = (1000 > (await (Game.Bladeburner.skillPoints)) ? "Exchange for Bladeburner SP" : "Generate Coding Contract");
         if (await Game.Player.hospitalizeIfNeeded())
             Game.Bladeburner.log("Hospitalized.."); // HP
         if (await Game.Player.joinFactionIfInvited("Bladeburners"))
@@ -113,7 +114,7 @@ export async function bn7(Game) {
                 await Game.Grafting.checkIn("Combat", true);
                 if (await (Game.Bladeburner.hasSimulacrum))
                 await Game.Grafting.checkIn("Charisma", true);
-            await Game.Hacknet.loop(1000 > (await (Game.Bladeburner.skillPoints)) ? "Exchange for Bladeburner SP" : "Generate Coding Contract");
+            Game.Hacknet.goal = (1000 > (await (Game.Bladeburner.skillPoints)) ? "Exchange for Bladeburner SP" : "Generate Coding Contract");
             if (.999 < await Game.Bladeburner.successChance(nextBlackOp))
                 break;
             if (best[best.length - 1][0] < await Game.Bladeburner.actionMaxLevel(best[best.length - 1][2])) {
