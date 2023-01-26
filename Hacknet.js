@@ -17,10 +17,9 @@ export class Hacknet {
 			if (0 > ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet) + ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses)) {
 				if (4 <= (await Do(this.ns, 'ns.hacknet.numHashes', ''))) {
 					let poof = Math.floor((await Do(this.ns, 'ns.hacknet.numHashes', '')) / 4);
-					this.log("Sold " + poof.toString() + " hashes for cash")
 					await Do(this.ns, "ns.hacknet.spendHashes", "Sell for Money", "", poof);
-					return;
 				}
+				return;
 			}
 		}
 		//		while ((4 <= (await Do(this.ns, 'ns.hacknet.numHashes', ''))) && ((await (this.game.Player.money)) < 1000000 * Math.floor((await Do(this.ns, 'ns.hacknet.numHashes', '')) / 4))) {
