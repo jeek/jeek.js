@@ -16,6 +16,9 @@ export class Hacknet {
 	async loop() {
 		while (this.goal == "" && (Date.now() - 60000 < this.start))
 		    await this.ns.asleep(1000);
+		if (this.goal == "") {
+			this.goal = "Sell for Money";
+		}
 		while (true) {
 			if (this.goal == "Sell for Money") {
 				await Do(this.ns, "ns.hacknet.spendHashes", this.goal, "", Math.floor((await Do(this.ns, 'ns.hacknet.numHashes', '')) / 4));
