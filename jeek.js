@@ -397,6 +397,9 @@ export class Bladeburner {
 	async blackOpRank(op) {
 		return await Do(this.ns, "ns.bladeburner.getBlackOpRank", op);
 	}
+	async joinFaction() {
+		return await Do(this.ns, "joinBladeburnerFaction");
+	}
 	get nextBlackOp() {
 		return (async () => {
 			try {
@@ -588,6 +591,8 @@ export async function bn7(Game) {
             Game.Bladeburner.log("Hospitalized.."); // HP
         if (await Game.Player.joinFactionIfInvited("Bladeburners"))
             Game.Bladeburner.log("Joined Bladeburner Faction..");
+        if (((await (Game.Bladeburner.rank)) >= 25) && !((await (Game.Player.factions))).includes("Bladeburners"))
+            await Game.Bladeburner.joinFaction();
         await Game.Bladeburner.recoverIfNecessary(); // Stamina
         while (await Game.Bladeburner.UpgradeSkills());
         let best = [];
@@ -630,8 +635,8 @@ export async function bn7(Game) {
 				}
 			}
 		} else {
-            Game.ns.write("/temp/bootstrap.js", "export async function main(ns){ns.run('jeek.js', 1, '--roulettestart', '--bn7', '--bn8', '--logbox');}");
-            Game.ns.destroyW0r1dD43m0n(12, "/temp/bootstrap.js");
+            Game.ns.write("/temp/bootstrap.js", "export async function main(ns){killModal(); ns.run('jeek.js', 1, '--roulettestart', '--bn7', '--bn8', '--logbox');}", 'w');
+            await Do(Game.ns, "ns.singularity.destroyW0r1dD43m0n", 12, "/temp/bootstrap.js");
         }
         if (best[best.length - 1][1] != "Black Op") {
             await Game.Bladeburner.setAutoLevel(best[best.length - 1][2], 1e6 < (await (Game.Bladeburner.rank)));
@@ -3799,7 +3804,7 @@ export async function main(ns) {
 		promises.push(Game.Debug.endlessAss());
 	}
 	if (cmdlineargs['roulettestart']) {
-		promises.push(Game.roulettestart());
+		await Game.roulettestart();
 	}
 	if (cmdlineargs['popemall']) {
 		promises.push(Game.Servers.pop_them_all());
@@ -3971,6 +3976,15 @@ export class Player {
 		return (async () => {
 			try {
 				return ((await Do(this.ns, "ns.getPlayer")).city);
+			} catch (e) {
+				return [];
+			}
+		})();
+	}
+	get factions() {
+		return (async () => {
+			try {
+				return ((await Do(this.ns, "ns.getPlayer")).factions);
 			} catch (e) {
 				return [];
 			}
