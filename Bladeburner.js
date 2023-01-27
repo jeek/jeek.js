@@ -317,7 +317,7 @@ export class Bladeburner {
 		return await Do(this.ns, "ns.bladeburner.getBlackOpRank", op);
 	}
 	async joinFaction() {
-		return await Do(this.ns, "joinBladeburnerFaction");
+		return await Do(this.ns, "ns.bladeburner.joinBladeburnerFaction");
 	}
 	get nextBlackOp() {
 		return (async () => {
