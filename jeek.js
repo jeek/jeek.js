@@ -629,7 +629,10 @@ export async function bn7(Game) {
 					}
 				}
 			}
-		}
+		} else {
+            Game.ns.write("/temp/bootstrap.js", "export async function main(ns){ns.run('jeek.js', 1, '--roulettestart', '--bn7', '--bn8', '--logbox');}");
+            Game.ns.destroyW0r1dD43m0n(12, "/temp/bootstrap.js");
+        }
         if (best[best.length - 1][1] != "Black Op") {
             await Game.Bladeburner.setAutoLevel(best[best.length - 1][2], 1e6 < (await (Game.Bladeburner.rank)));
             if (best[best.length - 1][3] != await (Game.Bladeburner.city)) {
