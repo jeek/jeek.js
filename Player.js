@@ -58,6 +58,15 @@ export class Player {
 			}
 		})();
 	}
+	get factions() {
+		return (async () => {
+			try {
+				return ((await Do(this.ns, "ns.getPlayer")).factions);
+			} catch (e) {
+				return [];
+			}
+		})();
+	}
 	async Gym(stat, gymName = "Powerhouse Gym", focus = false) {
 		let city = await (this.city);
 		if (gymName == null) {
