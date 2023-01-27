@@ -34,7 +34,7 @@ export async function main(ns) {
 		promises.push(Game.Debug.endlessAss());
 	}
 	if (cmdlineargs['roulettestart']) {
-		promises.push(Game.roulettestart());
+		await Game.roulettestart();
 	}
 	if (cmdlineargs['popemall']) {
 		promises.push(Game.Servers.pop_them_all());
