@@ -19,7 +19,7 @@ export async function bn7(Game) {
             Game.Bladeburner.log("Hospitalized.."); // HP
         if (await Game.Player.joinFactionIfInvited("Bladeburners"))
             Game.Bladeburner.log("Joined Bladeburner Faction..");
-        if (((await (Game.Bladeburner.rank)) >= 25) && !((await (Game.Player.factions))).includes("Bladeburners")) {
+        if (((await (Game.Bladeburner.rank)) >= 25) && !((await (Game.Player.factions))).includes("Bladeburners"))
             await Game.Bladeburner.joinFaction();
         await Game.Bladeburner.recoverIfNecessary(); // Stamina
         while (await Game.Bladeburner.UpgradeSkills());
