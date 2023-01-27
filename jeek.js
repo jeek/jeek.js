@@ -4889,7 +4889,13 @@ export class WholeGame {
 			log: (html, timestamp = true) => {
 				if (!item.logTarget || !this.doc.contains(item.logTarget)) item.logTarget = item.body.appendChild(this.elemFromHTML("<div class=log></div>"));
 				let logEntry = item.logTarget.appendChild(this.elemFromHTML(`<p>${timestamp ? this.ts() : ""} ${html}</p>`));
+				try {
+					while ((item.logTarget.innerHTML.match(/\<p\>/g) || []).length>10) {
+					    item.logTarget.innerHTML = item.logTarget.innerHTML.slice(item.logTarget.innerHTML.indexOf("<p>", 3));
+					}
+				} catch { }
 				item.logTarget.scrollTop = item.logTarget.scrollHeight;
+				item.recalcHeight();
 				return logEntry;
 			},
 			recalcHeight: () => { item.style.height = ""; item.style.height = item.offsetHeight + "px" },
