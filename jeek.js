@@ -397,7 +397,7 @@ export class Bladeburner {
 	async blackOpRank(op) {
 		return await Do(this.ns, "ns.bladeburner.getBlackOpRank", op);
 	}
-	async joinFaction() {
+	async joinTheFaction() {
 		return await Do(this.ns, "ns.bladeburner.joinBladeburnerFaction");
 	}
 	get nextBlackOp() {
@@ -592,7 +592,7 @@ export async function bn7(Game) {
         if (await Game.Player.joinFactionIfInvited("Bladeburners"))
             Game.Bladeburner.log("Joined Bladeburner Faction..");
         if (((await (Game.Bladeburner.rank)) >= 25) && !((await (Game.Player.factions))).includes("Bladeburners"))
-            await Game.Bladeburner.joinFaction();
+            await Game.Bladeburner.joinTheFaction();
         await Game.Bladeburner.recoverIfNecessary(); // Stamina
         while (await Game.Bladeburner.UpgradeSkills());
         let best = [];
@@ -737,7 +737,7 @@ export async function bn8(Game) {
     let scores = {};
     let report = {};
     while ((!await Do(Game.ns, "ns.stock.has4SDataTIXAPI", ""))) {
-        if ((await (Game.StockMarket.portfolioValue)) + (await Do(Game.ns, "ns.getPlayer")).money > 25000000000 * Game.ns.getBitNodeMultipliers().FourSigmaMarketDataApiCost) {
+        if ((await (Game.StockMarket.portfolioValue)) + (await Do(Game.ns, "ns.getPlayer")).money > 25000000000 * ((await Do(Game.ns, "ns.getBitNodeMultipliers"))).FourSigmaMarketDataApiCost) {
             Game.ns.write('/temp/4s.js', "export async function main(ns) { for (let stock of ns.stock.getSymbols()) { ns.stock.getPosition(stock)[0] ? ns.stock.sellStock(stock, ns.stock.getPosition(stock)[0]) : 0; ns.stock.getPosition(stock)[2] ? ns.stock.sellShort(stock, ns.stock.getPosition(stock)[2]) : 0; } ns.stock.purchase4SMarketDataTixApi(); }",'w')
         };
         await Game.ns.asleep(0);
@@ -2337,27 +2337,21 @@ function uniqueID(s, random = false) {
 }
 
 // Writes a command to a file, runs it, and then returns the result
-export async function Do(ns, command, ...args) {
+export async function Do(ns, command, ...args) { 
 	if (["ns.bladeburner.stopBladeburnerAction", "ns.bladeburner.setActionLevel", "ns.bladeburner.setActionAutolevel", "ns.singularity.hospitalize"].includes(command)) {
 		return await DoVoid(ns, command, ...args);
 	}
-	writeIfNotSame(ns, '/temp/rm.js', `export async function main(ns) {ns.rm(ns.args[0], 'home');}`);
 	let progname = "/temp/proc-" + uniqueID(command);
-	let procid = progname + uniqueID(JSON.stringify(...args), true) + ".txt";
-	writeIfNotSame(ns, progname + ".js", `export async function main(ns) { ns.write(ns.args.shift(), JSON.stringify(` + command + `(...JSON.parse(ns.args[0]))), 'w'); }`);
-	while (0 == ns.run(progname + ".js", 1, procid, JSON.stringify(args))) {
+	writeIfNotSame(ns, progname + ".js", `export async function main(ns) { ns.writePort(ns.pid, JSON.stringify(` + command + `(...JSON.parse(ns.args[0]))), 'w'); }`);
+	let pid = ns.run(progname + ".js", 1, JSON.stringify(args));
+	while (0 == pid) {
+		await ns.asleep(0);
+    	pid = ns.run(progname + ".js", 1, JSON.stringify(args));
+	}
+	while (ns.peek(pid) == "NULL PORT DATA") {
 		await ns.asleep(0);
 	}
-	let answer = ns.read(procid);
-	let good = false;
-	while (!good) {
-		await ns.asleep(0);
-		try {
-			answer = JSON.parse(ns.read(procid));
-			good = true;
-		} catch { }
-	}
-	while (0 == ns.run('/temp/rm.js', 1, procid)) { await ns.asleep(0) };
+	let answer = JSON.parse(ns.readPort(pid));
 	return answer;
 }
 
@@ -2381,19 +2375,15 @@ export async function DoAll(ns, command, args) {
 	let progname = "/temp/procA-" + uniqueID(command);
 	let procid = progname + uniqueID(JSON.stringify(args), true) + ".txt";
 	writeIfNotSame(ns, progname + ".js", `export async function main(ns) { let parsed = JSON.parse(ns.args[1]); let answer = {}; for (let i = 0; i < parsed.length ; i++) {answer[parsed[i]] = await ` + command + `(parsed[i]);}; ns.write(ns.args.shift(), JSON.stringify(answer), 'w'); }`);
-	while (0 == ns.run(progname + ".js", 1, procid, JSON.stringify(args))) {
+	let pid = ns.run(progname + ".js", 1, JSON.stringify(args));
+	while (0 == pid) {
+		await ns.asleep(0);
+    	pid = ns.run(progname + ".js", 1, JSON.stringify(args));
+	}
+	while (ns.peek(pid) == "NULL PORT DATA") {
 		await ns.asleep(0);
 	}
-	let answer = ns.read(procid);
-	let good = false;
-	while (!good) {
-		await ns.asleep(0);
-		try {
-			answer = JSON.parse(ns.read(procid));
-			good = true;
-		} catch { }
-	}
-	while (0 == ns.run('/temp/rm.js', 1, procid)) { await ns.asleep(0) };
+	let answer = JSON.parse(ns.readPort(pid));
 	return answer;
 }
 
@@ -2403,19 +2393,15 @@ export async function DoAllComplex(ns, command, args) {
 	let progname = "/temp/procC-" + uniqueID(command);
 	let procid = progname + uniqueID(JSON.stringify(args), true) + ".txt";
 	writeIfNotSame(ns, progname + ".js", `export async function main(ns) { let parsed = JSON.parse(ns.args[1]); let answer = {}; for (let i = 0; i < parsed.length ; i++) {answer[parsed[i]] = await ` + command + `(...parsed[i]);}; ns.write(ns.args.shift(), JSON.stringify(answer), 'w'); }`);
-	while (0 == ns.run(progname + ".js", 1, procid, JSON.stringify(args))) {
+	let pid = ns.run(progname + ".js", 1, JSON.stringify(args));
+	while (0 == pid) {
+		await ns.asleep(0);
+    	pid = ns.run(progname + ".js", 1, JSON.stringify(args));
+	}
+	while (ns.peek(pid) == "NULL PORT DATA") {
 		await ns.asleep(0);
 	}
-	let answer = ns.read(procid);
-	let good = false;
-	while (!good) {
-		await ns.asleep(0);
-		try {
-			answer = JSON.parse(ns.read(procid));
-			good = true;
-		} catch { }
-	}
-	while (0 == ns.run('/temp/rm.js', 1, procid)) { await ns.asleep(0) };
+	let answer = JSON.parse(ns.readPort(pid));
 	return answer;
 }
 let GANG = "Slum Snakes";
