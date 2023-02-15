@@ -35,27 +35,21 @@ function uniqueID(s, random = false) {
 }
 
 // Writes a command to a file, runs it, and then returns the result
-export async function Do(ns, command, ...args) {
+export async function Do(ns, command, ...args) { 
 	if (["ns.bladeburner.stopBladeburnerAction", "ns.bladeburner.setActionLevel", "ns.bladeburner.setActionAutolevel", "ns.singularity.hospitalize"].includes(command)) {
 		return await DoVoid(ns, command, ...args);
 	}
-	writeIfNotSame(ns, '/temp/rm.js', `export async function main(ns) {ns.rm(ns.args[0], 'home');}`);
 	let progname = "/temp/proc-" + uniqueID(command);
-	let procid = progname + uniqueID(JSON.stringify(...args), true) + ".txt";
-	writeIfNotSame(ns, progname + ".js", `export async function main(ns) { ns.write(ns.args.shift(), JSON.stringify(` + command + `(...JSON.parse(ns.args[0]))), 'w'); }`);
-	while (0 == ns.run(progname + ".js", 1, procid, JSON.stringify(args))) {
+	writeIfNotSame(ns, progname + ".js", `export async function main(ns) { ns.writePort(ns.pid, JSON.stringify(` + command + `(...JSON.parse(ns.args[0]))), 'w'); }`);
+	let pid = ns.run(progname + ".js", 1, JSON.stringify(args));
+	while (0 == pid) {
+		await ns.asleep(0);
+    	pid = ns.run(progname + ".js", 1, JSON.stringify(args));
+	}
+	while (ns.peek(pid) == "NULL PORT DATA") {
 		await ns.asleep(0);
 	}
-	let answer = ns.read(procid);
-	let good = false;
-	while (!good) {
-		await ns.asleep(0);
-		try {
-			answer = JSON.parse(ns.read(procid));
-			good = true;
-		} catch { }
-	}
-	while (0 == ns.run('/temp/rm.js', 1, procid)) { await ns.asleep(0) };
+	let answer = JSON.parse(ns.readPort(pid));
 	return answer;
 }
 
@@ -79,19 +73,15 @@ export async function DoAll(ns, command, args) {
 	let progname = "/temp/procA-" + uniqueID(command);
 	let procid = progname + uniqueID(JSON.stringify(args), true) + ".txt";
 	writeIfNotSame(ns, progname + ".js", `export async function main(ns) { let parsed = JSON.parse(ns.args[1]); let answer = {}; for (let i = 0; i < parsed.length ; i++) {answer[parsed[i]] = await ` + command + `(parsed[i]);}; ns.write(ns.args.shift(), JSON.stringify(answer), 'w'); }`);
-	while (0 == ns.run(progname + ".js", 1, procid, JSON.stringify(args))) {
+	let pid = ns.run(progname + ".js", 1, JSON.stringify(args));
+	while (0 == pid) {
+		await ns.asleep(0);
+    	pid = ns.run(progname + ".js", 1, JSON.stringify(args));
+	}
+	while (ns.peek(pid) == "NULL PORT DATA") {
 		await ns.asleep(0);
 	}
-	let answer = ns.read(procid);
-	let good = false;
-	while (!good) {
-		await ns.asleep(0);
-		try {
-			answer = JSON.parse(ns.read(procid));
-			good = true;
-		} catch { }
-	}
-	while (0 == ns.run('/temp/rm.js', 1, procid)) { await ns.asleep(0) };
+	let answer = JSON.parse(ns.readPort(pid));
 	return answer;
 }
 
@@ -101,18 +91,14 @@ export async function DoAllComplex(ns, command, args) {
 	let progname = "/temp/procC-" + uniqueID(command);
 	let procid = progname + uniqueID(JSON.stringify(args), true) + ".txt";
 	writeIfNotSame(ns, progname + ".js", `export async function main(ns) { let parsed = JSON.parse(ns.args[1]); let answer = {}; for (let i = 0; i < parsed.length ; i++) {answer[parsed[i]] = await ` + command + `(...parsed[i]);}; ns.write(ns.args.shift(), JSON.stringify(answer), 'w'); }`);
-	while (0 == ns.run(progname + ".js", 1, procid, JSON.stringify(args))) {
+	let pid = ns.run(progname + ".js", 1, JSON.stringify(args));
+	while (0 == pid) {
+		await ns.asleep(0);
+    	pid = ns.run(progname + ".js", 1, JSON.stringify(args));
+	}
+	while (ns.peek(pid) == "NULL PORT DATA") {
 		await ns.asleep(0);
 	}
-	let answer = ns.read(procid);
-	let good = false;
-	while (!good) {
-		await ns.asleep(0);
-		try {
-			answer = JSON.parse(ns.read(procid));
-			good = true;
-		} catch { }
-	}
-	while (0 == ns.run('/temp/rm.js', 1, procid)) { await ns.asleep(0) };
+	let answer = JSON.parse(ns.readPort(pid));
 	return answer;
 }

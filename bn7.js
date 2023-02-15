@@ -20,7 +20,7 @@ export async function bn7(Game) {
         if (await Game.Player.joinFactionIfInvited("Bladeburners"))
             Game.Bladeburner.log("Joined Bladeburner Faction..");
         if (((await (Game.Bladeburner.rank)) >= 25) && !((await (Game.Player.factions))).includes("Bladeburners"))
-            await Game.Bladeburner.joinFaction();
+            await Game.Bladeburner.joinTheFaction();
         await Game.Bladeburner.recoverIfNecessary(); // Stamina
         while (await Game.Bladeburner.UpgradeSkills());
         let best = [];
