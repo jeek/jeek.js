@@ -28,7 +28,7 @@ export async function bn8(Game) {
             Game.ns.run('/temp/4s.js');
         };
         while (tickPrice == await Do(Game.ns, "ns.stock.getPurchaseCost", 'ECP', 1, "Long")) {
-            await Game.ns.asleep(0);
+            await Game.ns.asleep(1000);
         }
         tickPrice = await Do(Game.ns, "ns.stock.getPurchaseCost", 'ECP', 1, "Long");
         prices.push({});
