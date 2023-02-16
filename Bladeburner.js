@@ -355,7 +355,7 @@ export class Bladeburner {
 		let answer = "<TABLE WIDTH=100%><TR VALIGN=TOP><TD WIDTH=50%>";
 		answer += "<H1>Rank: " + Math.floor(.5 + myrank).toString() + "<BR>";
 		answer += "City: " + mycity + "<BR>";
-		let chaos = await (Do(this.ns, "ns.bladeburner.getCityChaos", mycity));
+		let chaos = await Do(this.ns, "ns.bladeburner.getCityChaos", mycity);
 		answer += "Chaos: " + "<FONT COLOR=" + this.ns.ui.getTheme()[chaos < 40 ? 'success' : (chaos < 50 ? 'warning' : 'error')] + ">" + jFormat(chaos) + "</FONT><BR>";
 		answer += "Communities: " + (await Do(this.ns, "ns.bladeburner.getCityCommunities", mycity)).toString() + "<BR>";
 		answer += "Estimated Population: " + jFormat(await Do(this.ns, "ns.bladeburner.getCityEstimatedPopulation", mycity)) + "</H1></TD><TD><H1>";
@@ -371,8 +371,8 @@ export class Bladeburner {
 					}
 					if (wildcard) {
 						for (let i = 0; i < 1; i++) {
-								if (null != (await Do(this.ns, "ns.sleeve.getTask", i))) {
-									let z = (await Do(this.ns, "ns.sleeve.getTask", i));
+								let z = (await Do(this.ns, "ns.sleeve.getTask", i));
+								if (null != z) {
 									if (z.type == "INFILTRATE") {
 										answer += "*" + ": Infiltrate" + "<BR>";
 									} else {
