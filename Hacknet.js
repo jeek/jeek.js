@@ -29,14 +29,14 @@ export class Hacknet {
 			}
 		// Pay for yourself, Hacknet
 			if ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses < -1e9) {
-				if (0 > ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet) + ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses)) {
+				if (0 > ((await Do(this.ns, "ns.getMoneySources")).sinceInstall['hacknet']) + ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses)) {
 					if (4 <= (await Do(this.ns, 'ns.hacknet.numHashes', ''))) {
 						let poof = Math.floor((await Do(this.ns, 'ns.hacknet.numHashes', '')) / 4);
 						await Do(this.ns, "ns.hacknet.spendHashes", "Sell for Money", "", poof);
 					}
 				}
 			}
-			if (((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses >= -1e9) || (0 <= ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet) + ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses))) {
+			if (((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses >= -1e9) || (0 <= ((await Do(this.ns, "ns.getMoneySources")).sinceInstall['hacknet']) + ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses))) {
 				//		while ((4 <= (await Do(this.ns, 'ns.hacknet.numHashes', ''))) && ((await (this.game.Player.money)) < 1000000 * Math.floor((await Do(this.ns, 'ns.hacknet.numHashes', '')) / 4))) {
 				//			await Do(this.ns, "ns.hacknet.spendHashes", "Sell for Money");
 				//		}
