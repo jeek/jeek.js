@@ -2371,10 +2371,8 @@ export async function DoVoid(ns, command, ...args) {
 
 // Writes a command to a file, runs against every argument, and then returns the result as an object
 export async function DoAll(ns, command, args) {
-	writeIfNotSame(ns, '/temp/rm.js', `export async function main(ns) {ns.rm(ns.args[0], 'home');}`);
 	let progname = "/temp/procA-" + uniqueID(command);
-	let procid = progname + uniqueID(JSON.stringify(args), true) + ".txt";
-	writeIfNotSame(ns, progname + ".js", `export async function main(ns) { let parsed = JSON.parse(ns.args[1]); let answer = {}; for (let i = 0; i < parsed.length ; i++) {answer[parsed[i]] = await ` + command + `(parsed[i]);}; ns.write(ns.args.shift(), JSON.stringify(answer), 'w'); }`);
+	writeIfNotSame(ns, progname + ".js", `export async function main(ns) { let parsed = JSON.parse(ns.args[0]); let answer = {}; for (let i = 0; i < parsed.length ; i++) {answer[parsed[i]] = await ` + command + `(parsed[i]);}; ns.writePort(ns.pid, JSON.stringify(answer), 'w'); }`);
 	let pid = ns.run(progname + ".js", 1, JSON.stringify(args));
 	while (0 == pid) {
 		await ns.asleep(0);
@@ -2389,10 +2387,8 @@ export async function DoAll(ns, command, args) {
 
 // Writes a command to a file, runs against every argument, and then returns the result as an object
 export async function DoAllComplex(ns, command, args) {
-	writeIfNotSame(ns, '/temp/rm.js', `export async function main(ns) {ns.rm(ns.args[0], 'home');}`);
 	let progname = "/temp/procC-" + uniqueID(command);
-	let procid = progname + uniqueID(JSON.stringify(args), true) + ".txt";
-	writeIfNotSame(ns, progname + ".js", `export async function main(ns) { let parsed = JSON.parse(ns.args[1]); let answer = {}; for (let i = 0; i < parsed.length ; i++) {answer[parsed[i]] = await ` + command + `(...parsed[i]);}; ns.write(ns.args.shift(), JSON.stringify(answer), 'w'); }`);
+	writeIfNotSame(ns, progname + ".js", `export async function main(ns) { let parsed = JSON.parse(ns.args[0]); let answer = {}; for (let i = 0; i < parsed.length ; i++) {answer[parsed[i]] = await ` + command + `(...parsed[i]);}; ns.writePort(ns.pid, JSON.stringify(answer), 'w'); }`);
 	let pid = ns.run(progname + ".js", 1, JSON.stringify(args));
 	while (0 == pid) {
 		await ns.asleep(0);
