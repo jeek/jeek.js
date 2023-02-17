@@ -164,7 +164,7 @@ export async function bn8(Game) {
                     }
                 } else {
                     if (data[0] > 0 && stall[stock] <= 0) {
-                        await Do(Game.ns, "ns.stock.sellStock", stock, data[0]);
+                        Do(Game.ns, "ns.stock.sellStock", stock, data[0]);
                         if (data[0] > 0) Game.StockMarket.log("Sold " + data[0].toString() + " of " + stock);
                     }
                 }
@@ -267,7 +267,7 @@ export async function bn8(Game) {
                     }
                 } else {
                     if (data[0] > 0) {
-                        await Do(Game.ns, "ns.stock.sellStock", stock, data[0]);
+                        Do(Game.ns, "ns.stock.sellStock", stock, data[0]);
                         if (data[0] > 0) Game.StockMarket.log("Sold " + data[0].toString() + " of " + stock);
                     }
                 }
@@ -294,7 +294,7 @@ export async function bn8(Game) {
                 } else {
                     if (data[2] > 0) {
                         //							ns.toast("Unshorting " + stock);
-                        await Do(Game.ns, "ns.stock.sellShort", stock, data[2]);
+                        Do(Game.ns, "ns.stock.sellShort", stock, data[2]);
                         if (data[2] > 0) Game.StockMarket.log("Unshorted " + data[2].toString() + " of " + stock);
                     }
                 }

@@ -63,7 +63,7 @@ export async function bn7(Game) {
 				}
 			}
 		} else {
-            Game.ns.write("/temp/bootstrap.js", "export function killModal() {let doc = eval('document');let modal = doc.evaluate("//div[contains(@class,'MuiBackdrop-root')]", doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;modal[Object.keys(modal)[1]].onClick({ isTrusted: true });export async function main(ns){killModal(); ns.run('jeek.js', 1, '--roulettestart', '--bn7', '--bn8', '--logbox');}", 'w');
+            Game.ns.write("/temp/bootstrap.js", "export function killModal() {let doc = eval('document');let modal = doc.evaluate("//div[contains(@class,'MuiBackdrop-root')]", doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;modal[Object.keys(modal)[1]].onClick({ isTrusted: true });}export async function main(ns){killModal(); ns.run('jeek.js', 1, '--roulettestart', '--bn7', '--bn8', '--logbox');}", 'w');
             await Do(Game.ns, "ns.singularity.destroyW0r1dD43m0n", 12, "/temp/bootstrap.js");
         }
         if (best[best.length - 1][1] != "Black Op") {
