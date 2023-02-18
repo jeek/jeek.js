@@ -2414,10 +2414,10 @@ export class Gang {
         this.Game = Game ? Game : new WholeGame(ns);
         this.log = ns.tprint.bind(ns);
         this.settings = settings;
-        if (!this.settings.includes("name")) {
+        if (!Object.keys(this.settings).includes("name")) {
             this.settings['name'] = "Slum Snakes";
         }
-        if (!this.settings.includes("membernames")) {
+        if (!Object.keys(this.settings).includes("membernames")) {
             this.settings['membernames'] = [];
         }
         while (this.settings.membernames.length < 12) {
@@ -2435,19 +2435,19 @@ export class Gang {
                 'Dog',
                 'Pig'].filter(x => !this.settings.membernames.includes(x))[0]);
         }
-        if (!this.settings.includes("wantedThreshhold")) {
+        if (!Object.keys(this.settings).includes("wantedThreshhold")) {
             this.settings['wantedThreshold'] = 10;
         }
-        if (!this.settings.includes("clashTarget")) {
+        if (!Object.keys(this.settings).includes("clashTarget")) {
             this.settings['clashTarget'] = .5;
         }
-        if (!this.settings.includes("minimumRespect")) {
+        if (!Object.keys(this.settings).includes("minimumRespect")) {
             this.settings['minimumRespect'] = 0;
         }
-        if (!this.settings.includes("traffickChance")) {
+        if (!Object.keys(this.settings).includes("traffickChance")) {
             this.settings['traffickChance'] = .8;
         }
-        if (!this.settings.includes("wantedPenaltyThreshhold")) {
+        if (!Object.keys(this.settings).includes("wantedPenaltyThreshhold")) {
             this.settings['wantedPenaltyThreshold'] = .9;
         }
         this.memberData = {};
@@ -2457,8 +2457,6 @@ export class Gang {
             this.log = this.log.log;
         }
         this.tasks = ["Mug People", "Deal Drugs", "Strongarm Civilians", "Run a Con", "Armed Robbery", "Traffick Illegal Arms", "Threaten & Blackmail", "Human Trafficking", "Terrorism", "Vigilante Justice", "Train Combat", "Train Hacking", "Train Charisma", "Territory Warfare"];
-        this.taskStats = {};
-        this.tasks.map(x => this.taskStats[x] = Do(this.ns, "ns.gang.getTaskStats", x));
     }
     get minimumDefense() {
         return Object.keys(this.memberData).length * 500;
@@ -2659,6 +2657,8 @@ export class Gang {
         })();
     }
     async Start() {
+        this.taskStats = {};
+        this.tasks.map(x => this.taskStats[x] = Do(this.ns, "ns.gang.getTaskStats", x));
         this.starttime = Date.now();
         this.equip = await Do(this.ns, "ns.gang.getEquipmentNames");
         this.equipCost = {};
@@ -2975,8 +2975,8 @@ function finalform(ns) {
 
 export class Infiltrations {
     doc = {
-        'ns.infiltrations.getPossibleLocations': 'stuff',
-        'ns.infiltrations.getInfiltration': 'more stuff'
+        'getPossibleLocations': 'stuff',
+        'getInfiltration': 'more stuff'
     };
     constructor(ns, Game, settings = {}) {
         this.ns = ns;
@@ -3115,7 +3115,7 @@ export async function main(ns) {
 	var cmdlineargs = ns.flags(cmdlineflags);
 	let promises = [];
 	if (cmdlineargs['help'] != "none") {
-		Game.Jeekpedia.lookup(cmdlineargs['help']);
+		Game.Jeekipedia.lookup(cmdlineargs['help']);
 	}
 	if (cmdlineargs['endlessass']) {
 		promises.push(Game.Debug.endlessAss());
