@@ -122,11 +122,11 @@ export class Bladeburner {
 	constructor(ns, Game, settings = {}) {
 		this.ns = ns;
 		this.settings = settings;
-		this.raid = this.settings.includes("raid") ? this.settings.raid : true;
-		this.sting = this.settings.includes("sting") ? this.settings.string : true;
-		this.maxChaos = this.settings.includes("maxChaos") ? this.settings.maxChaos : 30;
-		this.minStamina = this.settings.includes("minStamina") ? this.settings.minStamina : .6;
-		this.maxStamina = this.settings.includes("maxStamina") ? this.settings.maxStamina : .9;
+		this.raid = Object.keys(this.settings).includes("raid") ? this.settings.raid : true;
+		this.sting = Object.keys(this.settings).includes("sting") ? this.settings.string : true;
+		this.maxChaos = Object.keys(this.settings).includes("maxChaos") ? this.settings.maxChaos : 30;
+		this.minStamina = Object.keys(this.settings).includes("minStamina") ? this.settings.minStamina : .6;
+		this.maxStamina = Object.keys(this.settings).includes("maxStamina") ? this.settings.maxStamina : .9;
 		this.Game = Game ? Game : new WholeGame(ns);
 		this.log = ns.tprint.bind(ns);
 		if (ns.flags(cmdlineflags)['logbox']) {
@@ -546,7 +546,7 @@ export class Bladeburner {
 			}
 		}
 		for (let op of await Do(this.ns, "ns.bladeburner.getBlackOpNames")) {
-			if (0 == (await Do(this.ns, 'ns.bladeburner.getActionCountRemaining', "Black Op", op))) {
+			if (0 == (await Do(this.ns, "ns.bladeburner.getActionCountRemaining", "Black Op", op))) {
 				//answer += "<FONT COLOR=" + this.ns.ui.getTheme()['disabled'] + ">" + op + ": " + (await Do(this.ns, "ns.bladeburner.getBlackOpRank", op)) + " (" + (Math.floor(100 * (await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Black Op", op))[0])).toString() + "%)</FONT> " + (this.isKillOp(op) ? this.killicon : "") + (this.isStealthOp(op) ? this.stealthicon : "") + "<BR>";
 			} else {
 				answer += op.replace("Operation ", "") + ": ";
@@ -2796,7 +2796,7 @@ export class Hacknet {
 		}
 		while (true) {
 			if (this.goal == "Sell for Money") {
-				await Do(this.ns, "ns.hacknet.spendHashes", this.goal, "", Math.floor((await Do(this.ns, 'ns.hacknet.numHashes', '')) / 4));
+				await Do(this.ns, "ns.hacknet.spendHashes", this.goal, "", Math.floor((await Do(this.ns, "ns.hacknet.numHashes", "")) / 4));
 				this.log("Spent hashes for cash")
 			} else {
 				while (await Do(this.ns, "ns.hacknet.spendHashes", this.goal))
@@ -2805,16 +2805,13 @@ export class Hacknet {
 		// Pay for yourself, Hacknet
 			if ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses < -1e9) {
 				if (0 > ((await Do(this.ns, "ns.getMoneySources")).sinceInstall['hacknet']) + ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses)) {
-					if (4 <= (await Do(this.ns, 'ns.hacknet.numHashes', ''))) {
-						let poof = Math.floor((await Do(this.ns, 'ns.hacknet.numHashes', '')) / 4);
+					if (4 <= (await Do(this.ns, "ns.hacknet.numHashes", ""))) {
+						let poof = Math.floor((await Do(this.ns, "ns.hacknet.numHashes", "")) / 4);
 						await Do(this.ns, "ns.hacknet.spendHashes", "Sell for Money", "", poof);
 					}
 				}
 			}
 			if (((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses >= -1e9) || (0 <= ((await Do(this.ns, "ns.getMoneySources")).sinceInstall['hacknet']) + ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses))) {
-				//		while ((4 <= (await Do(this.ns, 'ns.hacknet.numHashes', ''))) && ((await (this.game.Player.money)) < 1000000 * Math.floor((await Do(this.ns, 'ns.hacknet.numHashes', '')) / 4))) {
-				//			await Do(this.ns, "ns.hacknet.spendHashes", "Sell for Money");
-				//		}
 				let didSomething = true;
 				let mults = (await Do(this.ns, "ns.getPlayer", "")).mults.hacknet_node_money;
 				while (didSomething) {
@@ -2832,7 +2829,7 @@ export class Hacknet {
 					shoppingCart = shoppingCart.sort((a, b) => { return a[0] - b[0]; });
 					if (shoppingCart.length > 0) {
 						this.log(shoppingCart[0].slice(2).join(" "));
-						await Do(this.ns, ...(shoppingCart[0].slice(2)));
+						await Do(this.ns, ...(shoppingCart[0].slice(2))); //FFIGNORE
 						didSomething = true;
 					}
 				}
@@ -2856,7 +2853,7 @@ export class Hacknet {
 						this.log("Sold four hashes for cash.");
 				}
 				if (this.goal == "Sell for Money") {
-					let poof = Math.floor((await Do(this.ns, 'ns.hacknet.numHashes', '')) / 4);
+					let poof = Math.floor((await Do(this.ns, "ns.hacknet.numHashes", "")) / 4);
 					await Do(this.ns, "ns.hacknet.spendHashes", "Sell for Money", "", poof);
 				} else {
 					while (await Do(this.ns, "ns.hacknet.spendHashes", this.goal))
@@ -2947,6 +2944,35 @@ export function timeFormat(n) {
 	return hours + ":" + minutes + ":" + seconds;
 }
 
+function finalform(ns) {
+    let lines = ns.read("jeek.js").split("\n");
+    let i = 0;
+    while (i < lines.length) {
+        if (i > 220 && i < 240) {
+            ns.tprint(" ");
+            ns.tprint(i, " ", lines[i]);
+        }
+        if (lines[i].includes("await Do") && !lines[i].includes("FFIGNORE") && !lines[i].includes("DoAll")) {
+            let j = lines[i].search("await Do");
+            let array = [...(lines[i])];
+            array.splice(j, 9);
+            let nsIndex = lines[i].indexOf("ns", j);
+            let nsIndex2 = lines[i].indexOf("ns", nsIndex + 3);
+            if (nsIndex2 > -1) {
+                array.splice(nsIndex - 9, nsIndex2 - nsIndex);
+                let comma = array.indexOf('"', j) + 1;
+                array.splice(array.indexOf('"', j), 1, '(');
+                if (array[comma] == ",") {
+                    array.splice(comma, 1);
+                }
+            }
+            lines[i] = array.join("");
+        }
+        i += 1;
+    }
+    ns.write("finalform.js", lines.join("\n"), 'w');
+}import { Do } from "Do.js";
+
 export class Infiltrations {
     constructor(ns, Game, settings = {}) {
         this.ns = ns;
@@ -2963,7 +2989,7 @@ export class Infiltrations {
 		})();
     }
     async ['getInfiltration'](location) {
-        return await Do(this.ns, "this.infiltration.getInfiltration", location);
+        return await Do(this.ns, "ns.infiltration.getInfiltration", location);
     }
 }export class Jeekipedia {
 	constructor(ns, game) {
@@ -3556,6 +3582,7 @@ export class Server {
 				}, []);
 				pids = pids.filter(x => x != 0);
 				while (pids.length > 0) {
+					await this.ns.asleep(0);
 					if (!await Do(this.ns, "ns.isRunning", pids[0])) {
 						pids.shift();
 					}
@@ -3576,6 +3603,7 @@ export class Server {
 			}, []);
 			pids = pids.filter(x => x != 0);
 			while (pids.length > 0) {
+				await this.ns.asleep(0);
 				if (!await Do(this.ns, "ns.isRunning", pids[0])) {
 					pids.shift();
 				}
@@ -3597,6 +3625,7 @@ export class Server {
 			}, []);
 			pids = pids.filter(x => x != 0);
 			while (pids.length > 0) {
+				await this.ns.asleep(0);
 				if (!await Do(this.ns, "ns.isRunning", pids[0])) {
 					pids.shift();
 				}
@@ -3627,8 +3656,8 @@ export class Servers {
 				}
 			}
 			if ((await Do(this.ns, "ns.ls", "home")).includes(program[0])) {
-				for (let server of await this.serverlist) {
-					await Do(this.ns, program[1], server);
+				for (let server of await this.serverlist) { //FFIGNORE
+					await Do(this.ns, program[1], server); //FFIGNORE
 				}
 			}
 		}
@@ -4069,6 +4098,7 @@ export class WholeGame {
 		this.Casino = new Casino(ns, this);
 		this.Bladeburner = new Bladeburner(ns, this, {"raid": false, "sting": false});
 		this.Sleeves = new Sleeves(ns, this);
+		this.Gang = new Gang(ns, this);
 	}
 	css = `body{--prilt:#fd0;--pri:#fd0;--pridk:#fd0;--successlt:#ce5;--success:#ce5;--successdk:#ce5;--errlt:#c04;--err:#c04;--errdk:#c04;--seclt:#28c;--sec:#28c;--secdk:#28c;--warnlt:#f70;--warn:#f70;--warndk:#f70;--infolt:#3ef;--info:#3ef;--infodk:#3ef;--welllt:#146;--well:#222;--white:#fff;--black:#000;--hp:#c04;--money:#fc7;--hack:#ce5;--combat:#f70;--cha:#b8f;--int:#3ef;--rep:#b8f;--disabled:#888;--bgpri:#000;--bgsec:#111;--button:#146;--ff:"Lucida Console";overflow:hidden;display:flex}#root{flex:1 1 calc(100vw - 400px);overflow:scroll}.sb{font:12px var(--ff);color:var(--pri);background:var(--bgsec);overflow:hidden scroll;width:399px;min-height:100%;border-left:1px solid var(--welllt)}.sb *{vertical-align:middle;margin:0;font:inherit}.sb.c{width:45px}.sb.t, .sb.t>div{transition:height 200ms, width 200ms, color 200ms}.sbitem,.box{overflow:hidden;min-height:28px;max-height:90%}.sbitem{border-top:1px solid var(--welllt);resize:vertical;width:unset !important}.sbitem.c{color:var(--sec)}.box{position:fixed;width:min-content;min-width:min-content;resize:both;background:var(--bgsec)}.box.c{height:unset !important;width:unset !important;background:none}.head{display:flex;white-space:pre;font-weight:bold;user-select:none;height:28px;align-items:center}:is(.sb,.sbitem)>.head{direction:rtl;cursor:pointer;padding:3px 0px}.box>.head{background:var(--pri);color:var(--bgpri);padding:0px 3px;cursor:move}.body{font-size:12px;flex-direction:column;height:calc(100% - 31px)}.flex,:not(.noflex)>.body{display:flex}.flex>*,.body>*{flex:1 1 auto}.box>.body{border:1px solid var(--welllt)}.sb .title{margin:0 auto;font-size:14px;line-height:}.sbitem .close{display:none}.c:not(.sb),.c>.sbitem{height:28px !important;resize:none}.box.c>.body{display:none}.box.prompt{box-shadow:0 0 0 10000px #0007;min-width:400px}.box.prompt>.head>.icon{display:none}.sb .contextMenu{opacity:0.95;resize:none;background:var(--bgpri)}.sb .contextMenu .head{display:none}.sb .contextMenu .body{height:unset;border-radius:5px}.sb .icon{cursor:pointer;font:25px "codicon";line-height:0.9;display:flex;align-items:center}.sb .icon span{display:inline-block;font:25px -ff;width:25px;text-align:center}.sb .icon svg{height:21px;width:21px;margin:2px}:is(.sb,.sbitem)>.head>.icon{padding:0px 10px}.c>.head>.collapser{transform:rotate(180deg)}.sb :is(input,select,button,textarea){color:var(--pri);outline:none;border:none;white-space:pre}.sb :is(textarea,.log){white-space:pre-wrap;background:none;padding:0px;overflow-y:scroll}.sb :is(input,select){padding:3px;background:var(--well);border-bottom:1px solid var(--prilt);transition:border-bottom 250ms}.sb input:hover{border-bottom:1px solid var(--black)}.sb input:focus{border-bottom:1px solid var(--prilt)}.sb :is(button,input[type=checkbox]){background:var(--button);transition:background 250ms;border:1px solid var(--well)}.sb :is(button,input[type=checkbox]):hover{background:var(--bgsec)}.sb :is(button,input[type=checkbox]):focus, .sb select{border:1px solid var(--sec)}.sb button{padding:3px 6px;user-select:none}.sb .ts{color:var(--infolt)}.sb input[type=checkbox]{appearance:none;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px}.sb input[type=checkbox]:checked::after{font:22px codicon;content:""}.g2{display:grid;grid:auto-flow auto / auto auto;gap:6px;margin:5px;place-items:center}.g2>.l{justify-self:start}.g2>.r{justify-self:end}.g2>.f{grid-column:1 / span 2;text-align:center}.hidden, .tooltip{display:none}*:hover>.tooltip{display:block;position:absolute;left:-5px;bottom:calc(100% + 5px);border:1px solid var(--welllt);background:var(--bgsec);color:var(--pri);font:14px var(--ff);padding:5px;white-space:pre}.nogrow{flex:0 1 auto !important}`;
 	win = globalThis;
