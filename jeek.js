@@ -1,8 +1,9 @@
 
 export class Augmentations {
-	constructor(ns, game) {
+	constructor(ns, Game, settings = {}) {
 		this.ns = ns
-		this.game = game ? game : new WholeGame(ns);
+		this.Game = Game ? Game : new WholeGame(ns);
+		this.settings = settings;
 	}
 	async createDisplay() {
 		this.augWindow = await makeNewWindow("Augmentations", this.ns.ui.getTheme());
@@ -118,17 +119,18 @@ let bbTypes = {
 }
 
 export class Bladeburner {
-	constructor(ns, game, raid=true, sting=true, maxChaos=30, minStamina=.6, maxStamina=.9) {
+	constructor(ns, Game, settings = {}) {
 		this.ns = ns;
-		this.raid = raid;
-		this.sting = sting;
-		this.maxChaos = maxChaos;
-		this.minStamina = minStamina;
-		this.maxStamina = maxStamina;
-		this.game = game ? game : new WholeGame(ns);
+		this.settings = settings;
+		this.raid = this.settings.includes("raid") ? this.settings.raid : true;
+		this.sting = this.settings.includes("sting") ? this.settings.string : true;
+		this.maxChaos = this.settings.includes("maxChaos") ? this.settings.maxChaos : 30;
+		this.minStamina = this.settings.includes("minStamina") ? this.settings.minStamina : .6;
+		this.maxStamina = this.settings.includes("maxStamina") ? this.settings.maxStamina : .9;
+		this.Game = Game ? Game : new WholeGame(ns);
 		this.log = ns.tprint.bind(ns);
 		if (ns.flags(cmdlineflags)['logbox']) {
-			this.log = this.game.sidebar.querySelector(".bladebox") || this.game.createSidebarItem("Bladeburner", "", "B", "bladebox");
+			this.log = this.Game.sidebar.querySelector(".bladebox") || this.Game.createSidebarItem("Bladeburner", "", "B", "bladebox");
 			this.log = this.log.log;
 		}
 	}
@@ -258,7 +260,7 @@ export class Bladeburner {
 	get hasSimulacrum() {
 		return (async () => {
 			try {
-				return await (this.game.Player.hasAug("The Blade's Simulacrum"));
+				return await (this.Game.Player.hasAug("The Blade's Simulacrum"));
 			} catch (e) {
 				return [];
 			}
@@ -291,7 +293,7 @@ export class Bladeburner {
 		let city = Object.entries(await DoAll(this.ns, "ns.bladeburner.getCityEstimatedPopulation", CITIES)).sort((a, b) => b[1] - a[1])[0][0]
 		this.log("Inciting Violence in " + city);
 		await Do(this.ns, "ns.bladeburner.switchCity", city);
-		await this.game.Sleeves.bbEverybody("Infiltrate synthoids");
+		await this.Game.Sleeves.bbEverybody("Infiltrate synthoids");
 		while (500 > await (this.operationCount)) {
 		    await Do(this.ns, "ns.bladeburner.startAction", "General", "Incite Violence");
         	await this.ns.asleep(await Do(this.ns, "ns.bladeburner.getActionTime", "General", "Incite Violence"));
@@ -304,7 +306,7 @@ export class Bladeburner {
 			this.log("Recovering Stamina...");
 			await this.hardStop();
 			await Do(this.ns, "ns.bladeburner.startAction", "General", "Hyperbolic Regeneration Chamber");
-			await this.game.Sleeves.bbEverybody("Hyperbolic Regeneration Chamber")
+			await this.Game.Sleeves.bbEverybody("Hyperbolic Regeneration Chamber")
 			while (upper > (await Do(this.ns, "ns.bladeburner.getStamina")).reduce((a, b) => a / b)) {
 				await this.ns.asleep(1000);
 			}
@@ -320,7 +322,7 @@ export class Bladeburner {
 			this.log("Deescalating " + await Do(this.ns, "ns.bladeburner.getCity"));
 			await this.hardStop();
 			await Do(this.ns, "ns.bladeburner.startAction", "General", "Diplomacy");
-			await this.game.Sleeves.bbEverybody("Diplomacy");
+			await this.Game.Sleeves.bbEverybody("Diplomacy");
 			while (goal < (await Do(this.ns, "ns.bladeburner.getCityChaos", await Do(this.ns, "ns.bladeburner.getCity")))) {
 				await this.ns.asleep(1000);
 			}
@@ -441,10 +443,10 @@ export class Bladeburner {
 		answer += "Communities: " + (await Do(this.ns, "ns.bladeburner.getCityCommunities", mycity)).toString() + "<BR>";
 		answer += "Estimated Population: " + jFormat(await Do(this.ns, "ns.bladeburner.getCityEstimatedPopulation", mycity)) + "</H1></TD><TD><H1>";
 
-		if (0 < await (this.game.Sleeves.numSleeves)) {
+		if (0 < await (this.Game.Sleeves.numSleeves)) {
 			answer += "Sleeves:<BR>";
 					let wildcard = true;
-					for (let i = 0; i < await (this.game.Sleeves.numSleeves); i++) {
+					for (let i = 0; i < await (this.Game.Sleeves.numSleeves); i++) {
 						try {
 							if (((await Do(this.ns, "ns.sleeve.getTask", i)).actionName) != ((await Do(this.ns, "ns.sleeve.getTask", 0))).actionName)
 								wildcard = false;
@@ -468,7 +470,7 @@ export class Bladeburner {
 								}
 						}
 					} else {
-						for (let i = 0; i < await (this.game.Sleeves.numSleeves); i++) {
+						for (let i = 0; i < await (this.Game.Sleeves.numSleeves); i++) {
 								if (null != (await Do(this.ns, "ns.sleeve.getTask", i))) {
 									let z = (await Do(this.ns, "ns.sleeve.getTask", i));
 									if (z.type == "INFILTRATE") {
@@ -635,7 +637,7 @@ export async function bn7(Game) {
 				}
 			}
 		} else {
-            Game.ns.write("/temp/bootstrap.js", "export function killModal() {let doc = eval('document');let modal = doc.evaluate("//div[contains(@class,'MuiBackdrop-root')]", doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;modal[Object.keys(modal)[1]].onClick({ isTrusted: true });}export async function main(ns){killModal(); ns.run('jeek.js', 1, '--roulettestart', '--bn7', '--bn8', '--logbox');}", 'w');
+            Game.ns.write("/temp/bootstrap.js", `export function killModal() {let doc = eval('document');let modal = doc.evaluate("//div[contains(@class,'MuiBackdrop-root')]", doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;modal[Object.keys(modal)[1]].onClick({ isTrusted: true });}export async function main(ns){killModal(); ns.run('jeek.js', 1, '--roulettestart', '--bn7', '--bn8', '--logbox');}`, 'w');
             await Do(Game.ns, "ns.singularity.destroyW0r1dD43m0n", 12, "/temp/bootstrap.js");
         }
         if (best[best.length - 1][1] != "Black Op") {
@@ -1287,9 +1289,9 @@ export async function roulettestart(Game) {
 }
 
 export class Casino {
-	constructor(ns, game) {
+	constructor(ns, Game) {
 		this.ns = ns;
-		this.game = game ? game : new WholeGame(ns);
+		this.Game = Game ? Game : new WholeGame(ns);
 	}
 	async roulette() {
 		while (!((await Do(this.ns, "ns.getPlayer")).city == "Aevum" || (await Do(this.ns, "ns.singularity.travelToCity", 'Aevum')))) {
@@ -2409,7 +2411,7 @@ let ASC = 1.06;
 export class Gang {
     constructor(ns, game, settings = {}) {
         this.ns = ns;
-        this.game = game ? game : new WholeGame(ns);
+        this.Game = Game ? Game : new WholeGame(ns);
         this.log = ns.tprint.bind(ns);
         this.settings = settings;
         if (!this.settings.includes("name")) {
@@ -2451,13 +2453,13 @@ export class Gang {
         this.memberData = {};
         this.nextTask = {};
         if (ns.flags(cmdlineflags)['logbox']) {
-            this.log = this.game.sidebar.querySelector(".gangbox") || this.game.createSidebarItem("Gang", "", "G", "gangbox");
+            this.log = this.Game.sidebar.querySelector(".gangbox") || this.Game.createSidebarItem("Gang", "", "G", "gangbox");
             this.log = this.log.log;
         }
         this.tasks = ["Mug People", "Deal Drugs", "Strongarm Civilians", "Run a Con", "Armed Robbery", "Traffick Illegal Arms", "Threaten & Blackmail", "Human Trafficking", "Terrorism", "Vigilante Justice", "Train Combat", "Train Hacking", "Train Charisma", "Territory Warfare"];
         this.taskStats = {};
         this.tasks.map(x => this.taskStats[x] = Do(this.ns, "ns.gang.getTaskStats", x));
-}
+    }
     get minimumDefense() {
         return Object.keys(this.memberData).length * 500;
     }
@@ -2638,6 +2640,24 @@ export class Gang {
             }
         }
     }
+    get ['getOtherGangInformation']() {
+        return (async () => {
+            try {
+                return await Do(this.ns, "ns.gang.getOtherGangInformation");
+            } catch (e) {
+                return [];
+            }
+        })();
+    }
+    get ['getGangInformation']() {
+        return (async () => {
+            try {
+                return await Do(this.ns, "ns.gang.getGangInformation");
+            } catch (e) {
+                return [];
+            }
+        })();
+    }
     async Start() {
         this.starttime = Date.now();
         this.equip = await Do(this.ns, "ns.gang.getEquipmentNames");
@@ -2659,21 +2679,24 @@ export class Gang {
             // No hitting yourself, and gangs with no territory don't matter
             let othergangs = await Do(this.ns, "ns.gang.getOtherGangInformation");
             if (Object.keys(othergangs).filter(x => othergangs[x].territory > 0).length > 0) {
-                let total = Object.keys(othergangs).filter(x => othergangs[x].territory > 0).map(x => ns.gang.getChanceToWinClash(x) * ns.gang.getOtherGangInformation()[x].territory).reduce((a, b) => a + b, 0);
-                if (total / (1 - ns.gang.getGangInformation().territory) >= .5)
+                let total = 0;
+                for (let gang of Object.keys(othergangs)) {
+                    total += (await Do(this.ns, "ns.gang.getChanceToWinClash", x)) * (await (this.getOtherGangInformation))[gang].territory;
+                }
+                if (total / (1 - (await (this.getGangInformation)).territory) >= .5)
                     Do(this.ns, "ns.gang.setTerritoryWarfare", true);
                 // If there's a high enough chance of victory against every gang, go to war.
-                if (othergangs.every(x => ns.gang.getChanceToWinClash(x) >= CLASH_TARGET))
+                if ((await Promise.all(Object.keys(othergangs).map(x => Do(this.ns, "ns.gang.getChanceToWinClash", x)))).every(x => clashChance[x] >= CLASH_TARGET))
                     Do(this.ns, "ns.gang.setTerritoryWarfare", true);
-                let oldterritory = Math.floor(100 * ns.gang.getGangInformation().territory);
-                let startpower = ns.gang.getGangInformation().power;
+                let oldterritory = Math.floor(100 * (await (this.getOtherGangInformation)).territory);
+                let startpower = (await (this.getGangInformation)).power;
 
                 // Chill until the clash tick processes.
-                while (ns.gang.getGangInformation().power == startpower) {
+                while ((await (this.getGangInformation)).power == startpower) {
                     await ns.sleep(0);
                 }
-                if (oldterritory != Math.floor(100 * ns.gang.getGangInformation().territory)) {
-                    globalThis.gangBox.log("Territory now " + Math.floor(100 * ns.gang.getGangInformation().territory).toString());
+                if (oldterritory != Math.floor(100 * (await (this.getOtherGangInformation)).territory)) {
+                    globalThis.gangBox.log("Territory now " + Math.floor(100 * (await (this.getGangInformation)).territory).toString());
                 }
             }
 
@@ -2923,7 +2946,26 @@ export function timeFormat(n) {
 		seconds = "0" + seconds;
 	return hours + ":" + minutes + ":" + seconds;
 }
-export class Jeekipedia {
+
+export class Infiltrations {
+    constructor(ns, Game, settings = {}) {
+        this.ns = ns;
+        this.Game = Game ? Game : new WholeGame(ns);
+        this.settings = settings;
+    }
+    get ['getPossibleLocations']() {
+        return (async () => {
+			try {
+				return await Do(this.ns, "ns.infiltration.getPossibleLocations");
+			} catch (e) {
+				return [];
+			}
+		})();
+    }
+    async ['getInfiltration'](location) {
+        return await Do(this.ns, "this.infiltration.getInfiltration", location);
+    }
+}export class Jeekipedia {
 	constructor(ns, game) {
 		this.ns = ns;
 		this.game = game ? game : new WholeGame(ns);
@@ -4021,10 +4063,11 @@ export class WholeGame {
 		this.Augmentations = new Augmentations(ns, this);
 		this.Player = new Player(ns, this);
 		this.Grafting = new Grafting(ns, this);
+		this.Infiltrations = new Infiltrations(ns, this);
 		// this.Corp = new Corp(ns, this);
 		this.Jeekipedia = new Jeekipedia(ns, this);
 		this.Casino = new Casino(ns, this);
-		this.Bladeburner = new Bladeburner(ns, this); this.Bladeburner.raid=false; this.Bladeburner.sting=false;
+		this.Bladeburner = new Bladeburner(ns, this, {"raid": false, "sting": false});
 		this.Sleeves = new Sleeves(ns, this);
 	}
 	css = `body{--prilt:#fd0;--pri:#fd0;--pridk:#fd0;--successlt:#ce5;--success:#ce5;--successdk:#ce5;--errlt:#c04;--err:#c04;--errdk:#c04;--seclt:#28c;--sec:#28c;--secdk:#28c;--warnlt:#f70;--warn:#f70;--warndk:#f70;--infolt:#3ef;--info:#3ef;--infodk:#3ef;--welllt:#146;--well:#222;--white:#fff;--black:#000;--hp:#c04;--money:#fc7;--hack:#ce5;--combat:#f70;--cha:#b8f;--int:#3ef;--rep:#b8f;--disabled:#888;--bgpri:#000;--bgsec:#111;--button:#146;--ff:"Lucida Console";overflow:hidden;display:flex}#root{flex:1 1 calc(100vw - 400px);overflow:scroll}.sb{font:12px var(--ff);color:var(--pri);background:var(--bgsec);overflow:hidden scroll;width:399px;min-height:100%;border-left:1px solid var(--welllt)}.sb *{vertical-align:middle;margin:0;font:inherit}.sb.c{width:45px}.sb.t, .sb.t>div{transition:height 200ms, width 200ms, color 200ms}.sbitem,.box{overflow:hidden;min-height:28px;max-height:90%}.sbitem{border-top:1px solid var(--welllt);resize:vertical;width:unset !important}.sbitem.c{color:var(--sec)}.box{position:fixed;width:min-content;min-width:min-content;resize:both;background:var(--bgsec)}.box.c{height:unset !important;width:unset !important;background:none}.head{display:flex;white-space:pre;font-weight:bold;user-select:none;height:28px;align-items:center}:is(.sb,.sbitem)>.head{direction:rtl;cursor:pointer;padding:3px 0px}.box>.head{background:var(--pri);color:var(--bgpri);padding:0px 3px;cursor:move}.body{font-size:12px;flex-direction:column;height:calc(100% - 31px)}.flex,:not(.noflex)>.body{display:flex}.flex>*,.body>*{flex:1 1 auto}.box>.body{border:1px solid var(--welllt)}.sb .title{margin:0 auto;font-size:14px;line-height:}.sbitem .close{display:none}.c:not(.sb),.c>.sbitem{height:28px !important;resize:none}.box.c>.body{display:none}.box.prompt{box-shadow:0 0 0 10000px #0007;min-width:400px}.box.prompt>.head>.icon{display:none}.sb .contextMenu{opacity:0.95;resize:none;background:var(--bgpri)}.sb .contextMenu .head{display:none}.sb .contextMenu .body{height:unset;border-radius:5px}.sb .icon{cursor:pointer;font:25px "codicon";line-height:0.9;display:flex;align-items:center}.sb .icon span{display:inline-block;font:25px -ff;width:25px;text-align:center}.sb .icon svg{height:21px;width:21px;margin:2px}:is(.sb,.sbitem)>.head>.icon{padding:0px 10px}.c>.head>.collapser{transform:rotate(180deg)}.sb :is(input,select,button,textarea){color:var(--pri);outline:none;border:none;white-space:pre}.sb :is(textarea,.log){white-space:pre-wrap;background:none;padding:0px;overflow-y:scroll}.sb :is(input,select){padding:3px;background:var(--well);border-bottom:1px solid var(--prilt);transition:border-bottom 250ms}.sb input:hover{border-bottom:1px solid var(--black)}.sb input:focus{border-bottom:1px solid var(--prilt)}.sb :is(button,input[type=checkbox]){background:var(--button);transition:background 250ms;border:1px solid var(--well)}.sb :is(button,input[type=checkbox]):hover{background:var(--bgsec)}.sb :is(button,input[type=checkbox]):focus, .sb select{border:1px solid var(--sec)}.sb button{padding:3px 6px;user-select:none}.sb .ts{color:var(--infolt)}.sb input[type=checkbox]{appearance:none;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px}.sb input[type=checkbox]:checked::after{font:22px codicon;content:""}.g2{display:grid;grid:auto-flow auto / auto auto;gap:6px;margin:5px;place-items:center}.g2>.l{justify-self:start}.g2>.r{justify-self:end}.g2>.f{grid-column:1 / span 2;text-align:center}.hidden, .tooltip{display:none}*:hover>.tooltip{display:block;position:absolute;left:-5px;bottom:calc(100% + 5px);border:1px solid var(--welllt);background:var(--bgsec);color:var(--pri);font:14px var(--ff);padding:5px;white-space:pre}.nogrow{flex:0 1 auto !important}`;
@@ -4143,7 +4186,7 @@ export class WholeGame {
 		}
 		await Do(this.ns, "ns.singularity.connect", "w0r1d_d43m0n");
 		for (let i of ["ns.brutessh", "ns.ftpcrack", "ns.sqlinject", "ns.relaysmtp", "ns.httpworm", "ns.nuke"]) {
-			await Do(this.ns, i, "w0r1d_d43m0n");
+			await Do(this.ns, i, "w0r1d_d43m0n"); // FFIGNORE
 		}
 		await Do(this.ns, "await ns.singularity.installBackdoor");
 	}
