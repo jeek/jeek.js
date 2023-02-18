@@ -171,7 +171,7 @@ export class WholeGame {
 		}
 		await Do(this.ns, "ns.singularity.connect", "w0r1d_d43m0n");
 		for (let i of ["ns.brutessh", "ns.ftpcrack", "ns.sqlinject", "ns.relaysmtp", "ns.httpworm", "ns.nuke"]) {
-			await Do(this.ns, i, "w0r1d_d43m0n");
+			await Do(this.ns, i, "w0r1d_d43m0n"); // FFIGNORE
 		}
 		await Do(this.ns, "await ns.singularity.installBackdoor");
 	}
