@@ -55,8 +55,6 @@ export class Gang {
             this.log = this.log.log;
         }
         this.tasks = ["Mug People", "Deal Drugs", "Strongarm Civilians", "Run a Con", "Armed Robbery", "Traffick Illegal Arms", "Threaten & Blackmail", "Human Trafficking", "Terrorism", "Vigilante Justice", "Train Combat", "Train Hacking", "Train Charisma", "Territory Warfare"];
-        this.taskStats = {};
-        this.tasks.map(x => this.taskStats[x] = Do(this.ns, "ns.gang.getTaskStats", x));
     }
     get minimumDefense() {
         return Object.keys(this.memberData).length * 500;
@@ -257,6 +255,8 @@ export class Gang {
         })();
     }
     async Start() {
+        this.taskStats = {};
+        this.tasks.map(x => this.taskStats[x] = Do(this.ns, "ns.gang.getTaskStats", x));
         this.starttime = Date.now();
         this.equip = await Do(this.ns, "ns.gang.getEquipmentNames");
         this.equipCost = {};

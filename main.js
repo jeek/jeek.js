@@ -32,7 +32,7 @@ export async function main(ns) {
 	var cmdlineargs = ns.flags(cmdlineflags);
 	let promises = [];
 	if (cmdlineargs['help'] != "none") {
-		Game.Jeekpedia.lookup(cmdlineargs['help']);
+		Game.Jeekipedia.lookup(cmdlineargs['help']);
 	}
 	if (cmdlineargs['endlessass']) {
 		promises.push(Game.Debug.endlessAss());
