@@ -79,3 +79,32 @@ export function timeFormat(n) {
 		seconds = "0" + seconds;
 	return hours + ":" + minutes + ":" + seconds;
 }
+
+function finalform(ns) {
+    let lines = ns.read("jeek.js").split("\n");
+    let i = 0;
+    while (i < lines.length) {
+        if (i > 220 && i < 240) {
+            ns.tprint(" ");
+            ns.tprint(i, " ", lines[i]);
+        }
+        if (lines[i].includes("await Do") && !lines[i].includes("FFIGNORE") && !lines[i].includes("DoAll")) {
+            let j = lines[i].search("await Do");
+            let array = [...(lines[i])];
+            array.splice(j, 9);
+            let nsIndex = lines[i].indexOf("ns", j);
+            let nsIndex2 = lines[i].indexOf("ns", nsIndex + 3);
+            if (nsIndex2 > -1) {
+                array.splice(nsIndex - 9, nsIndex2 - nsIndex);
+                let comma = array.indexOf('"', j) + 1;
+                array.splice(array.indexOf('"', j), 1, '(');
+                if (array[comma] == ",") {
+                    array.splice(comma, 1);
+                }
+            }
+            lines[i] = array.join("");
+        }
+        i += 1;
+    }
+    ns.write("finalform.js", lines.join("\n"), 'w');
+}
