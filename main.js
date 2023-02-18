@@ -15,6 +15,7 @@ const cmdlineflags = [
 	["augs", false], // Augmentations
 	["popemall", false], // Get access to all possible servers
 	["endlessass", false], // Endless Assassinations (CHEAT)
+	["help", "none"],
 ];
 
 import { WholeGame } from "WholeGame.js"
@@ -30,6 +31,9 @@ export async function main(ns) {
 	let Game = new WholeGame(ns);
 	var cmdlineargs = ns.flags(cmdlineflags);
 	let promises = [];
+	if (cmdlineargs['help'] != "none") {
+		Game.Jeekpedia.lookup(cmdlineargs['help']);
+	}
 	if (cmdlineargs['endlessass']) {
 		promises.push(Game.Debug.endlessAss());
 	}

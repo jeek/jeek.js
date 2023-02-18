@@ -1,6 +1,10 @@
 import { Do } from "Do.js";
 
 export class Infiltrations {
+    doc = {
+        'ns.infiltrations.getPossibleLocations': 'stuff',
+        'ns.infiltrations.getInfiltration': 'more stuff'
+    };
     constructor(ns, Game, settings = {}) {
         this.ns = ns;
         this.Game = Game ? Game : new WholeGame(ns);
