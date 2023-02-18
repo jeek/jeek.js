@@ -2409,7 +2409,7 @@ let ASC = 1.06;
 /** @param {NS} ns **/
 
 export class Gang {
-    constructor(ns, game, settings = {}) {
+    constructor(ns, Game, settings = {}) {
         this.ns = ns;
         this.Game = Game ? Game : new WholeGame(ns);
         this.log = ns.tprint.bind(ns);
@@ -2974,6 +2974,10 @@ function finalform(ns) {
 }import { Do } from "Do.js";
 
 export class Infiltrations {
+    doc = {
+        'ns.infiltrations.getPossibleLocations': 'stuff',
+        'ns.infiltrations.getInfiltration': 'more stuff'
+    };
     constructor(ns, Game, settings = {}) {
         this.ns = ns;
         this.Game = Game ? Game : new WholeGame(ns);
@@ -2992,9 +2996,22 @@ export class Infiltrations {
         return await Do(this.ns, "ns.infiltration.getInfiltration", location);
     }
 }export class Jeekipedia {
-	constructor(ns, game) {
+	constructor(ns, Game) {
 		this.ns = ns;
-		this.game = game ? game : new WholeGame(ns);
+		this.Game = Game ? Game : new WholeGame(ns);
+	}
+	async lookup(functionName) {
+		this.ns.iKnowWhatImDoing();
+		let lookupData = functionName.split(".");
+		if (Object.keys(this.Game).includes(lookupData[1])) {
+            if (Object.keys(this.Game[lookupData[1]].includes("doc"))) {
+				eval('window').tprintRaw(this.render(this.Game[lookupData[1]].doc[lookupData[2]]));
+				return;
+			}
+		}
+	}
+	async render(text) {
+		return React.createElement("span", {}, text);
 	}
 }
 /* Find the jobs array
@@ -3082,6 +3099,7 @@ const cmdlineflags = [
 	["augs", false], // Augmentations
 	["popemall", false], // Get access to all possible servers
 	["endlessass", false], // Endless Assassinations (CHEAT)
+	["help", "none"],
 ];
 
 
@@ -3096,6 +3114,9 @@ export async function main(ns) {
 	let Game = new WholeGame(ns);
 	var cmdlineargs = ns.flags(cmdlineflags);
 	let promises = [];
+	if (cmdlineargs['help'] != "none") {
+		Game.Jeekpedia.lookup(cmdlineargs['help']);
+	}
 	if (cmdlineargs['endlessass']) {
 		promises.push(Game.Debug.endlessAss());
 	}
