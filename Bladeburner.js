@@ -40,11 +40,11 @@ export class Bladeburner {
 	constructor(ns, Game, settings = {}) {
 		this.ns = ns;
 		this.settings = settings;
-		this.raid = this.settings.includes("raid") ? this.settings.raid : true;
-		this.sting = this.settings.includes("sting") ? this.settings.string : true;
-		this.maxChaos = this.settings.includes("maxChaos") ? this.settings.maxChaos : 30;
-		this.minStamina = this.settings.includes("minStamina") ? this.settings.minStamina : .6;
-		this.maxStamina = this.settings.includes("maxStamina") ? this.settings.maxStamina : .9;
+		this.raid = Object.keys(this.settings).includes("raid") ? this.settings.raid : true;
+		this.sting = Object.keys(this.settings).includes("sting") ? this.settings.string : true;
+		this.maxChaos = Object.keys(this.settings).includes("maxChaos") ? this.settings.maxChaos : 30;
+		this.minStamina = Object.keys(this.settings).includes("minStamina") ? this.settings.minStamina : .6;
+		this.maxStamina = Object.keys(this.settings).includes("maxStamina") ? this.settings.maxStamina : .9;
 		this.Game = Game ? Game : new WholeGame(ns);
 		this.log = ns.tprint.bind(ns);
 		if (ns.flags(cmdlineflags)['logbox']) {
@@ -464,7 +464,7 @@ export class Bladeburner {
 			}
 		}
 		for (let op of await Do(this.ns, "ns.bladeburner.getBlackOpNames")) {
-			if (0 == (await Do(this.ns, 'ns.bladeburner.getActionCountRemaining', "Black Op", op))) {
+			if (0 == (await Do(this.ns, "ns.bladeburner.getActionCountRemaining", "Black Op", op))) {
 				//answer += "<FONT COLOR=" + this.ns.ui.getTheme()['disabled'] + ">" + op + ": " + (await Do(this.ns, "ns.bladeburner.getBlackOpRank", op)) + " (" + (Math.floor(100 * (await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", "Black Op", op))[0])).toString() + "%)</FONT> " + (this.isKillOp(op) ? this.killicon : "") + (this.isStealthOp(op) ? this.stealthicon : "") + "<BR>";
 			} else {
 				answer += op.replace("Operation ", "") + ": ";

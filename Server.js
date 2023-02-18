@@ -244,6 +244,7 @@ export class Server {
 				}, []);
 				pids = pids.filter(x => x != 0);
 				while (pids.length > 0) {
+					await ns.asleep(0);
 					if (!await Do(this.ns, "ns.isRunning", pids[0])) {
 						pids.shift();
 					}
@@ -264,6 +265,7 @@ export class Server {
 			}, []);
 			pids = pids.filter(x => x != 0);
 			while (pids.length > 0) {
+				await ns.asleep(0);
 				if (!await Do(this.ns, "ns.isRunning", pids[0])) {
 					pids.shift();
 				}
@@ -285,6 +287,7 @@ export class Server {
 			}, []);
 			pids = pids.filter(x => x != 0);
 			while (pids.length > 0) {
+				await ns.asleep(0);
 				if (!await Do(this.ns, "ns.isRunning", pids[0])) {
 					pids.shift();
 				}

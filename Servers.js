@@ -24,8 +24,8 @@ export class Servers {
 				}
 			}
 			if ((await Do(this.ns, "ns.ls", "home")).includes(program[0])) {
-				for (let server of await this.serverlist) {
-					await Do(this.ns, program[1], server);
+				for (let server of await this.serverlist) { //FFIGNORE
+					await Do(this.ns, program[1], server); //FFIGNORE
 				}
 			}
 		}

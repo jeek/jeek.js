@@ -21,7 +21,7 @@ export class Hacknet {
 		}
 		while (true) {
 			if (this.goal == "Sell for Money") {
-				await Do(this.ns, "ns.hacknet.spendHashes", this.goal, "", Math.floor((await Do(this.ns, 'ns.hacknet.numHashes', '')) / 4));
+				await Do(this.ns, "ns.hacknet.spendHashes", this.goal, "", Math.floor((await Do(this.ns, "ns.hacknet.numHashes", "")) / 4));
 				this.log("Spent hashes for cash")
 			} else {
 				while (await Do(this.ns, "ns.hacknet.spendHashes", this.goal))
@@ -30,16 +30,13 @@ export class Hacknet {
 		// Pay for yourself, Hacknet
 			if ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses < -1e9) {
 				if (0 > ((await Do(this.ns, "ns.getMoneySources")).sinceInstall['hacknet']) + ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses)) {
-					if (4 <= (await Do(this.ns, 'ns.hacknet.numHashes', ''))) {
-						let poof = Math.floor((await Do(this.ns, 'ns.hacknet.numHashes', '')) / 4);
+					if (4 <= (await Do(this.ns, "ns.hacknet.numHashes", ""))) {
+						let poof = Math.floor((await Do(this.ns, "ns.hacknet.numHashes", "")) / 4);
 						await Do(this.ns, "ns.hacknet.spendHashes", "Sell for Money", "", poof);
 					}
 				}
 			}
 			if (((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses >= -1e9) || (0 <= ((await Do(this.ns, "ns.getMoneySources")).sinceInstall['hacknet']) + ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses))) {
-				//		while ((4 <= (await Do(this.ns, 'ns.hacknet.numHashes', ''))) && ((await (this.game.Player.money)) < 1000000 * Math.floor((await Do(this.ns, 'ns.hacknet.numHashes', '')) / 4))) {
-				//			await Do(this.ns, "ns.hacknet.spendHashes", "Sell for Money");
-				//		}
 				let didSomething = true;
 				let mults = (await Do(this.ns, "ns.getPlayer", "")).mults.hacknet_node_money;
 				while (didSomething) {
@@ -57,7 +54,7 @@ export class Hacknet {
 					shoppingCart = shoppingCart.sort((a, b) => { return a[0] - b[0]; });
 					if (shoppingCart.length > 0) {
 						this.log(shoppingCart[0].slice(2).join(" "));
-						await Do(this.ns, ...(shoppingCart[0].slice(2)));
+						await Do(this.ns, ...(shoppingCart[0].slice(2))); //FFIGNORE
 						didSomething = true;
 					}
 				}
@@ -81,7 +78,7 @@ export class Hacknet {
 						this.log("Sold four hashes for cash.");
 				}
 				if (this.goal == "Sell for Money") {
-					let poof = Math.floor((await Do(this.ns, 'ns.hacknet.numHashes', '')) / 4);
+					let poof = Math.floor((await Do(this.ns, "ns.hacknet.numHashes", "")) / 4);
 					await Do(this.ns, "ns.hacknet.spendHashes", "Sell for Money", "", poof);
 				} else {
 					while (await Do(this.ns, "ns.hacknet.spendHashes", this.goal))

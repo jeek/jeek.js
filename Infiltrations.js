@@ -16,6 +16,6 @@ export class Infiltrations {
 		})();
     }
     async ['getInfiltration'](location) {
-        return await Do(this.ns, "this.infiltration.getInfiltration", location);
+        return await Do(this.ns, "ns.infiltration.getInfiltration", location);
     }
 }
