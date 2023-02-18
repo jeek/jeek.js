@@ -7,7 +7,7 @@ import { Do, DoAll } from "Do.js";
 import { WholeGame } from "WholeGame.js";
 
 export class Gang {
-    constructor(ns, game, settings = {}) {
+    constructor(ns, Game, settings = {}) {
         this.ns = ns;
         this.Game = Game ? Game : new WholeGame(ns);
         this.log = ns.tprint.bind(ns);
