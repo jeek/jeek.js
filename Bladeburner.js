@@ -37,17 +37,18 @@ let bbTypes = {
 }
 
 export class Bladeburner {
-	constructor(ns, game, raid=true, sting=true, maxChaos=30, minStamina=.6, maxStamina=.9) {
+	constructor(ns, Game, settings = {}) {
 		this.ns = ns;
-		this.raid = raid;
-		this.sting = sting;
-		this.maxChaos = maxChaos;
-		this.minStamina = minStamina;
-		this.maxStamina = maxStamina;
-		this.game = game ? game : new WholeGame(ns);
+		this.settings = settings;
+		this.raid = this.settings.includes("raid") ? this.settings.raid : true;
+		this.sting = this.settings.includes("sting") ? this.settings.string : true;
+		this.maxChaos = this.settings.includes("maxChaos") ? this.settings.maxChaos : 30;
+		this.minStamina = this.settings.includes("minStamina") ? this.settings.minStamina : .6;
+		this.maxStamina = this.settings.includes("maxStamina") ? this.settings.maxStamina : .9;
+		this.Game = Game ? Game : new WholeGame(ns);
 		this.log = ns.tprint.bind(ns);
 		if (ns.flags(cmdlineflags)['logbox']) {
-			this.log = this.game.sidebar.querySelector(".bladebox") || this.game.createSidebarItem("Bladeburner", "", "B", "bladebox");
+			this.log = this.Game.sidebar.querySelector(".bladebox") || this.Game.createSidebarItem("Bladeburner", "", "B", "bladebox");
 			this.log = this.log.log;
 		}
 	}
@@ -177,7 +178,7 @@ export class Bladeburner {
 	get hasSimulacrum() {
 		return (async () => {
 			try {
-				return await (this.game.Player.hasAug("The Blade's Simulacrum"));
+				return await (this.Game.Player.hasAug("The Blade's Simulacrum"));
 			} catch (e) {
 				return [];
 			}
@@ -210,7 +211,7 @@ export class Bladeburner {
 		let city = Object.entries(await DoAll(this.ns, "ns.bladeburner.getCityEstimatedPopulation", CITIES)).sort((a, b) => b[1] - a[1])[0][0]
 		this.log("Inciting Violence in " + city);
 		await Do(this.ns, "ns.bladeburner.switchCity", city);
-		await this.game.Sleeves.bbEverybody("Infiltrate synthoids");
+		await this.Game.Sleeves.bbEverybody("Infiltrate synthoids");
 		while (500 > await (this.operationCount)) {
 		    await Do(this.ns, "ns.bladeburner.startAction", "General", "Incite Violence");
         	await this.ns.asleep(await Do(this.ns, "ns.bladeburner.getActionTime", "General", "Incite Violence"));
@@ -223,7 +224,7 @@ export class Bladeburner {
 			this.log("Recovering Stamina...");
 			await this.hardStop();
 			await Do(this.ns, "ns.bladeburner.startAction", "General", "Hyperbolic Regeneration Chamber");
-			await this.game.Sleeves.bbEverybody("Hyperbolic Regeneration Chamber")
+			await this.Game.Sleeves.bbEverybody("Hyperbolic Regeneration Chamber")
 			while (upper > (await Do(this.ns, "ns.bladeburner.getStamina")).reduce((a, b) => a / b)) {
 				await this.ns.asleep(1000);
 			}
@@ -239,7 +240,7 @@ export class Bladeburner {
 			this.log("Deescalating " + await Do(this.ns, "ns.bladeburner.getCity"));
 			await this.hardStop();
 			await Do(this.ns, "ns.bladeburner.startAction", "General", "Diplomacy");
-			await this.game.Sleeves.bbEverybody("Diplomacy");
+			await this.Game.Sleeves.bbEverybody("Diplomacy");
 			while (goal < (await Do(this.ns, "ns.bladeburner.getCityChaos", await Do(this.ns, "ns.bladeburner.getCity")))) {
 				await this.ns.asleep(1000);
 			}
@@ -360,10 +361,10 @@ export class Bladeburner {
 		answer += "Communities: " + (await Do(this.ns, "ns.bladeburner.getCityCommunities", mycity)).toString() + "<BR>";
 		answer += "Estimated Population: " + jFormat(await Do(this.ns, "ns.bladeburner.getCityEstimatedPopulation", mycity)) + "</H1></TD><TD><H1>";
 
-		if (0 < await (this.game.Sleeves.numSleeves)) {
+		if (0 < await (this.Game.Sleeves.numSleeves)) {
 			answer += "Sleeves:<BR>";
 					let wildcard = true;
-					for (let i = 0; i < await (this.game.Sleeves.numSleeves); i++) {
+					for (let i = 0; i < await (this.Game.Sleeves.numSleeves); i++) {
 						try {
 							if (((await Do(this.ns, "ns.sleeve.getTask", i)).actionName) != ((await Do(this.ns, "ns.sleeve.getTask", 0))).actionName)
 								wildcard = false;
@@ -387,7 +388,7 @@ export class Bladeburner {
 								}
 						}
 					} else {
-						for (let i = 0; i < await (this.game.Sleeves.numSleeves); i++) {
+						for (let i = 0; i < await (this.Game.Sleeves.numSleeves); i++) {
 								if (null != (await Do(this.ns, "ns.sleeve.getTask", i))) {
 									let z = (await Do(this.ns, "ns.sleeve.getTask", i));
 									if (z.type == "INFILTRATE") {

@@ -3,9 +3,10 @@ import { makeNewWindow } from "Windows.js";
 import { WholeGame } from "WholeGame.js";
 
 export class Augmentations {
-	constructor(ns, game) {
+	constructor(ns, Game, settings = {}) {
 		this.ns = ns
-		this.game = game ? game : new WholeGame(ns);
+		this.Game = Game ? Game : new WholeGame(ns);
+		this.settings = settings;
 	}
 	async createDisplay() {
 		this.augWindow = await makeNewWindow("Augmentations", this.ns.ui.getTheme());
