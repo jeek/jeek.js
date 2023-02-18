@@ -12,10 +12,10 @@ export class Gang {
         this.Game = Game ? Game : new WholeGame(ns);
         this.log = ns.tprint.bind(ns);
         this.settings = settings;
-        if (!this.settings.includes("name")) {
+        if (!Object.keys(this.settings).includes("name")) {
             this.settings['name'] = "Slum Snakes";
         }
-        if (!this.settings.includes("membernames")) {
+        if (!Object.keys(this.settings).includes("membernames")) {
             this.settings['membernames'] = [];
         }
         while (this.settings.membernames.length < 12) {
@@ -33,19 +33,19 @@ export class Gang {
                 'Dog',
                 'Pig'].filter(x => !this.settings.membernames.includes(x))[0]);
         }
-        if (!this.settings.includes("wantedThreshhold")) {
+        if (!Object.keys(this.settings).includes("wantedThreshhold")) {
             this.settings['wantedThreshold'] = 10;
         }
-        if (!this.settings.includes("clashTarget")) {
+        if (!Object.keys(this.settings).includes("clashTarget")) {
             this.settings['clashTarget'] = .5;
         }
-        if (!this.settings.includes("minimumRespect")) {
+        if (!Object.keys(this.settings).includes("minimumRespect")) {
             this.settings['minimumRespect'] = 0;
         }
-        if (!this.settings.includes("traffickChance")) {
+        if (!Object.keys(this.settings).includes("traffickChance")) {
             this.settings['traffickChance'] = .8;
         }
-        if (!this.settings.includes("wantedPenaltyThreshhold")) {
+        if (!Object.keys(this.settings).includes("wantedPenaltyThreshhold")) {
             this.settings['wantedPenaltyThreshold'] = .9;
         }
         this.memberData = {};
