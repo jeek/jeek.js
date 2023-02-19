@@ -154,7 +154,7 @@ export class Gang {
                         replist = replist.filter(x => x[1] != moneylist[moneylist.length - 1][1]);
                         moneylist = moneylist.filter(x => x[1] != moneylist[moneylist.length - 1][1]);
                     }
-                    if (ns.gang.getGangInformation().territory >= .98 && [...new Set(moneylist.map(x => x[1]))].length == 1) {
+                    if ((await Do(this.ns, "ns.gang.getGangInformation")).territory >= .98 && [...new Set(moneylist.map(x => x[1]))].length == 1) {
                         this.nextTask[moneylist[0][1]] = "Train Combat";
                         moneylist = [];
                         replist = [];
@@ -279,22 +279,22 @@ export class Gang {
             if (Object.keys(othergangs).filter(x => othergangs[x].territory > 0).length > 0) {
                 let total = 0;
                 for (let gang of Object.keys(othergangs)) {
-                    total += (await Do(this.ns, "ns.gang.getChanceToWinClash", x)) * (await (this.getOtherGangInformation))[gang].territory;
+                    total += (await Do(this.ns, "ns.gang.getChanceToWinClash", x)) * (await (this['getOtherGangInformation']))[gang].territory;
                 }
                 if (total / (1 - (await (this.getGangInformation)).territory) >= .5)
                     Do(this.ns, "ns.gang.setTerritoryWarfare", true);
                 // If there's a high enough chance of victory against every gang, go to war.
                 if ((await Promise.all(Object.keys(othergangs).map(x => Do(this.ns, "ns.gang.getChanceToWinClash", x)))).every(x => clashChance[x] >= CLASH_TARGET))
                     Do(this.ns, "ns.gang.setTerritoryWarfare", true);
-                let oldterritory = Math.floor(100 * (await (this.getOtherGangInformation)).territory);
-                let startpower = (await (this.getGangInformation)).power;
+                let oldterritory = Math.floor(100 * (await (this['getOtherGangInformation'])).territory);
+                let startpower = (await (this['getGangInformation'])).power;
 
                 // Chill until the clash tick processes.
-                while ((await (this.getGangInformation)).power == startpower) {
+                while ((await (this['getGangInformation'])).power == startpower) {
                     await ns.sleep(0);
                 }
-                if (oldterritory != Math.floor(100 * (await (this.getOtherGangInformation)).territory)) {
-                    globalThis.gangBox.log("Territory now " + Math.floor(100 * (await (this.getGangInformation)).territory).toString());
+                if (oldterritory != Math.floor(100 * (await (this['getOtherGangInformation'])).territory)) {
+                    globalThis.gangBox.log("Territory now " + Math.floor(100 * (await (this['getGangInformation'])).territory).toString());
                 }
             }
 
