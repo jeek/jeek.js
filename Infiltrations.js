@@ -3,7 +3,27 @@ import { Do } from "Do.js";
 export class Infiltrations {
     doc = {
         'getPossibleLocations': 'stuff',
-        'getInfiltration': 'more stuff'
+        'getInfiltration': `
+# Infiltration.getInfiltration() method
+---
+Get all infiltrations with difficulty, location and rewards.
+
+Signature:
+
+\`getInfiltration(location: string): InfiltrationLocation;\`
+
+Parameters
+
+Parameter	Type	Description
+location	string	
+
+Returns:        
+InfiltrationLocation
+        
+Infiltration data for given location.
+        
+Remarks
+RAM cost: 15 GB`
     };
     constructor(ns, Game, settings = {}) {
         this.ns = ns;
