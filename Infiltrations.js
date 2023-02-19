@@ -20,6 +20,12 @@ export class Infiltrations {
 		})();
     }
     async ['getInfiltration'](location) {
-        return await Do(this.ns, "ns.infiltration.getInfiltration", location);
+        return (async () => {
+			try {
+                return await Do(this.ns, "ns.infiltration.getInfiltration", location);
+            } catch (e) {
+                return [];
+            }
+        })();
     }
 }
