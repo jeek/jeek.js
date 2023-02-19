@@ -186,7 +186,7 @@ function lzdecompression(data) {
 	return answer;
 }
 
-function lzcompression(data, ns) {
+function lzcompression(data) {
 	let z = 0;
 	let queue = [[], [], []];
 	while (queue[1].length <= data.length) {
@@ -199,11 +199,8 @@ function lzcompression(data, ns) {
 		queue[1][i].push(i.toString() + data.substring(0, i));
 		queue[2][i].push(i.toString() + data.substring(0, i));
 	}
-	ns.tprint(queue);
 	while (queue[1][data.length].length == 0 && queue[2][data.length].length == 0) {
 		let i = (new Array(data.length)).fill(0).map((_, i) => i).map(i => [i, queue[1][i].length + queue[2][i].length]).filter(x => x[1] > 0).reduce((a, b) => b)[0];
-		//		ns.tprint(i);
-		//		ns.exit();
 		if (queue[2][i].length > 0) queue[2][i].map(x => queue[1][i].push(x + "0"));
 		if (queue[1][i].length > 0) queue[1][i].map(x => queue[2][i].push(x + "0"));
 		queue[1][i] = Array.from(...new Set([queue[1][i].filter(x => (lzdecompression(x).length == i) && (lzdecompression(x) === data.substring(0, i))).sort((a, b) => { return a.length - b.length; })]));
@@ -238,8 +235,6 @@ function lzcompression(data, ns) {
 	}
 	queue[1][data.length] = queue[1][data.length].sort((a, b) => { return a.length - b.length; });
 	queue[2][data.length] = queue[2][data.length].sort((a, b) => { return a.length - b.length; });
-	ns.tprint(queue[1][data.length], " ", queue[2][data.length]);
-//	ns.exit();
 }
 
 function stonks1(data) {
@@ -443,7 +438,7 @@ function hammingdecode(data) {
 	return hammingdecode(data.substring(0, badindex).concat(data.substring(badindex, badindex + 1) == "0" ? "1" : "0").concat(data.substring(badindex + 1)));
 }
 
-function findallvalidmathexpressions(data, ns) {
+function findallvalidmathexpressions(data) {
 	let queue = new Set();
 	queue.add(data[0]);
 	for (let current of queue) {
@@ -666,7 +661,7 @@ export class Contracts {
 			}
 		}
 		while (z > 0 || solutions.length > 0) {
-			await ns.asleep(1000);
+			await this.ns.asleep(1000);
 			if (solutions.length > 0) {
 				let success = await Do(this.ns, "ns.codingcontract.attempt", solutions[0].data[0], solutions[0].data[1], solutions[0].data[2]);
 			    if (success.length > 0) {
