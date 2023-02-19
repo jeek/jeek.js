@@ -6,6 +6,7 @@ export class Jeekipedia {
 	async lookup(functionName) {
 		this.ns.iKnowWhatImDoing();
 		let lookupData = functionName.split(".");
+		this.ns.tprint(lookupData);
 		if (Object.keys(this.Game).includes(lookupData[1])) {
             if (Object.keys(this.Game[lookupData[1]].includes("doc"))) {
 				eval('window').tprintRaw(this.render(this.Game[lookupData[1]].doc[lookupData[2]]));
