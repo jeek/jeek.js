@@ -654,7 +654,7 @@ export class Contracts {
 				if (!done) {
 					if (this.contracts[contract].type === types[0]) {
 						this.log("Starting " + types[0] + " on " + this.contracts[contract].server);
-						procs[y % 16].postMessage([types[1], contracts[contract].data, contract, contracts[contract].server]);
+						procs[y % 16].postMessage([types[1], this.contracts[contract].data, contract, this.contracts[contract].server]);
 						z += 1;
 						y += 1;
 						await this.ns.asleep(0);
