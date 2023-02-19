@@ -1370,6 +1370,7 @@ export class Casino {
 	}
 }
 
+let workerCode = `
 export function minpathsum(data) {
 	while (data.length > 1) {
 		for (let i = 0; i < (data[data.length - 2]).length; i++) {
@@ -1688,7 +1689,6 @@ export function stonks4(data) {
 	return best;
 }
 
-
 export function generateips(data) {
 	let answer = [];
 	for (let i = 1; i + 1 < data.length; i++) {
@@ -1925,6 +1925,7 @@ export function shortestpathinagrid(data) {
 	}
 	return "";
 }
+`;
 
 export class Contracts {
 	constructor(ns, game) {
@@ -1971,6 +1972,18 @@ export class Contracts {
 	}
 	async solve() {
 		await this.list();
+		let procs = [];
+		let y = 0;
+		let z = 0;
+		let solutions = [];
+		let blob = new Blob([workerCode], { type: "application/javascript" });
+		for (let i = 0; i < 16; i++) {
+			procs.push(new Worker(URL.createObjectURL(blob)));
+			procs[procs.length - 1].onmessage = (event) => {
+				solutions.push(event);
+				z -= 1;
+			};
+		}
 		for (let contract of Object.keys(this.contracts)) {
 			let done = false;
 			//this.ns.tprint(contract);
@@ -2009,24 +2022,34 @@ export class Contracts {
 				if (!done) {
 					if (this.contracts[contract].type === types[0]) {
 						this.log("Starting " + types[0] + " on " + this.contracts[contract].server);
+						procs[y % 16].postMessage([types[1], contracts[contract].data, contract, contracts[contract].server]);
+						z += 1;
+						y += 1;
 						await this.ns.asleep(0);
-						let starttime = Date.now();
-						let success = await Do(this.ns, "ns.codingcontract.attempt", types[1](this.contracts[contract].data, this.ns), contract, this.contracts[contract].server);
-						if (success.length > 0) {
-							delete this.contracts[contract];
-							this.log("Succeeded at " + types[0] + ": " + success);
-							done = true;
-						} else {
-							this.log("Failed at " + types[0]);
-							this.log("Failed at " + types[0], " ", types[1](this.contracts[contract].data, this.ns));
-							//this.ns.exit();
-						}
-						this.times[types[0]].push(Date.now() - starttime);
-						this.log(types[0] + " average time: " + (this.times[types[0]].reduce((a, b) => a + b) / this.times[types[0]].length).toString());
+						//						let starttime = Date.now();
+						//						this.times[types[0]].push(Date.now() - starttime);
+						//						this.log(types[0] + " average time: " + (this.times[types[0]].reduce((a, b) => a + b) / this.times[types[0]].length).toString());
 					}
 				}
 			}
 		}
+		while (z > 0 || solutions.length > 0) {
+			await ns.asleep(1000);
+			if (solutions.length > 0) {
+				let success = await Do(this.ns, "ns.codingcontract.attempt", solutions[0].data[0], solutions[0].data[1], solutions[0].data[2]);
+			    if (success.length > 0) {
+					delete this.contracts[contract];
+					this.log("Succeeded at " + types[0] + ": " + success);
+					done = true;
+				} else {
+					this.log("Failed at " + types[0]);
+					this.log("Failed at " + types[0], " ", types[1](this.contracts[contract].data, this.ns));
+					//this.ns.exit();
+				}
+				solutions.shift();
+			}
+		}
+        procs.map(x => x.terminate());
 		await this.list();
 	}
 }
@@ -2518,7 +2541,7 @@ export class Gang {
                 this.members.filter(x => !remaining.includes(x)).filter(x => this.memberData[x].agi_exp < this.minimumDefense).map(x => this.nextTask[x] = "Train Combat");
                 this.members.filter(x => !remaining.includes(x)).filter(x => this.memberData[x].def_exp < this.minimumDefense).map(x => this.nextTask[x] = "Train Combat");
                 for (let i = 0; i < this.members.length; i++) {
-                    let total = this.memberData[this.members[i]].str + this.memberData[this.members[i]].def + this.memberData[this.members[i]].dex + this.memberData[this.members[i]].cha + this.memberData[this.members[i]].hack;
+                    let total = this.memberData[this.members[i]].str + this.memberData[this.members[i]].def + this.memberData[this.members[i]].dex + this.memberData[this.members[i]].cha + this.memberData[this.members[i]]['hack'];
                     if (total > 700) {
                         remaining.push(this.members[i]);
                     }
@@ -2538,7 +2561,7 @@ export class Gang {
                 }
                 replist = replist.sort((a, b) => { return a[2] - b[2] }).filter(x => x[2] > 0);
                 for (let i = 0; i < this.members.length; i++) {
-                    let total = this.memberData[this.members[i]].str + this.memberData[this.members[i]].def + this.memberData[this.members[i]].dex + this.memberData[this.members[i]].cha + this.memberData[this.members[i]].hack;
+                    let total = this.memberData[this.members[i]].str + this.memberData[this.members[i]].def + this.memberData[this.members[i]].dex + this.memberData[this.members[i]].cha + this.memberData[this.members[i]]['hack'];
                     if (total >= 630 && total <= 700) {
                         replist = replist.filter(x => x[0] != "Terrorism" || x[1] != this.members[i]);
                         moneylist = moneylist.filter(x => x[0] != "Terrorism" || x[1] != this.members[i]);
@@ -2556,7 +2579,7 @@ export class Gang {
                         replist = replist.filter(x => x[1] != moneylist[moneylist.length - 1][1]);
                         moneylist = moneylist.filter(x => x[1] != moneylist[moneylist.length - 1][1]);
                     }
-                    if (ns.gang.getGangInformation().territory >= .98 && [...new Set(moneylist.map(x => x[1]))].length == 1) {
+                    if ((await Do(this.ns, "ns.gang.getGangInformation")).territory >= .98 && [...new Set(moneylist.map(x => x[1]))].length == 1) {
                         this.nextTask[moneylist[0][1]] = "Train Combat";
                         moneylist = [];
                         replist = [];
@@ -2617,7 +2640,7 @@ export class Gang {
         if ((await Do(this.ns, "ns.fileExists", "SQLInject.exe")) || this.members.length < 12) {
         for (let j = 0; j < this.equip.length; j++) {
                 for (let i = 0; i < this.members.length; i++) {
-                    let total = this.memberData[this.members[i]].str + this.memberData[this.members[i]].def + this.memberData[this.members[i]].dex + this.memberData[this.members[i]].cha + this.memberData[this.members[i]].hack;
+                    let total = this.memberData[this.members[i]].str + this.memberData[this.members[i]].def + this.memberData[this.members[i]].dex + this.memberData[this.members[i]].cha + this.memberData[this.members[i]]['hack'];
                     // Buy the good stuff only once the terrorism stats are over 700.
                     if (total >= 700) {
                         if (this.equipCost[equip[j]] < funds) {
@@ -2681,22 +2704,22 @@ export class Gang {
             if (Object.keys(othergangs).filter(x => othergangs[x].territory > 0).length > 0) {
                 let total = 0;
                 for (let gang of Object.keys(othergangs)) {
-                    total += (await Do(this.ns, "ns.gang.getChanceToWinClash", x)) * (await (this.getOtherGangInformation))[gang].territory;
+                    total += (await Do(this.ns, "ns.gang.getChanceToWinClash", x)) * (await (this['getOtherGangInformation']))[gang].territory;
                 }
                 if (total / (1 - (await (this.getGangInformation)).territory) >= .5)
                     Do(this.ns, "ns.gang.setTerritoryWarfare", true);
                 // If there's a high enough chance of victory against every gang, go to war.
                 if ((await Promise.all(Object.keys(othergangs).map(x => Do(this.ns, "ns.gang.getChanceToWinClash", x)))).every(x => clashChance[x] >= CLASH_TARGET))
                     Do(this.ns, "ns.gang.setTerritoryWarfare", true);
-                let oldterritory = Math.floor(100 * (await (this.getOtherGangInformation)).territory);
-                let startpower = (await (this.getGangInformation)).power;
+                let oldterritory = Math.floor(100 * (await (this['getOtherGangInformation'])).territory);
+                let startpower = (await (this['getGangInformation'])).power;
 
                 // Chill until the clash tick processes.
-                while ((await (this.getGangInformation)).power == startpower) {
+                while ((await (this['getGangInformation'])).power == startpower) {
                     await ns.sleep(0);
                 }
-                if (oldterritory != Math.floor(100 * (await (this.getOtherGangInformation)).territory)) {
-                    globalThis.gangBox.log("Territory now " + Math.floor(100 * (await (this.getGangInformation)).territory).toString());
+                if (oldterritory != Math.floor(100 * (await (this['getOtherGangInformation'])).territory)) {
+                    globalThis.gangBox.log("Territory now " + Math.floor(100 * (await (this['getGangInformation'])).territory).toString());
                 }
             }
 
@@ -2993,7 +3016,13 @@ export class Infiltrations {
 		})();
     }
     async ['getInfiltration'](location) {
-        return await Do(this.ns, "ns.infiltration.getInfiltration", location);
+        return (async () => {
+			try {
+                return await Do(this.ns, "ns.infiltration.getInfiltration", location);
+            } catch (e) {
+                return [];
+            }
+        })();
     }
 }export class Jeekipedia {
 	constructor(ns, Game) {
@@ -3003,6 +3032,7 @@ export class Infiltrations {
 	async lookup(functionName) {
 		this.ns.iKnowWhatImDoing();
 		let lookupData = functionName.split(".");
+		this.ns.tprint(lookupData);
 		if (Object.keys(this.Game).includes(lookupData[1])) {
             if (Object.keys(this.Game[lookupData[1]].includes("doc"))) {
 				eval('window').tprintRaw(this.render(this.Game[lookupData[1]].doc[lookupData[2]]));
