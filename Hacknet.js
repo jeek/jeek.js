@@ -20,6 +20,7 @@ export class Hacknet {
 			this.goal = "Sell for Money";
 		}
 		while (true) {
+			await this.ns.asleep(0);
 			if (this.goal == "Sell for Money") {
 				await Do(this.ns, "ns.hacknet.spendHashes", this.goal, "", Math.floor((await Do(this.ns, "ns.hacknet.numHashes", "")) / 4));
 				this.log("Spent hashes for cash")
