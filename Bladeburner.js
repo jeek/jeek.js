@@ -488,5 +488,6 @@ export class Bladeburner {
 		answer += "</TD>"
 		answer += "</TR></TABLE>";
 		this.bbWindow.update(answer);
+		await this.ns.asleep(1000);
 	}
 }

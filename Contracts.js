@@ -3,7 +3,7 @@ import { makeNewWindow } from "Windows.js";
 import { WholeGame } from "WholeGame.js";
 
 let workerCode = `
-export function minpathsum(data) {
+function minpathsum(data) {
 	while (data.length > 1) {
 		for (let i = 0; i < (data[data.length - 2]).length; i++) {
 			data[data.length - 2][i] += Math.min(data[data.length - 1][i], Math.min(data[data.length - 1][i + 1]));
@@ -13,7 +13,7 @@ export function minpathsum(data) {
 	return data[0][0];
 }
 
-export function uniquepathsI(data) {
+function uniquepathsI(data) {
 	let numbers = []
 	for (let i = 0; i < data[0]; i++) {
 		numbers.push([]);
@@ -27,7 +27,7 @@ export function uniquepathsI(data) {
 	return numbers[data[0] - 1][data[1] - 1];
 }
 
-export function uniquepathsII(data) {
+function uniquepathsII(data) {
 	let answer = [];
 	for (let i = 0; i < data.length; i++) {
 		answer.push(new Array(data[0].length).fill(0));
@@ -43,7 +43,7 @@ export function uniquepathsII(data) {
 	return answer[0][0];
 }
 
-export function largestprimefactor(data) {
+function largestprimefactor(data) {
 	let i = 2;
 	while (data > 1) {
 		while (data % i == 0) {
@@ -54,7 +54,7 @@ export function largestprimefactor(data) {
 	return i - 1;
 }
 
-export function mergeoverlappingintervals(data) {
+function mergeoverlappingintervals(data) {
 	let intervals = (new Array(data.map(x => x[1]).reduce((a, b) => { return Math.max(a, b) }))).fill(0);
 	for (let interval of data) {
 		for (let i = interval[0]; i < interval[1]; i++) {
@@ -78,16 +78,16 @@ export function mergeoverlappingintervals(data) {
 	return answer;
 }
 
-export function caesarcipher(data) {
+function caesarcipher(data) {
 	return data[0].split("").map(x => { return x === " " ? " " : "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[(("ABCDEFGHIJKLMNOPQRSTUVWXYZ".indexOf(x) + 26 - data[1]) % 26)] }).join("");
 	// return data[0].split("").map(x => x.charCodeAt(0)).map(x => x == 32 ? 32 : (x + 65 - data[1])%26 + 65).map(x => String.fromCharCode(x)).join("");
 }
 
-export function vigenere(data) {
+function vigenere(data) {
 	return data[0].split("").map((x, i) => { return "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[(("ABCDEFGHIJKLMNOPQRSTUVWXYZ".indexOf(x) + 13 + data[1].charCodeAt(i % data[1].length))) % 26] }).join("");
 }
 
-export function totalwaystosum(data) {
+function totalwaystosum(data) {
 	let answer = [1].concat((new Array(data + 1)).fill(0));
 	for (let i = 1; i < data; i++) {
 		for (let j = i; j <= data; j++) {
@@ -97,7 +97,7 @@ export function totalwaystosum(data) {
 	return answer[data];
 }
 
-export function totalwaystosumII(data) {
+function totalwaystosumII(data) {
 	let answer = [1].concat((new Array(data[0])).fill(0));
 	for (let i of data[1]) {
 		for (let j = i; j <= data[0]; j++) {
@@ -107,7 +107,7 @@ export function totalwaystosumII(data) {
 	return answer[data[0]];
 }
 
-export function spiralizematrix(data) {
+function spiralizematrix(data) {
 	let answer = [];
 	while (data.length > 0 && data[0].length > 0) {
 		answer = answer.concat(data.shift());
@@ -124,7 +124,7 @@ export function spiralizematrix(data) {
 	return answer;
 }
 
-export function subarraywithmaximumsum(data) {
+function subarraywithmaximumsum(data) {
 	let answer = -1e308;
 	for (let i = 0; i < data.length; i++) {
 		for (let j = i; j < data.length; j++) {
@@ -134,7 +134,7 @@ export function subarraywithmaximumsum(data) {
 	return answer;
 }
 
-export function twocolor(data) {
+function twocolor(data) {
 	for (let i = 0; i < 2 ** data[0]; i++) {
 		let answer = [];
 		for (let j = 0; j < data[0]; j++) {
@@ -147,7 +147,7 @@ export function twocolor(data) {
 	return [];
 }
 
-export function rlecompression(data) {
+function rlecompression(data) {
 	let answer = "";
 	data = data.split("");
 	while (data.length > 0) {
@@ -162,7 +162,7 @@ export function rlecompression(data) {
 	return answer;
 }
 
-export function lzdecompression(data) {
+function lzdecompression(data) {
 	if (data.length == 0) {
 		return "";
 	}
@@ -186,7 +186,7 @@ export function lzdecompression(data) {
 	return answer;
 }
 
-export function lzcompression(data, ns) {
+function lzcompression(data, ns) {
 	let z = 0;
 	let queue = [[], [], []];
 	while (queue[1].length <= data.length) {
@@ -242,7 +242,7 @@ export function lzcompression(data, ns) {
 //	ns.exit();
 }
 
-export function stonks1(data) {
+function stonks1(data) {
 	let best = 0;
 	for (let i = 0; i < data.length; i++) {
 		for (let j = i + 1; j < data.length; j++) {
@@ -252,7 +252,7 @@ export function stonks1(data) {
 	return best;
 }
 
-export function stonks2(data) {
+function stonks2(data) {
 	let best = 0;
 	let queue = {};
 	queue[JSON.stringify(data)] = 0;
@@ -277,7 +277,7 @@ export function stonks2(data) {
 	return best;
 }
 
-export function stonks3(data) {
+function stonks3(data) {
 	let best = 0;
 	for (let i = 0; i < data.length; i++) {
 		for (let j = i + 1; j < data.length; j++) {
@@ -292,7 +292,7 @@ export function stonks3(data) {
 	return best;
 }
 
-export function stonks4(data) {
+function stonks4(data) {
 	let best = 0;
 	let queue = {};
 	queue[0] = {};
@@ -321,7 +321,7 @@ export function stonks4(data) {
 	return best;
 }
 
-export function generateips(data) {
+function generateips(data) {
 	let answer = [];
 	for (let i = 1; i + 1 < data.length; i++) {
 		for (let j = i + 1; j + 1 < data.length; j++) {
@@ -336,7 +336,7 @@ export function generateips(data) {
 	return answer.map(x => x.join("."));
 }
 
-export function arrayjumpinggame(data) {
+function arrayjumpinggame(data) {
 	let queue = new Set();
 	if (data[0] == 0) {
 		return 0;
@@ -358,7 +358,7 @@ export function arrayjumpinggame(data) {
 	return 0;
 }
 
-export function arrayjumpinggameII(data) {
+function arrayjumpinggameII(data) {
 	let queue = {};
 	let best = 1e308;
 	queue[data.toString()] = 0;
@@ -380,7 +380,7 @@ export function arrayjumpinggameII(data) {
 	return best == 1e308 ? 0 : best;
 }
 
-export function hammingencode(data) {
+function hammingencode(data) {
 	let answer = [];
 
 	// Convert the data to a bit array. Can't use & due to data possibly being larger than a 32-bit int.
@@ -419,7 +419,7 @@ export function hammingencode(data) {
 	return answer.map(x => x.toString()).join("");
 }
 
-export function hammingdecode(data) {
+function hammingdecode(data) {
 	let powersoftwo = (new Array(Math.ceil(Math.log2(data)))).fill(0).map((_, i) => 2 ** i);
 	let badbits = [];
 	for (let i of powersoftwo.filter(x => x < data.length)) {
@@ -443,7 +443,7 @@ export function hammingdecode(data) {
 	return hammingdecode(data.substring(0, badindex).concat(data.substring(badindex, badindex + 1) == "0" ? "1" : "0").concat(data.substring(badindex + 1)));
 }
 
-export function findallvalidmathexpressions(data, ns) {
+function findallvalidmathexpressions(data, ns) {
 	let queue = new Set();
 	queue.add(data[0]);
 	for (let current of queue) {
@@ -467,7 +467,7 @@ export function findallvalidmathexpressions(data, ns) {
 	return zeroes.filter(x => eval(x) == data[1]);
 }
 
-export function sanitizeparentheses(data) {
+function sanitizeparentheses(data) {
 	let queue = new Set();
 	queue.add(data);
 	while (Array.from(queue).length > 0 && (Array.from(queue)[0].split("").includes("(") || Array.from(queue)[0].split("").includes(")"))) {
@@ -507,7 +507,7 @@ export function sanitizeparentheses(data) {
 	return [Array.from(queue)[0]];
 }
 
-export function shortestpathinagrid(data) {
+function shortestpathinagrid(data) {
 	let solutions = { "0,0": "" };
 	let queue = new Set();
 	queue.add("0,0");
@@ -620,33 +620,33 @@ export class Contracts {
 			let done = false;
 			//this.ns.tprint(contract);
 			for (let types of [
-				["Minimum Path Sum in a Triangle", minpathsum],
-				["Unique Paths in a Grid I", uniquepathsI],
-				["Unique Paths in a Grid II", uniquepathsII],
-				["Find Largest Prime Factor", largestprimefactor],
-				["Merge Overlapping Intervals", mergeoverlappingintervals],
-				["Encryption I: Caesar Cipher", caesarcipher],
-				["Total Ways to Sum", totalwaystosum],
-				["Total Ways to Sum II", totalwaystosumII],
-				["Spiralize Matrix", spiralizematrix],
-				["Subarray with Maximum Sum", subarraywithmaximumsum],
-				["Proper 2-Coloring of a Graph", twocolor],
-				["Compression I: RLE Compression", rlecompression],
-				["Compression II: LZ Decompression", lzdecompression],
-				//["Compression III: LZ Compression", lzcompression],
-				["Algorithmic Stock Trader I", stonks1],
-				["Algorithmic Stock Trader II", stonks2],
-				["Algorithmic Stock Trader III", stonks3],
-				["Algorithmic Stock Trader IV", stonks4],
-				["Encryption II: Vigenère Cipher", vigenere],
-				["Generate IP Addresses", generateips],
-				["Array Jumping Game", arrayjumpinggame],
-				["Array Jumping Game II", arrayjumpinggameII],
-				["HammingCodes: Integer to Encoded Binary", hammingencode],
-				["HammingCodes: Encoded Binary to Integer", hammingdecode],
-				["Find All Valid Math Expressions", findallvalidmathexpressions],
-				["Sanitize Parentheses in Expression", sanitizeparentheses],
-				["Shortest Path in a Grid", shortestpathinagrid]
+				["Minimum Path Sum in a Triangle", "minpathsum"],
+				["Unique Paths in a Grid I", "uniquepathsI"],
+				["Unique Paths in a Grid II", "uniquepathsII"],
+				["Find Largest Prime Factor", "largestprimefactor"],
+				["Merge Overlapping Intervals", "mergeoverlappingintervals"],
+				["Encryption I: Caesar Cipher", "caesarcipher"],
+				["Total Ways to Sum", "totalwaystosum"],
+				["Total Ways to Sum II", "totalwaystosumII"],
+				["Spiralize Matrix", "spiralizematrix"],
+				["Subarray with Maximum Sum", "subarraywithmaximumsum"],
+				["Proper 2-Coloring of a Graph", "twocolor"],
+				["Compression I: RLE Compression", "rlecompression"],
+				["Compression II: LZ Decompression", "lzdecompression"],
+				//["Compression III: LZ Compression", "lzcompression"],
+				["Algorithmic Stock Trader I", "stonks1"],
+				["Algorithmic Stock Trader II", "stonks2"],
+				["Algorithmic Stock Trader III", "stonks3"],
+				["Algorithmic Stock Trader IV", "stonks4"],
+				["Encryption II: Vigenère Cipher", "vigenere"],
+				["Generate IP Addresses", "generateips"],
+				["Array Jumping Game", "arrayjumpinggame"],
+				["Array Jumping Game II", "arrayjumpinggameII"],
+				["HammingCodes: Integer to Encoded Binary", "hammingencode"],
+				["HammingCodes: Encoded Binary to Integer", "hammingdecode"],
+				["Find All Valid Math Expressions", "findallvalidmathexpressions"],
+				["Sanitize Parentheses in Expression", "sanitizeparentheses"],
+				["Shortest Path in a Grid", "shortestpathinagrid"]
 			]) {
 				if (!Object.keys(this.times).includes(types[0])) {
 					this.times[types[0]] = [];

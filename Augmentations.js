@@ -85,5 +85,6 @@ export class Augmentations {
 		update += "</TABLE>";
 		owned += "</TABLE>";
 		this.augWindow.update(update + "<BR>" + owned);
+		await this.ns.asleep(1000);
 	}
 }

@@ -89,7 +89,7 @@ function finalform(ns) {
             ns.tprint(i, " ", lines[i]);
         }
         if (lines[i].includes("await Do") && !lines[i].includes("FFIGNORE") && !lines[i].includes("DoAll")) {
-            let j = lines[i].search("await Do");
+            let j = lines[i].search("await Do"); //FFIGNORE
             let array = [...(lines[i])];
             array.splice(j, 9);
             let nsIndex = lines[i].indexOf("ns", j);
