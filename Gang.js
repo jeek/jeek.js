@@ -116,7 +116,7 @@ export class Gang {
                 this.members.filter(x => !remaining.includes(x)).filter(x => this.memberData[x].agi_exp < this.minimumDefense).map(x => this.nextTask[x] = "Train Combat");
                 this.members.filter(x => !remaining.includes(x)).filter(x => this.memberData[x].def_exp < this.minimumDefense).map(x => this.nextTask[x] = "Train Combat");
                 for (let i = 0; i < this.members.length; i++) {
-                    let total = this.memberData[this.members[i]].str + this.memberData[this.members[i]].def + this.memberData[this.members[i]].dex + this.memberData[this.members[i]].cha + this.memberData[this.members[i]].hack;
+                    let total = this.memberData[this.members[i]].str + this.memberData[this.members[i]].def + this.memberData[this.members[i]].dex + this.memberData[this.members[i]].cha + this.memberData[this.members[i]]['hack'];
                     if (total > 700) {
                         remaining.push(this.members[i]);
                     }
@@ -136,7 +136,7 @@ export class Gang {
                 }
                 replist = replist.sort((a, b) => { return a[2] - b[2] }).filter(x => x[2] > 0);
                 for (let i = 0; i < this.members.length; i++) {
-                    let total = this.memberData[this.members[i]].str + this.memberData[this.members[i]].def + this.memberData[this.members[i]].dex + this.memberData[this.members[i]].cha + this.memberData[this.members[i]].hack;
+                    let total = this.memberData[this.members[i]].str + this.memberData[this.members[i]].def + this.memberData[this.members[i]].dex + this.memberData[this.members[i]].cha + this.memberData[this.members[i]]['hack']';
                     if (total >= 630 && total <= 700) {
                         replist = replist.filter(x => x[0] != "Terrorism" || x[1] != this.members[i]);
                         moneylist = moneylist.filter(x => x[0] != "Terrorism" || x[1] != this.members[i]);
@@ -215,7 +215,7 @@ export class Gang {
         if ((await Do(this.ns, "ns.fileExists", "SQLInject.exe")) || this.members.length < 12) {
         for (let j = 0; j < this.equip.length; j++) {
                 for (let i = 0; i < this.members.length; i++) {
-                    let total = this.memberData[this.members[i]].str + this.memberData[this.members[i]].def + this.memberData[this.members[i]].dex + this.memberData[this.members[i]].cha + this.memberData[this.members[i]].hack;
+                    let total = this.memberData[this.members[i]].str + this.memberData[this.members[i]].def + this.memberData[this.members[i]].dex + this.memberData[this.members[i]].cha + this.memberData[this.members[i]]['hack'];
                     // Buy the good stuff only once the terrorism stats are over 700.
                     if (total >= 700) {
                         if (this.equipCost[equip[j]] < funds) {
