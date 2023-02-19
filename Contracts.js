@@ -552,6 +552,8 @@ function shortestpathinagrid(data) {
 	}
 	return "";
 }
+
+onmessage = (event) => {postMessage([eval(event.data[0])(event.data[1]), event.data[2], event.data[3], event.data[0]]);}
 `;
 
 export class Contracts {
