@@ -136,7 +136,7 @@ export class Gang {
                 }
                 replist = replist.sort((a, b) => { return a[2] - b[2] }).filter(x => x[2] > 0);
                 for (let i = 0; i < this.members.length; i++) {
-                    let total = this.memberData[this.members[i]].str + this.memberData[this.members[i]].def + this.memberData[this.members[i]].dex + this.memberData[this.members[i]].cha + this.memberData[this.members[i]]['hack']';
+                    let total = this.memberData[this.members[i]].str + this.memberData[this.members[i]].def + this.memberData[this.members[i]].dex + this.memberData[this.members[i]].cha + this.memberData[this.members[i]]['hack'];
                     if (total >= 630 && total <= 700) {
                         replist = replist.filter(x => x[0] != "Terrorism" || x[1] != this.members[i]);
                         moneylist = moneylist.filter(x => x[0] != "Terrorism" || x[1] != this.members[i]);
