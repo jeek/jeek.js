@@ -604,29 +604,19 @@ export class Contracts {
 	}
 	async solve() {
 		await this.list();
-	        let procs = [];
-	        let y = 0;
-	        let z = 0;
-	        let blob = new Blob([workerCode], { type: "application/javascript" });
-	        for (let i = 0; i < 16; i++) {
-		        procs.push(new Worker(URL.createObjectURL(blob)));
-        		procs[procs.length - 1].onmessage = (event) => {
-	        		//ns.tprint("<- ", event.data[0], " ", event.data[1], " ", event.data[2], " ", event.data[3]);
-		        	this.ns.codingcontract.attempt(event.data[0], event.data[1], event.data[2]);
-				let success = await Do(this.ns, "ns.codingcontract.attempt", types[1](this.contracts[contract].data, this.ns), contract, this.contracts[contract].server);
-				if (success.length > 0) {
-					delete this.contracts[contract];
-					this.log("Succeeded at " + types[0] + ": " + success);
-					done = true;
-				} else {
-					this.log("Failed at " + types[0]);
-					this.log("Failed at " + types[0], " ", types[1](this.contracts[contract].data, this.ns));
-					//this.ns.exit();
-                		}
-			        z -= 1;
-	        	};
-	        }	
-         	for (let contract of Object.keys(this.contracts)) {
+		let procs = [];
+		let y = 0;
+		let z = 0;
+		let solutions = [];
+		let blob = new Blob([workerCode], { type: "application/javascript" });
+		for (let i = 0; i < 16; i++) {
+			procs.push(new Worker(URL.createObjectURL(blob)));
+			procs[procs.length - 1].onmessage = (event) => {
+				solutions.push(event);
+				z -= 1;
+			};
+		}
+		for (let contract of Object.keys(this.contracts)) {
 			let done = false;
 			//this.ns.tprint(contract);
 			for (let types of [
@@ -664,21 +654,34 @@ export class Contracts {
 				if (!done) {
 					if (this.contracts[contract].type === types[0]) {
 						this.log("Starting " + types[0] + " on " + this.contracts[contract].server);
-                 				procs[y % 16].postMessage([types[1], contracts[contract].data, contract, contracts[contract].server]);
-		                  		z += 1;
-				                y += 1;
+						procs[y % 16].postMessage([types[1], contracts[contract].data, contract, contracts[contract].server]);
+						z += 1;
+						y += 1;
 						await this.ns.asleep(0);
-//						let starttime = Date.now();
-//						this.times[types[0]].push(Date.now() - starttime);
-//						this.log(types[0] + " average time: " + (this.times[types[0]].reduce((a, b) => a + b) / this.times[types[0]].length).toString());
+						//						let starttime = Date.now();
+						//						this.times[types[0]].push(Date.now() - starttime);
+						//						this.log(types[0] + " average time: " + (this.times[types[0]].reduce((a, b) => a + b) / this.times[types[0]].length).toString());
 					}
 				}
 			}
 		}
-                while (z > 0) {
-		    await ns.asleep(1000);
-         	}
-	        procs.map(x => x.terminate());
+		while (z > 0 || solutions.length > 0) {
+			await ns.asleep(1000);
+			if (solutions.length > 0) {
+				let success = await Do(this.ns, "ns.codingcontract.attempt", solutions[0].data[0], solutions[0].data[1], solutions[0].data[2]);
+			    if (success.length > 0) {
+					delete this.contracts[contract];
+					this.log("Succeeded at " + types[0] + ": " + success);
+					done = true;
+				} else {
+					this.log("Failed at " + types[0]);
+					this.log("Failed at " + types[0], " ", types[1](this.contracts[contract].data, this.ns));
+					//this.ns.exit();
+				}
+				solutions.shift();
+			}
+		}
+        procs.map(x => x.terminate());
 		await this.list();
 	}
 }
