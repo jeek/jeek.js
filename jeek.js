@@ -3956,9 +3956,10 @@ export class Servers {
 }import { Do, DoAll } from "Do.js";
 
 export class Sleeves {
-	constructor(ns, game) {
+	constructor(ns, Game) {
 		this.ns = ns;
-		this.game = game ? game : new WholeGame(ns);
+		this.Game = Game ? Game : new WholeGame(ns);
+		this.startingAGang = false;
 	}
 	get numSleeves() {
 		return (async () => {
@@ -3980,21 +3981,37 @@ export class Sleeves {
 		}
 	}
 	async startAGangFirst() {
+		this.startingAGang = true;
+		this.Game.Hacknet.goal = "Improve Gym Training";
 		let thresh = 0;
-		if (this.game.bitNodeN == 2) {
+		if (this.Game.bitNodeN == 2) {
 			return;
 		}
 		if (0 == await (this.numSleeves)) {
 			return;
 		}
-		let sleeveIndex = [];
-		while (sleeveIndex.length < await (this.numSleeves)) {
-			sleeveIndex.push(sleeveIndex.length);
-		}
 		let done = false;
         while (!done) {
 			done = true;
-			for (let i = 0 ; i < await (this.Numsleeves) ; i++) {
+			for (let i = 0 ; i < await (this.numSleeves) ; i++) {
+				if ((await Do(this.ns, "ns.sleeve.getSleeve", i)).shock > 97.5) {
+					for (let j = 0 ; j < await (this.numSleeves) ; j++) {
+						done = false;
+						await Do(this.ns, "ns.sleeve.setToShockRecovery", j);
+					}
+				}
+			    while ((await Do(this.ns, "ns.sleeve.getSleeve", i)).shock > 97.5) {
+					await this.ns.asleep(1000);
+					try {
+						await Do(this.ns, "ns.hacknet.spendHashes", "Improve Gym Training");
+					} catch { };
+				}
+			}
+		}
+		done = false;
+        while (!done) {
+			done = true;
+			for (let i = 0 ; i < await (this.numSleeves) ; i++) {
 				if (.75 > await Do(this.ns, "ns.formulas.work.crimeSuccessChance", await Do(this.ns, "ns.sleeve.getSleeve", i), "Homicide")) {
 					this.ns.tprint(i, " ", await Do(this.ns, "ns.formulas.work.crimeSuccessChance", await Do(this.ns, "ns.sleeve.getSleeve", i), "Homicide"));
 					done = false;
@@ -4003,12 +4020,17 @@ export class Sleeves {
 				}
 			}
 		}
-		for (let i = 0 ; i < await (this.Numsleeves) ; i++) {
+		for (let i = 0 ; i < await (this.numSleeves) ; i++) {
 		    await Do(this.ns, "ns.sleeve.setToCommitCrime", i, "Homicide");
 		}
 		while (-54000 > await Do(this.ns, "ns.heart.break")) {
             await this.ns.asleep(10000);
 			this.ns.tprint("Karma: ", await Do(this.ns, "ns.heart.break"));
+		}
+		this.startingAGang = false;
+		this.Game.Hacknet.goal = "Sell for Money";
+		for (let i = 0 ; i < await (this.numSleeves) ; i++) {
+			await Do(this.ns, "ns.sleeve.setToShockRecovery", i);
 		}
 	}
 	async trainCombatStatsUpTo(goal, withSleeves = false, halfdexagi=false) {
@@ -4016,19 +4038,22 @@ export class Sleeves {
 		for (let stat of ["Strength", "Defense", "Dexterity", "Agility"]) {
 			for (let i = 0 ; i < await (this.numSleeves) ; i++) {
 				if ((halfdexagi && ["Dexterity", "Agility"].includes(stat) ? goal / 4 : goal) > ((await Do(this.ns, "ns.sleeve.getSleeve", i)).skills[stat.toLowerCase()])) {
-					await (this.game.Sleeves.trainWithMe(stat));
-					await this.Gym(stat, "Powerhouse Gym", false);
+					await (this.Game.Sleeves.trainWithMe(stat));
+					await this.Game.Player.Gym(stat, "Powerhouse Gym", false);
 					didSomething = true;
 				}
 				while ((halfdexagi && ["Dexterity", "Agility"].includes(stat) ? goal / 4 : goal) > ((await Do(this.ns, "ns.sleeve.getSleeve", i)).skills[stat.toLowerCase()])) {
 	    			await this.ns.asleep(0);
+					try {
+						await Do(this.ns, "ns.hacknet.spendHashes", "Improve Gym Training");
+					} catch { };
 		    		didSomething = true;
 			    }
 			}
 			await this.ns.asleep(1000);
 		}
 		if (withSleeves) {
-			await this.game.Sleeves.deShock();
+			await this.Game.Sleeves.deShock();
 		}
 		return didSomething;
 	}
@@ -4098,7 +4123,7 @@ export class Sleeves {
 			await this.bbDo(i, action, contract);
 		}
 	}
-}
+}import { Do, DoAll, DoAllComplex } from "Do.js";
 
 const stockMapping = {
 	"ECP": "ecorp",
@@ -4563,6 +4588,7 @@ export let makeNewWindow = async (title = "Default Window Title", theme) => {
       good = false;
     }
   }
+  await slp(2000);
   doc.head.innerHTML = `
   <title>${title}</title>
   <style>
