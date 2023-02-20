@@ -2826,12 +2826,19 @@ export class Hacknet {
 				while (await Do(this.ns, "ns.hacknet.spendHashes", this.goal))
 					this.log("Spent hashes on " + this.goal);
 			}
-		// Pay for yourself, Hacknet
-			if ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses < -1e9) {
-				if (0 > ((await Do(this.ns, "ns.getMoneySources")).sinceInstall['hacknet']) + ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses)) {
-					if (4 <= (await Do(this.ns, "ns.hacknet.numHashes", ""))) {
-						let poof = Math.floor((await Do(this.ns, "ns.hacknet.numHashes", "")) / 4);
-						await Do(this.ns, "ns.hacknet.spendHashes", "Sell for Money", "", poof);
+		    if (this.game.Sleeves.startingAGang) {
+				if (await Do(this.ns, "ns.hacknet.spendHashes", "Improve Training")) {
+                    this.log("Spent hashes on Improve Gym Training")
+				}
+			}
+    		// Pay for yourself, Hacknet
+    		if (!this.game.Sleeves.startingAGang) {
+	    		if ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses < -1e9) {
+		    		if (0 > ((await Do(this.ns, "ns.getMoneySources")).sinceInstall['hacknet']) + ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses)) {
+			    		if (4 <= (await Do(this.ns, "ns.hacknet.numHashes", ""))) {
+				    		let poof = Math.floor((await Do(this.ns, "ns.hacknet.numHashes", "")) / 4);
+					    	await Do(this.ns, "ns.hacknet.spendHashes", "Sell for Money", "", poof);
+					    }
 					}
 				}
 			}
@@ -4002,9 +4009,6 @@ export class Sleeves {
 				}
 			    while ((await Do(this.ns, "ns.sleeve.getSleeve", i)).shock > 97.5) {
 					await this.ns.asleep(1000);
-					try {
-						await Do(this.ns, "ns.hacknet.spendHashes", "Improve Gym Training");
-					} catch { };
 				}
 			}
 		}
@@ -4044,9 +4048,6 @@ export class Sleeves {
 				}
 				while ((halfdexagi && ["Dexterity", "Agility"].includes(stat) ? goal / 4 : goal) > ((await Do(this.ns, "ns.sleeve.getSleeve", i)).skills[stat.toLowerCase()])) {
 	    			await this.ns.asleep(0);
-					try {
-						await Do(this.ns, "ns.hacknet.spendHashes", "Improve Gym Training");
-					} catch { };
 		    		didSomething = true;
 			    }
 			}
