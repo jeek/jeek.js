@@ -3259,6 +3259,7 @@ export async function main(ns) {
 	}
 	if (cmdlineargs['bn7'] || cmdlineargs['bn8']) {
     	promises.push(Game.Contracts.loop());
+    	promises.push(Game.Sleeves.SleeveInfoLog());
 	}
 	let displays = [];
 	if (cmdlineargs['stockdisplay']) {
@@ -3967,6 +3968,11 @@ export class Sleeves {
 		this.ns = ns;
 		this.Game = Game ? Game : new WholeGame(ns);
 		this.startingAGang = false;
+		if (ns.flags(cmdlineflags)['logbox']) {
+			this.log = this.game.sidebar.querySelector(".sleeveinfobox") || this.game.createSidebarItem("Sleeves", "", "H", "sleeveinfobox");
+			this.log.size = 8;
+			this.log = this.log.log;
+		}
 	}
 	get numSleeves() {
 		return (async () => {
@@ -3980,6 +3986,18 @@ export class Sleeves {
 				return 0;
 			}
 		})();
+	}
+	async SleeveInfoLog() {
+		while (true) {
+			if (ns.flags(cmdlineflags)['logbox']) {
+     			for (let i = 0 ; i < await (this.numSleeves) ; i++) {
+	     			this.log(JSON.stringify(await Do(this.ns, "ns.sleeve.getTask", i)));
+				}
+				await this.ns.asleep(10000);
+			} else {
+				await this.ns.asleep(123456789);
+			}
+		}
 	}
 	async trainWithMe(stat) {
 		for (let i = 0; i < await (this.numSleeves); i++) {
@@ -4452,7 +4470,7 @@ export class WholeGame {
 				if (!item.logTarget || !this.doc.contains(item.logTarget)) item.logTarget = item.body.appendChild(this.elemFromHTML("<div class=log></div>"));
 				let logEntry = item.logTarget.appendChild(this.elemFromHTML(`<p>${timestamp ? this.ts() : ""} ${html}</p>`));
 				try {
-					while ((item.logTarget.innerHTML.match(/\<p\>/g) || []).length>10) {
+					while ((item.logTarget.innerHTML.match(/\<p\>/g) || []).length>this.size) {
 					    item.logTarget.innerHTML = item.logTarget.innerHTML.slice(item.logTarget.innerHTML.indexOf("<p>", 3));
 					}
 				} catch { }
@@ -4460,6 +4478,7 @@ export class WholeGame {
 				item.recalcHeight();
 				return logEntry;
 			},
+			size: 10,
 			recalcHeight: () => { item.style.height = ""; item.style.height = item.offsetHeight + "px" },
 			contextItems: {},
 			addContextItem: (name, fn, cFn = () => 1) => item.contextItems[name] = { fn: fn, cFn: cFn },
@@ -4575,7 +4594,7 @@ export class WholeGame {
 // Thanks to omuretsu
 let slp = ms => new Promise(r => setTimeout(r, ms));
 export let makeNewWindow = async (title = "Default Window Title", theme) => {
-  let win = open(null, title.replaceAll(" ", "_"), "popup=yes,height=200,width=500,left=100,top=100,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,directories=no,status=no");
+  let win = open("", title.replaceAll(" ", "_"), "popup=yes,height=200,width=500,left=100,top=100,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,directories=no,status=no");
 //  let win = open("main.bundle.js", title.replaceAll(" ", "_"), "popup=yes,height=200,width=500,left=100,top=100,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,directories=no,status=no");
   let good = false;
   let doc = 0;
@@ -4589,7 +4608,7 @@ export let makeNewWindow = async (title = "Default Window Title", theme) => {
       good = false;
     }
   }
-  await slp(2000);
+  await slp(200);
   doc.head.innerHTML = `
   <title>${title}</title>
   <style>
@@ -4655,7 +4674,7 @@ export let makeNewWindow = async (title = "Default Window Title", theme) => {
   win.update = (content) => {
     logs.innerHTML = content;
   }
-  win.reopen = () => open("main.bundle.js", title.replaceAll(" ", "_"), "popup=yes,height=200,width=500,left=100,top=100,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,directories=no,status=no");
+  win.reopen = () => open("", title.replaceAll(" ", "_"), "popup=yes,height=200,width=500,left=100,top=100,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,directories=no,status=no");
   return win;
 }
 /* Worker Test Code
