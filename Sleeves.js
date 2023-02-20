@@ -7,7 +7,7 @@ export class Sleeves {
 		this.Game = Game ? Game : new WholeGame(ns);
 		this.startingAGang = false;
 		if (ns.flags(cmdlineflags)['logbox']) {
-			this.log = this.game.sidebar.querySelector(".sleeveinfobox") || this.game.createSidebarItem("Sleeves", "", "H", "sleeveinfobox");
+			this.log = this.Game.sidebar.querySelector(".sleeveinfobox") || this.Game.createSidebarItem("Sleeves", "", "H", "sleeveinfobox");
 			this.log.size = 8;
 			this.log = this.log.log;
 		}
