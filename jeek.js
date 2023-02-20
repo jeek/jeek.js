@@ -3415,8 +3415,10 @@ export class Player {
 					didSomething = true;
 				}
 			}
-			while (goal > ((await Do(this.ns, "ns.getPlayer")).skills[stat.toLowerCase()]))
+			while (goal > ((await Do(this.ns, "ns.getPlayer")).skills[stat.toLowerCase()])) {
+				await this.ns.asleep(0);
 				didSomething = true;
+			}
 			await this.ns.asleep(1000);
 		}
 		if (withSleeves) {
@@ -4372,7 +4374,8 @@ export class WholeGame {
 // Thanks to omuretsu
 let slp = ms => new Promise(r => setTimeout(r, ms));
 export let makeNewWindow = async (title = "Default Window Title", theme) => {
-  let win = open("main.bundle.js", title.replaceAll(" ", "_"), "popup=yes,height=200,width=500,left=100,top=100,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,directories=no,status=no");
+  let win = open(null, title.replaceAll(" ", "_"), "popup=yes,height=200,width=500,left=100,top=100,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,directories=no,status=no");
+//  let win = open("main.bundle.js", title.replaceAll(" ", "_"), "popup=yes,height=200,width=500,left=100,top=100,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,directories=no,status=no");
   let good = false;
   let doc = 0;
   while (!good) {
