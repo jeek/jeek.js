@@ -269,7 +269,7 @@ export class Gang {
     
             // Chill until clash time
             while (Date.now() <= starttime) {
-                await ns.sleep(0);
+                await ns.asleep(0);
             }
 
             // Clash time
@@ -291,7 +291,7 @@ export class Gang {
 
                 // Chill until the clash tick processes.
                 while ((await (this['getGangInformation'])).power == startpower) {
-                    await ns.sleep(0);
+                    await ns.asleep(0);
                 }
                 if (oldterritory != Math.floor(100 * (await (this['getOtherGangInformation'])).territory)) {
                     globalThis.gangBox.log("Territory now " + Math.floor(100 * (await (this['getGangInformation'])).territory).toString());

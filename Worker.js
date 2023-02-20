@@ -11,11 +11,11 @@ export async function main(ns) {
 	data.push(`Worker said : ${event.data}`);
   };
   while (data.length == 0) {
-	await ns.sleep(0);
+	await ns.asleep(0);
   }
   ns.tprint(data.pop());
   while (data.length == 0) {
-	await ns.sleep(0);
+	await ns.asleep(0);
   }
   ns.tprint(data.pop());
 } */
