@@ -4,6 +4,7 @@ export async function bn7(Game) {
     let numberOfSleeves = await (Game.Sleeves.numSleeves);
     await Game.Sleeves.bbCombatAugs();
     await Game.Player.trainCombatStatsUpTo(100, true); // The true indicates to drag sleeves along
+    await Game.Sleeves.startAGangFirst();
     if (!await Game.Bladeburner.start())
         return false;
     Game.Bladeburner.log("Start.")

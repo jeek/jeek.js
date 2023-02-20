@@ -25,6 +25,59 @@ export class Sleeves {
 			await Do(this.ns, "ns.sleeve.setToGymWorkout", i, "Powerhouse Gym", stat);
 		}
 	}
+	async startAGangFirst() {
+		let thresh = 0;
+		if (this.game.bitNodeN == 2) {
+			return;
+		}
+		if (0 == await (this.numSleeves)) {
+			return;
+		}
+		let sleeveIndex = [];
+		while (sleeveIndex.length < await (this.numSleeves)) {
+			sleeveIndex.push(sleeveIndex.length);
+		}
+		let done = false;
+        while (!done) {
+			done = true;
+			for (let i = 0 ; i < await (this.Numsleeves) ; i++) {
+				if (.75 > await Do(this.ns, "ns.formulas.work.crimeSuccessChance", await Do(this.ns, "ns.sleeve.getSleeve", i), "Homicide")) {
+					this.ns.tprint(i, " ", await Do(this.ns, "ns.formulas.work.crimeSuccessChance", await Do(this.ns, "ns.sleeve.getSleeve", i), "Homicide"));
+					done = false;
+					thresh += 10;
+					await this.trainCombatStatsUpTo(thresh, true, true);
+				}
+			}
+		}
+		for (let i = 0 ; i < await (this.Numsleeves) ; i++) {
+		    await Do(this.ns, "ns.sleeve.setToCommitCrime", i, "Homicide");
+		}
+		while (-54000 > await Do(this.ns, "ns.heart.break")) {
+            await this.ns.asleep(10000);
+			this.ns.tprint("Karma: ", await Do(this.ns, "ns.heart.break"));
+		}
+	}
+	async trainCombatStatsUpTo(goal, withSleeves = false, halfdexagi=false) {
+		let didSomething = false;
+		for (let stat of ["Strength", "Defense", "Dexterity", "Agility"]) {
+			for (let i = 0 ; i < await (this.numSleeves) ; i++) {
+				if ((halfdexagi && ["Dexterity", "Agility"].includes(stat) ? goal / 4 : goal) > ((await Do(this.ns, "ns.sleeve.getSleeve", i)).skills[stat.toLowerCase()])) {
+					await (this.game.Sleeves.trainWithMe(stat));
+					await this.Gym(stat, "Powerhouse Gym", false);
+					didSomething = true;
+				}
+				while ((halfdexagi && ["Dexterity", "Agility"].includes(stat) ? goal / 4 : goal) > ((await Do(this.ns, "ns.sleeve.getSleeve", i)).skills[stat.toLowerCase()])) {
+	    			await this.ns.asleep(0);
+		    		didSomething = true;
+			    }
+			}
+			await this.ns.asleep(1000);
+		}
+		if (withSleeves) {
+			await this.game.Sleeves.deShock();
+		}
+		return didSomething;
+	}
 	async bbCombatSort() {
 		return (async () => {
 			try {
