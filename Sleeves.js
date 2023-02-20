@@ -6,9 +6,9 @@ export class Sleeves {
 		this.ns = ns;
 		this.Game = Game ? Game : new WholeGame(ns);
 		this.startingAGang = false;
-		if (ns.flags(cmdlineflags)['logbox']) {
+		if (this.ns.flags(cmdlineflags)['logbox']) {
 			this.log = this.Game.sidebar.querySelector(".sleeveinfobox") || this.Game.createSidebarItem("Sleeves", "", "H", "sleeveinfobox");
-			this.log.size = 8;
+			this.log.sizeM = 8;
 			this.log = this.log.log;
 		}
 	}
@@ -27,7 +27,7 @@ export class Sleeves {
 	}
 	async SleeveInfoLog() {
 		while (true) {
-			if (ns.flags(cmdlineflags)['logbox']) {
+			if (this.ns.flags(cmdlineflags)['logbox']) {
      			for (let i = 0 ; i < await (this.numSleeves) ; i++) {
 	     			this.log(JSON.stringify(await Do(this.ns, "ns.sleeve.getTask", i)));
 				}
