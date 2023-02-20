@@ -33,14 +33,28 @@ export class Sleeves {
 		if (0 == await (this.numSleeves)) {
 			return;
 		}
-		let sleeveIndex = [];
-		while (sleeveIndex.length < await (this.numSleeves)) {
-			sleeveIndex.push(sleeveIndex.length);
-		}
 		let done = false;
         while (!done) {
 			done = true;
-			for (let i = 0 ; i < await (this.Numsleeves) ; i++) {
+			for (let i = 0 ; i < await (this.numSleeves) ; i++) {
+				if ((await Do(this.ns, "ns.sleeve.getSleeve", i)).shock > 97.5) {
+					for (let j = 0 ; j < await (this.numSleeves) ; j++) {
+						done = false;
+						await Do(this.ns, "ns.sleeve.setToShockRecovery", j);
+					}
+				}
+			    while ((await Do(this.ns, "ns.sleeve.getSleeve", i)).shock > 97.5) {
+					await this.ns.asleep(1000);
+					try {
+						await Do(this.ns, "ns.hacknet.spendHashes", "Improve Gym Training");
+					} catch { };
+				}
+			}
+		}
+		done = false;
+        while (!done) {
+			done = true;
+			for (let i = 0 ; i < await (this.numSleeves) ; i++) {
 				if (.75 > await Do(this.ns, "ns.formulas.work.crimeSuccessChance", await Do(this.ns, "ns.sleeve.getSleeve", i), "Homicide")) {
 					this.ns.tprint(i, " ", await Do(this.ns, "ns.formulas.work.crimeSuccessChance", await Do(this.ns, "ns.sleeve.getSleeve", i), "Homicide"));
 					done = false;
@@ -49,12 +63,15 @@ export class Sleeves {
 				}
 			}
 		}
-		for (let i = 0 ; i < await (this.Numsleeves) ; i++) {
+		for (let i = 0 ; i < await (this.numSleeves) ; i++) {
 		    await Do(this.ns, "ns.sleeve.setToCommitCrime", i, "Homicide");
 		}
 		while (-54000 > await Do(this.ns, "ns.heart.break")) {
             await this.ns.asleep(10000);
 			this.ns.tprint("Karma: ", await Do(this.ns, "ns.heart.break"));
+		}
+		for (let i = 0 ; i < await (this.numSleeves) ; i++) {
+			await Do(this.ns, "ns.sleeve.setToShockRecovery", i);
 		}
 	}
 	async trainCombatStatsUpTo(goal, withSleeves = false, halfdexagi=false) {
@@ -63,11 +80,14 @@ export class Sleeves {
 			for (let i = 0 ; i < await (this.numSleeves) ; i++) {
 				if ((halfdexagi && ["Dexterity", "Agility"].includes(stat) ? goal / 4 : goal) > ((await Do(this.ns, "ns.sleeve.getSleeve", i)).skills[stat.toLowerCase()])) {
 					await (this.game.Sleeves.trainWithMe(stat));
-					await this.Gym(stat, "Powerhouse Gym", false);
+					await this.game.Player.Gym(stat, "Powerhouse Gym", false);
 					didSomething = true;
 				}
 				while ((halfdexagi && ["Dexterity", "Agility"].includes(stat) ? goal / 4 : goal) > ((await Do(this.ns, "ns.sleeve.getSleeve", i)).skills[stat.toLowerCase()])) {
 	    			await this.ns.asleep(0);
+					try {
+						await Do(this.ns, "ns.hacknet.spendHashes", "Improve Gym Training");
+					} catch { };
 		    		didSomething = true;
 			    }
 			}
