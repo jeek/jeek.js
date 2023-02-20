@@ -669,7 +669,6 @@ export class Contracts {
 			    if (success.length > 0) {
 					delete this.contracts[solutions[0].data[1]];
 					this.log("Succeeded at " + solutions[0].data[3] + ": " + success);
-					done = true;
 				} else {
 					this.log("Failed at " + solutions[0].data[3]);
 					this.log("Failed at " + solutions[0].data[3], " ", types[1](this.contracts[solutions[0].data[1]].data, this.ns));
