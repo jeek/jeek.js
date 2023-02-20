@@ -65,15 +65,13 @@ export async function bn8(Game) {
             }
             for (let i = 0; i < prices.length; i++) {
                 let j = Math.min(i, 10);
-                for (let k = i - j; k <= i + j; k++) {
-//                    try {
-                        if ((prices[i - k][stock][0] < prices[i][stock][0] && prices[i][stock][0] > prices[i + k][stock][0])) {
-                            guess[i] += 1;
-                        }
-                        if ((prices[i - k][stock][0] > prices[i][stock][0] && prices[i][stock][0] < prices[i + k][stock][0])) {
-                            guess[i] += 1;
-                        }
-//                    } catch { }
+                for (let k = 0; k < j && i + k < prices.length; k++) {
+                    if ((prices[i - k][stock][0] < prices[i][stock][0] && prices[i][stock][0] > prices[i + k][stock][0])) {
+                        guess[i] += 1;
+                    }
+                    if ((prices[i - k][stock][0] > prices[i][stock][0] && prices[i][stock][0] < prices[i + k][stock][0])) {
+                        guess[i] += 1;
+                    }
                 }
             }
             scores[stock] = up / count;
