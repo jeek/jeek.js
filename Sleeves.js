@@ -31,6 +31,8 @@ export class Sleeves {
 		while (true) {
 			if (this.ns.flags(cmdlineflags)['logbox']) {
      			for (let i = 0 ; i < await (this.numSleeves) ; i++) {
+					let me = await Do(this.ns, "ns.sleeve.getSleeve", i);
+					this.log2([me.skills.strength.toString(), me.skills.defense.toString(), me.skills.dexterity.toString(), me.skills.agility.toString(), me.skills.intelligence.toString(), me.skills.shock.toString()].join("/"), false);
 	     			this.log2(JSON.stringify((await Do(this.ns, "ns.sleeve.getTask", i)).values().join("/")), false);
 				}
 				await this.ns.asleep(10000);
