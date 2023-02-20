@@ -7,9 +7,11 @@ export class Sleeves {
 		this.Game = Game ? Game : new WholeGame(ns);
 		this.startingAGang = false;
 		if (this.ns.flags(cmdlineflags)['logbox']) {
-			this.log = this.Game.sidebar.querySelector(".sleeveinfobox") || this.Game.createSidebarItem("Sleeves", "", "H", "sleeveinfobox");
-			this.log.sizeM = 8;
+			this.log = this.Game.sidebar.querySelector(".sleevelog") || this.Game.createSidebarItem("Sleeve Log", "", "S", "sleevelog");
 			this.log = this.log.log;
+			this.log2 = this.Game.sidebar.querySelector(".sleeveinfobox") || this.Game.createSidebarItem("Sleeves Info", "", "S", "sleeveinfobox");
+			this.log2.sizeM = 16;
+			this.log2 = this.log.log;
 		}
 	}
 	get numSleeves() {
@@ -29,7 +31,7 @@ export class Sleeves {
 		while (true) {
 			if (this.ns.flags(cmdlineflags)['logbox']) {
      			for (let i = 0 ; i < await (this.numSleeves) ; i++) {
-	     			this.log(JSON.stringify(await Do(this.ns, "ns.sleeve.getTask", i)));
+	     			this.log2(JSON.stringify((await Do(this.ns, "ns.sleeve.getTask", i)).values().join("/")), false);
 				}
 				await this.ns.asleep(10000);
 			} else {
@@ -44,6 +46,7 @@ export class Sleeves {
 		}
 	}
 	async startAGangFirst() {
+		this.log("Starting a Gang")
 		this.startingAGang = true;
 		this.Game.Hacknet.goal = "Improve Gym Training";
 		let thresh = 0;
@@ -54,6 +57,7 @@ export class Sleeves {
 			return;
 		}
 		let done = false;
+		this.log("Shock Recovery...")
         while (!done) {
 			done = true;
 			for (let i = 0 ; i < await (this.numSleeves) ; i++) {
@@ -73,9 +77,10 @@ export class Sleeves {
 			done = true;
 			for (let i = 0 ; i < await (this.numSleeves) ; i++) {
 				if (.75 > await Do(this.ns, "ns.formulas.work.crimeSuccessChance", await Do(this.ns, "ns.sleeve.getSleeve", i), "Homicide")) {
-					this.ns.tprint(i, " ", await Do(this.ns, "ns.formulas.work.crimeSuccessChance", await Do(this.ns, "ns.sleeve.getSleeve", i), "Homicide"));
+					this.log(i.toString() + " Success Rate: " + (await Do(this.ns, "ns.formulas.work.crimeSuccessChance", await Do(this.ns, "ns.sleeve.getSleeve", i), "Homicide")).toString() + " ");
 					done = false;
 					thresh += 10;
+					this.log("Raising threshold to: " + thresh.toString());
 					await this.trainCombatStatsUpTo(thresh, true, true);
 				}
 			}
@@ -85,15 +90,17 @@ export class Sleeves {
 		}
 		while (-54000 > await Do(this.ns, "ns.heart.break")) {
             await this.ns.asleep(10000);
-			this.ns.tprint("Karma: ", await Do(this.ns, "ns.heart.break"));
+			this.log("Homiciding, Karma: " + (await Do(this.ns, "ns.heart.break")).toString());
 		}
 		this.startingAGang = false;
 		this.Game.Hacknet.goal = "Sell for Money";
+		this.log("You have -54000 Karma. Start a Gang.");
 		for (let i = 0 ; i < await (this.numSleeves) ; i++) {
 			await Do(this.ns, "ns.sleeve.setToShockRecovery", i);
 		}
 	}
 	async trainCombatStatsUpTo(goal, withSleeves = false, halfdexagi=false) {
+		this.log("Training Player stats up to " + goal.toString());
 		let didSomething = false;
 		for (let stat of ["Strength", "Defense", "Dexterity", "Agility"]) {
 			for (let i = 0 ; i < await (this.numSleeves) ; i++) {
@@ -157,7 +164,7 @@ export class Sleeves {
 			// "strength":1,"strength_exp":1,"defense":1,"defense_exp":1,"dexterity":1.05,"dexterity_exp":1,"agility":1.05,"agility_exp":1
 			for (let aug of augs) {
 				if (await Do(this.ns, "ns.sleeve.purchaseSleeveAug", i, aug)) {
-					this.ns.toast("Sleeve " + i.toString() + " got " + aug)
+					this.log("Sleeve " + i.toString() + " got " + aug)
 					return [i, aug];
 				}
 			}
