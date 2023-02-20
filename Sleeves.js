@@ -48,9 +48,6 @@ export class Sleeves {
 				}
 			    while ((await Do(this.ns, "ns.sleeve.getSleeve", i)).shock > 97.5) {
 					await this.ns.asleep(1000);
-					try {
-						await Do(this.ns, "ns.hacknet.spendHashes", "Improve Gym Training");
-					} catch { };
 				}
 			}
 		}
@@ -90,9 +87,6 @@ export class Sleeves {
 				}
 				while ((halfdexagi && ["Dexterity", "Agility"].includes(stat) ? goal / 4 : goal) > ((await Do(this.ns, "ns.sleeve.getSleeve", i)).skills[stat.toLowerCase()])) {
 	    			await this.ns.asleep(0);
-					try {
-						await Do(this.ns, "ns.hacknet.spendHashes", "Improve Gym Training");
-					} catch { };
 		    		didSomething = true;
 			    }
 			}
