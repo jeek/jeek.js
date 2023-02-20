@@ -742,13 +742,13 @@ export async function bn8(Game) {
     let report = {};
     let starttime = Date.now();
     while ((!await Do(Game.ns, "ns.stock.has4SDataTIXAPI", ""))) {
-        await Game.ns.asleep([6000-(Date.now()-starttime), 0].reduce((a, b) => a > b ? a : b));
-        starttime = Date.now();
         if ((await (Game.StockMarket.portfolioValue)) + (await Do(Game.ns, "ns.getPlayer")).money > 25000000000 * ((await Do(Game.ns, "ns.getBitNodeMultipliers"))).FourSigmaMarketDataApiCost) {
             Game.ns.write('/temp/4s.js', "export async function main(ns) { for (let stock of ns.stock.getSymbols()) { ns.stock.getPosition(stock)[0] ? ns.stock.sellStock(stock, ns.stock.getPosition(stock)[0]) : 0; ns.stock.getPosition(stock)[2] ? ns.stock.sellShort(stock, ns.stock.getPosition(stock)[2]) : 0; } ns.stock.purchase4SMarketDataTixApi(); }",'w')
             await Game.ns.asleep(0);
             Game.ns.run('/temp/4s.js');
         };
+        await Game.ns.asleep([2000-(Date.now()-starttime), 0].reduce((a, b) => a > b ? a : b));
+        starttime = Date.now();
         while (tickPrice == await Do(Game.ns, "ns.stock.getPurchaseCost", 'ECP', 1, "Long")) {
             await Game.ns.asleep(1000);
         }
@@ -784,15 +784,13 @@ export async function bn8(Game) {
             }
             for (let i = 0; i < prices.length; i++) {
                 let j = Math.min(i, 10);
-                for (let k = i - j; k <= i + j; k++) {
-//                    try {
-                        if ((prices[i - k][stock][0] < prices[i][stock][0] && prices[i][stock][0] > prices[i + k][stock][0])) {
-                            guess[i] += 1;
-                        }
-                        if ((prices[i - k][stock][0] > prices[i][stock][0] && prices[i][stock][0] < prices[i + k][stock][0])) {
-                            guess[i] += 1;
-                        }
-//                    } catch { }
+                for (let k = 0; k < j && i + k < prices.length; k++) {
+                    if ((prices[i - k][stock][0] < prices[i][stock][0] && prices[i][stock][0] > prices[i + k][stock][0])) {
+                        guess[i] += 1;
+                    }
+                    if ((prices[i - k][stock][0] > prices[i][stock][0] && prices[i][stock][0] < prices[i + k][stock][0])) {
+                        guess[i] += 1;
+                    }
                 }
             }
             scores[stock] = up / count;
@@ -2037,15 +2035,14 @@ export class Contracts {
 		}
 		while (z > 0 || solutions.length > 0) {
 			await this.ns.asleep(1000);
-			if (solutions.length > 0) {
+			while (solutions.length > 0) {
 				let success = await Do(this.ns, "ns.codingcontract.attempt", solutions[0].data[0], solutions[0].data[1], solutions[0].data[2]);
 			    if (success.length > 0) {
-					delete this.contracts[contract];
-					this.log("Succeeded at " + types[0] + ": " + success);
-					done = true;
+					delete this.contracts[solutions[0].data[1]];
+					this.log("Succeeded at " + solutions[0].data[3] + ": " + success);
 				} else {
-					this.log("Failed at " + types[0]);
-					this.log("Failed at " + types[0], " ", types[1](this.contracts[contract].data, this.ns));
+					this.log("Failed at " + solutions[0].data[3]);
+					this.log("Failed at " + solutions[0].data[3], " ", types[1](this.contracts[solutions[0].data[1]].data, this.ns));
 					//this.ns.exit();
 				}
 				solutions.shift();
