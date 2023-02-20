@@ -74,7 +74,7 @@ export class WholeGame {
 				if (!item.logTarget || !this.doc.contains(item.logTarget)) item.logTarget = item.body.appendChild(this.elemFromHTML("<div class=log></div>"));
 				let logEntry = item.logTarget.appendChild(this.elemFromHTML(`<p>${timestamp ? this.ts() : ""} ${html}</p>`));
 				try {
-					while ((item.logTarget.innerHTML.match(/\<p\>/g) || []).length>10) {
+					while ((item.logTarget.innerHTML.match(/\<p\>/g) || []).length>this.size) {
 					    item.logTarget.innerHTML = item.logTarget.innerHTML.slice(item.logTarget.innerHTML.indexOf("<p>", 3));
 					}
 				} catch { }
@@ -82,6 +82,7 @@ export class WholeGame {
 				item.recalcHeight();
 				return logEntry;
 			},
+			size: 10,
 			recalcHeight: () => { item.style.height = ""; item.style.height = item.offsetHeight + "px" },
 			contextItems: {},
 			addContextItem: (name, fn, cFn = () => 1) => item.contextItems[name] = { fn: fn, cFn: cFn },

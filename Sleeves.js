@@ -6,6 +6,11 @@ export class Sleeves {
 		this.ns = ns;
 		this.Game = Game ? Game : new WholeGame(ns);
 		this.startingAGang = false;
+		if (ns.flags(cmdlineflags)['logbox']) {
+			this.log = this.game.sidebar.querySelector(".sleeveinfobox") || this.game.createSidebarItem("Sleeves", "", "H", "sleeveinfobox");
+			this.log.size = 8;
+			this.log = this.log.log;
+		}
 	}
 	get numSleeves() {
 		return (async () => {
@@ -19,6 +24,18 @@ export class Sleeves {
 				return 0;
 			}
 		})();
+	}
+	async SleeveInfoLog() {
+		while (true) {
+			if (ns.flags(cmdlineflags)['logbox']) {
+     			for (let i = 0 ; i < await (this.numSleeves) ; i++) {
+	     			this.log(JSON.stringify(await Do(this.ns, "ns.sleeve.getTask", i)));
+				}
+				await this.ns.asleep(10000);
+			} else {
+				await this.ns.asleep(123456789);
+			}
+		}
 	}
 	async trainWithMe(stat) {
 		for (let i = 0; i < await (this.numSleeves); i++) {
