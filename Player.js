@@ -139,8 +139,10 @@ export class Player {
 					didSomething = true;
 				}
 			}
-			while (goal > ((await Do(this.ns, "ns.getPlayer")).skills[stat.toLowerCase()]))
+			while (goal > ((await Do(this.ns, "ns.getPlayer")).skills[stat.toLowerCase()])) {
+				await this.ns.asleep(0);
 				didSomething = true;
+			}
 			await this.ns.asleep(1000);
 		}
 		if (withSleeves) {
