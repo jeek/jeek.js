@@ -1,7 +1,7 @@
 // Thanks to omuretsu
 let slp = ms => new Promise(r => setTimeout(r, ms));
 export let makeNewWindow = async (title = "Default Window Title", theme) => {
-  let win = open(null, title.replaceAll(" ", "_"), "popup=yes,height=200,width=500,left=100,top=100,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,directories=no,status=no");
+  let win = open("", title.replaceAll(" ", "_"), "popup=yes,height=200,width=500,left=100,top=100,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,directories=no,status=no");
 //  let win = open("main.bundle.js", title.replaceAll(" ", "_"), "popup=yes,height=200,width=500,left=100,top=100,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,directories=no,status=no");
   let good = false;
   let doc = 0;
@@ -15,7 +15,7 @@ export let makeNewWindow = async (title = "Default Window Title", theme) => {
       good = false;
     }
   }
-  await slp(2000);
+  await slp(200);
   doc.head.innerHTML = `
   <title>${title}</title>
   <style>
@@ -81,6 +81,6 @@ export let makeNewWindow = async (title = "Default Window Title", theme) => {
   win.update = (content) => {
     logs.innerHTML = content;
   }
-  win.reopen = () => open("main.bundle.js", title.replaceAll(" ", "_"), "popup=yes,height=200,width=500,left=100,top=100,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,directories=no,status=no");
+  win.reopen = () => open("", title.replaceAll(" ", "_"), "popup=yes,height=200,width=500,left=100,top=100,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,directories=no,status=no");
   return win;
 }
