@@ -2694,7 +2694,7 @@ export class Gang {
     
             // Chill until clash time
             while (Date.now() <= starttime) {
-                await ns.sleep(0);
+                await ns.asleep(0);
             }
 
             // Clash time
@@ -2716,7 +2716,7 @@ export class Gang {
 
                 // Chill until the clash tick processes.
                 while ((await (this['getGangInformation'])).power == startpower) {
-                    await ns.sleep(0);
+                    await ns.asleep(0);
                 }
                 if (oldterritory != Math.floor(100 * (await (this['getOtherGangInformation'])).territory)) {
                     globalThis.gangBox.log("Territory now " + Math.floor(100 * (await (this['getGangInformation'])).territory).toString());
@@ -3260,6 +3260,7 @@ export async function main(ns) {
 	if (cmdlineargs['bn7'] || cmdlineargs['bn8']) {
     	promises.push(Game.Contracts.loop());
     	promises.push(Game.Sleeves.SleeveInfoLog());
+    	promises.push(Game.Servers.serverbox());
 	}
 	let displays = [];
 	if (cmdlineargs['stockdisplay']) {
@@ -3968,10 +3969,12 @@ export class Sleeves {
 		this.ns = ns;
 		this.Game = Game ? Game : new WholeGame(ns);
 		this.startingAGang = false;
-		if (ns.flags(cmdlineflags)['logbox']) {
-			this.log = this.game.sidebar.querySelector(".sleeveinfobox") || this.game.createSidebarItem("Sleeves", "", "H", "sleeveinfobox");
-			this.log.size = 8;
+		if (this.ns.flags(cmdlineflags)['logbox']) {
+			this.log = this.Game.sidebar.querySelector(".sleevelog") || this.Game.createSidebarItem("Sleeve Log", "", "S", "sleevelog");
 			this.log = this.log.log;
+			this.log2 = this.Game.sidebar.querySelector(".sleeveinfobox") || this.Game.createSidebarItem("Sleeves Info", "", "S", "sleeveinfobox");
+			this.log2.sizeM = 16;
+			this.log2 = this.log2.log;
 		}
 	}
 	get numSleeves() {
@@ -3989,9 +3992,11 @@ export class Sleeves {
 	}
 	async SleeveInfoLog() {
 		while (true) {
-			if (ns.flags(cmdlineflags)['logbox']) {
-     			for (let i = 0 ; i < await (this.numSleeves) ; i++) {
-	     			this.log(JSON.stringify(await Do(this.ns, "ns.sleeve.getTask", i)));
+			if (this.ns.flags(cmdlineflags)['logbox']) {
+				for (let i = 0; i < await (this.numSleeves); i++) {
+					let me = await Do(this.ns, "ns.sleeve.getSleeve", i);
+					this.log2([me.skills.hacking.toString(), me.skills.strength.toString(), me.skills.defense.toString(), me.skills.dexterity.toString(), me.skills.agility.toString(), me.skills.intelligence.toString(), me.shock.toString()].join("/"), false);
+					try { this.log2(JSON.stringify(Object.values(await Do(this.ns, "ns.sleeve.getTask", i)).join("/")), false) } catch { };
 				}
 				await this.ns.asleep(10000);
 			} else {
@@ -4006,6 +4011,7 @@ export class Sleeves {
 		}
 	}
 	async startAGangFirst() {
+		this.log("Starting a Gang")
 		this.startingAGang = true;
 		this.Game.Hacknet.goal = "Improve Gym Training";
 		let thresh = 0;
@@ -4016,58 +4022,62 @@ export class Sleeves {
 			return;
 		}
 		let done = false;
-        while (!done) {
+		this.log("Shock Recovery...")
+		while (!done) {
 			done = true;
-			for (let i = 0 ; i < await (this.numSleeves) ; i++) {
+			for (let i = 0; i < await (this.numSleeves); i++) {
 				if ((await Do(this.ns, "ns.sleeve.getSleeve", i)).shock > 97.5) {
-					for (let j = 0 ; j < await (this.numSleeves) ; j++) {
+					for (let j = 0; j < await (this.numSleeves); j++) {
 						done = false;
 						await Do(this.ns, "ns.sleeve.setToShockRecovery", j);
 					}
 				}
-			    while ((await Do(this.ns, "ns.sleeve.getSleeve", i)).shock > 97.5) {
+				while ((await Do(this.ns, "ns.sleeve.getSleeve", i)).shock > 97.5) {
 					await this.ns.asleep(1000);
 				}
 			}
 		}
 		done = false;
-        while (!done) {
+		while (!done) {
 			done = true;
-			for (let i = 0 ; i < await (this.numSleeves) ; i++) {
+			for (let i = 0; i < await (this.numSleeves); i++) {
 				if (.75 > await Do(this.ns, "ns.formulas.work.crimeSuccessChance", await Do(this.ns, "ns.sleeve.getSleeve", i), "Homicide")) {
-					this.ns.tprint(i, " ", await Do(this.ns, "ns.formulas.work.crimeSuccessChance", await Do(this.ns, "ns.sleeve.getSleeve", i), "Homicide"));
+					this.log(i.toString() + " Success Rate: " + (await Do(this.ns, "ns.formulas.work.crimeSuccessChance", await Do(this.ns, "ns.sleeve.getSleeve", i), "Homicide")).toString() + " ");
 					done = false;
 					thresh += 10;
+					this.log("Raising threshold to: " + thresh.toString());
 					await this.trainCombatStatsUpTo(thresh, true, true);
 				}
 			}
 		}
-		for (let i = 0 ; i < await (this.numSleeves) ; i++) {
-		    await Do(this.ns, "ns.sleeve.setToCommitCrime", i, "Homicide");
+		for (let i = 0; i < await (this.numSleeves); i++) {
+			await Do(this.ns, "ns.sleeve.setToCommitCrime", i, "Homicide");
 		}
-		while (-54000 > await Do(this.ns, "ns.heart.break")) {
-            await this.ns.asleep(10000);
-			this.ns.tprint("Karma: ", await Do(this.ns, "ns.heart.break"));
+		while (-54000 < await Do(this.ns, "ns.heart.break")) {
+			await this.ns.asleep(10000);
+			this.log("Homiciding, Karma: " + (await Do(this.ns, "ns.heart.break")).toString());
 		}
 		this.startingAGang = false;
 		this.Game.Hacknet.goal = "Sell for Money";
-		for (let i = 0 ; i < await (this.numSleeves) ; i++) {
+		this.log("You have -54000 Karma. Start a Gang.");
+		for (let i = 0; i < await (this.numSleeves); i++) {
 			await Do(this.ns, "ns.sleeve.setToShockRecovery", i);
 		}
 	}
-	async trainCombatStatsUpTo(goal, withSleeves = false, halfdexagi=false) {
+	async trainCombatStatsUpTo(goal, withSleeves = false, halfdexagi = false) {
+		this.log("Training Player stats up to " + goal.toString());
 		let didSomething = false;
 		for (let stat of ["Strength", "Defense", "Dexterity", "Agility"]) {
-			for (let i = 0 ; i < await (this.numSleeves) ; i++) {
+			for (let i = 0; i < await (this.numSleeves); i++) {
 				if ((halfdexagi && ["Dexterity", "Agility"].includes(stat) ? goal / 4 : goal) > ((await Do(this.ns, "ns.sleeve.getSleeve", i)).skills[stat.toLowerCase()])) {
 					await (this.Game.Sleeves.trainWithMe(stat));
 					await this.Game.Player.Gym(stat, "Powerhouse Gym", false);
 					didSomething = true;
 				}
 				while ((halfdexagi && ["Dexterity", "Agility"].includes(stat) ? goal / 4 : goal) > ((await Do(this.ns, "ns.sleeve.getSleeve", i)).skills[stat.toLowerCase()])) {
-	    			await this.ns.asleep(0);
-		    		didSomething = true;
-			    }
+					await this.ns.asleep(0);
+					didSomething = true;
+				}
 			}
 			await this.ns.asleep(1000);
 		}
@@ -4119,7 +4129,7 @@ export class Sleeves {
 			// "strength":1,"strength_exp":1,"defense":1,"defense_exp":1,"dexterity":1.05,"dexterity_exp":1,"agility":1.05,"agility_exp":1
 			for (let aug of augs) {
 				if (await Do(this.ns, "ns.sleeve.purchaseSleeveAug", i, aug)) {
-					this.ns.toast("Sleeve " + i.toString() + " got " + aug)
+					this.log("Sleeve " + i.toString() + " got " + aug)
 					return [i, aug];
 				}
 			}
@@ -4138,7 +4148,7 @@ export class Sleeves {
 		}
 	}
 	async bbEverybody(action, contract = null) {
-		for (let i = 0; i < await (this.game.Sleeves.numSleeves); i++) {
+		for (let i = 0; i < await (this.Game.Sleeves.numSleeves); i++) {
 			await this.bbDo(i, action, contract);
 		}
 	}
@@ -4470,7 +4480,7 @@ export class WholeGame {
 				if (!item.logTarget || !this.doc.contains(item.logTarget)) item.logTarget = item.body.appendChild(this.elemFromHTML("<div class=log></div>"));
 				let logEntry = item.logTarget.appendChild(this.elemFromHTML(`<p>${timestamp ? this.ts() : ""} ${html}</p>`));
 				try {
-					while ((item.logTarget.innerHTML.match(/\<p\>/g) || []).length>this.size) {
+					while ((item.logTarget.innerHTML.match(/\<p\>/g) || []).length>item.sizeM) {
 					    item.logTarget.innerHTML = item.logTarget.innerHTML.slice(item.logTarget.innerHTML.indexOf("<p>", 3));
 					}
 				} catch { }
@@ -4478,7 +4488,7 @@ export class WholeGame {
 				item.recalcHeight();
 				return logEntry;
 			},
-			size: 10,
+			sizeM: 10,
 			recalcHeight: () => { item.style.height = ""; item.style.height = item.offsetHeight + "px" },
 			contextItems: {},
 			addContextItem: (name, fn, cFn = () => 1) => item.contextItems[name] = { fn: fn, cFn: cFn },
@@ -4690,11 +4700,11 @@ export async function main(ns) {
 	data.push(`Worker said : ${event.data}`);
   };
   while (data.length == 0) {
-	await ns.sleep(0);
+	await ns.asleep(0);
   }
   ns.tprint(data.pop());
   while (data.length == 0) {
-	await ns.sleep(0);
+	await ns.asleep(0);
   }
   ns.tprint(data.pop());
 } */
