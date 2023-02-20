@@ -580,6 +580,7 @@ export async function bn7(Game) {
     let numberOfSleeves = await (Game.Sleeves.numSleeves);
     await Game.Sleeves.bbCombatAugs();
     await Game.Player.trainCombatStatsUpTo(100, true); // The true indicates to drag sleeves along
+    await Game.Sleeves.startAGangFirst();
     if (!await Game.Bladeburner.start())
         return false;
     Game.Bladeburner.log("Start.")
@@ -3768,11 +3769,132 @@ export class Server {
 }
 
 export class Servers {
-	constructor(ns, game) {
+	constructor(ns, Game) {
 		this.ns = ns;
-		this.game = game ? game : new WholeGame(ns);
+		this.Game = Game ? Game : new WholeGame(ns);
 		this.serverlist = ["home", "n00dles", "foodnstuff", "sigma-cosmetics", "joesguns", "hong-fang-tea", "harakiri-sushi", "iron-gym", "CSEC", "zer0", "nectar-net", "max-hardware", "phantasy", "neo-net", "omega-net", "silver-helix", "netlink", "crush-fitness", "computek", "johnson-ortho", "the-hub", "avmnite-02h", "rothman-uni", "I.I.I.I", "syscore", "summit-uni", "catalyst", "zb-institute", "aevum-police", "lexo-corp", "alpha-ent", "millenium-fitness", "rho-construction", "aerocorp", "global-pharm", "galactic-cyber", "snap-fitness", "omnia", "unitalife", "deltaone", "univ-energy", "zeus-med", "solaris", "defcomm", "icarus", "infocomm", "zb-def", "nova-med", "taiyang-digital", "titan-labs", "microdyne", "applied-energetics", "run4theh111z", "stormtech", "fulcrumtech", "helios", "vitalife", "omnitek", "kuai-gong", "4sigma", ".", "powerhouse-fitness", "nwo", "b-and-a", "blade", "clarkinc", "ecorp", "The-Cave", "megacorp", "fulcrumassets"];
-		["home", "n00dles", "foodnstuff", "sigma-cosmetics", "joesguns", "hong-fang-tea", "harakiri-sushi", "iron-gym", "CSEC", "zer0", "nectar-net", "max-hardware", "phantasy", "neo-net", "omega-net", "silver-helix", "netlink", "crush-fitness", "computek", "johnson-ortho", "the-hub", "avmnite-02h", "rothman-uni", "I.I.I.I", "syscore", "summit-uni", "catalyst", "zb-institute", "aevum-police", "lexo-corp", "alpha-ent", "millenium-fitness", "rho-construction", "aerocorp", "global-pharm", "galactic-cyber", "snap-fitness", "omnia", "unitalife", "deltaone", "univ-energy", "zeus-med", "solaris", "defcomm", "icarus", "infocomm", "zb-def", "nova-med", "taiyang-digital", "titan-labs", "microdyne", "applied-energetics", "run4theh111z", "stormtech", "fulcrumtech", "helios", "vitalife", "omnitek", "kuai-gong", "4sigma", ".", "powerhouse-fitness", "nwo", "b-and-a", "blade", "clarkinc", "ecorp", "The-Cave", "megacorp", "fulcrumassets"].map(x => this[x] = new Server(ns, x, game));
+		["home", "n00dles", "foodnstuff", "sigma-cosmetics", "joesguns", "hong-fang-tea", "harakiri-sushi", "iron-gym", "CSEC", "zer0", "nectar-net", "max-hardware", "phantasy", "neo-net", "omega-net", "silver-helix", "netlink", "crush-fitness", "computek", "johnson-ortho", "the-hub", "avmnite-02h", "rothman-uni", "I.I.I.I", "syscore", "summit-uni", "catalyst", "zb-institute", "aevum-police", "lexo-corp", "alpha-ent", "millenium-fitness", "rho-construction", "aerocorp", "global-pharm", "galactic-cyber", "snap-fitness", "omnia", "unitalife", "deltaone", "univ-energy", "zeus-med", "solaris", "defcomm", "icarus", "infocomm", "zb-def", "nova-med", "taiyang-digital", "titan-labs", "microdyne", "applied-energetics", "run4theh111z", "stormtech", "fulcrumtech", "helios", "vitalife", "omnitek", "kuai-gong", "4sigma", ".", "powerhouse-fitness", "nwo", "b-and-a", "blade", "clarkinc", "ecorp", "The-Cave", "megacorp", "fulcrumassets"].map(x => this[x] = new Server(ns, x, Game));
+		this.log = ns.tprint.bind(ns);
+		if (ns.flags(cmdlineflags)['logbox']) {
+			this.log = this.Game.sidebar.querySelector(".servers") || this.Game.createSidebarItem("Servers", "", "S", "servers");
+			this.body = this.log.body;
+			this.body.innerHTML = "<canvas width=1000 height=1000 id='serverbox'></canvas>";
+			this.log.recalcHeight();
+			this.log = this.log.log;
+		}
+	}
+	async serverbox() {
+		if (this.ns.flags(cmdlineflags)['logbox']) {
+			let layout = [[],['home']];
+			let purchasedServers = await Do(this.ns, "ns.getPurchasedServers");
+			for (let i = 1 ; i < layout.length ; i++) {
+				for (let j = 0 ; j < layout[i].length ; j++) {
+                    let possible = await Do(this.ns, "ns.scan", layout[i][j]);
+					for (let server of possible) {
+						let addThis = true;
+						if (i > 0 && layout[i-1].includes(server)) {
+							addThis = false;
+						}
+						if (layout[i].includes(server)) {
+							addThis = false;
+						}
+						if (i + 1 < layout.length && layout[i + 1].includes(server)) {
+							addThis = false;
+						}
+						if (server.indexOf("hacknet") > -1) {
+							addThis = false;
+						}
+						if (purchasedServers.includes(server)) {
+							addThis = false;
+						}
+						if (addThis) {
+							if (i + 1 >= layout.length) {
+								layout.push([]);
+							}
+							if (layout[i][j] == 'home' && (await Do(this.ns, "ns.scan", server)).length==1) {
+    							layout[i-1].push(server);
+							} else {
+    							layout[i+1].push(server);
+	    					}
+		    			}
+					}
+				}
+			}
+			let heights = [0];
+			while (heights.length < layout.length) {
+				heights.push(heights[heights.length-1] + 950/layout.length);
+			}
+			let c = document.getElementById("serverbox");
+			let ctx = c.getContext("2d");
+			while (true) {
+				ctx = c.getContext("2d");
+				ctx.beginPath();
+				ctx.fillStyle = "#000000";
+    			ctx.rect(0,0,1000,1000);
+				ctx.fill();
+				for (let i = 0 ; i < layout.length ; i++) {
+	    			for (let j = 0 ; j < layout[i].length ; j++) {
+		    			let server = layout[i][j];
+			    		let myX = 375;
+				    	if (layout[i].length > 1) {
+					    	myX = 750 / (layout[i].length - 1) * layout[i].findIndex(x => x === server);
+					    }
+					    let myY = heights[i];
+				    	if (i + 1 < layout.length) {
+    				    	let connectTo = (await Do(this.ns, "ns.scan", server)).filter(x => layout[i+1].includes(x));
+	    				    for (let target of connectTo) {
+		    				    let theirX = 375;
+			    	    		if (layout[i + 1].length > 1) {
+				    	    		theirX = 750 / (layout[i+1].length - 1) * layout[i+1].findIndex(x => x === target);
+					        	}
+						        let theirY = heights[i+1];
+								ctx = c.getContext("2d");
+								ctx.beginPath();
+					    	    ctx.strokeStyle = "#00FFFF";
+						        ctx.moveTo(115+myX, 25+myY);
+                                ctx.lineTo(115+theirX, 25+theirY);
+                                ctx.stroke();
+					    	}
+				    	}
+						ctx = c.getContext("2d");
+				        let security = ((await Do(this.ns, "ns.getServerSecurityLevel", server))-(await Do(this.ns, "ns.getServerMinSecurityLevel", server))) / (99 - await Do(this.ns, "ns.getServerMinSecurityLevel", server));
+					    ctx.beginPath();
+					    ctx.strokeStyle = "#FF0000";
+					    ctx.fillStyle = "#FF0000";
+					    ctx.arc(myX+115, myY+25, 15, -Math.PI / 2 + Math.PI * (1 - security), Math.PI / 2);
+						ctx.lineTo(myX+115, myY+25);
+					    ctx.fill();
+
+						ctx = c.getContext("2d");
+				        let money = (await Do(this.ns, "ns.getServerMoneyAvailable", server)) / (await Do(this.ns, "ns.getServerMaxMoney", server));
+					    ctx.beginPath();
+					    ctx.strokeStyle = "#00FF00";
+					    ctx.fillStyle = "#00FF00";
+					    ctx.arc(myX+115, myY+25, 15, Math.PI / 2, Math.PI / 2 + Math.PI * money);
+						ctx.lineTo(myX+115, myY+25);
+					    ctx.fill();
+
+						if (isNaN(money) || money === Infinity) {
+							ctx = c.getContext("2d");
+							ctx.beginPath();
+							ctx.strokeStyle = "#00FFFF";
+							ctx.fillStyle = "#00FFFF";
+							ctx.arc(myX+115, myY+25, 15, 0, 2 * Math.PI);
+							ctx.lineTo(myX+115, myY+25);
+							ctx.fill();	
+						}
+
+						ctx = c.getContext("2d");
+                        ctx.font = "15px Hack";
+						ctx.fillStyle = "#FFFFFF";
+						ctx.strokeStyle = "#FFFFFF";
+						ctx.textAlign = "center";
+						ctx.fillText(server, myX + 115, myY + 25 + 30);
+    				}
+				}
+				await this.ns.asleep(60000);
+			}
+		}
 	}
 	async pop_them_all() {
 		let result = [];
@@ -3809,7 +3931,7 @@ export class Servers {
 		let maxRam = await Do(this.ns, "ns.getPurchasedServerMaxRam", "");
 		if (servers.length == await Do(this.ns, "ns.getPurchasedServerLimit", "")) {
 		    if (maxRam > await Do(this.ns, "ns.getServerMaxRam", servers[0])) {
-				if ((await (this.game.Player.money)) > (await Do(this.ns, "ns.getPurchasedServerCost", maxRam))) {
+				if ((await (this.Game.Player.money)) > (await Do(this.ns, "ns.getPurchasedServerCost", maxRam))) {
 					await Do(this.ns, "ns.killall", servers[0]);
 					await Do(this.ns, "ns.deleteServer", servers[0]);
 					return await this.buyDubs();
@@ -3831,7 +3953,7 @@ export class Servers {
 		text += "</TABLE>"
 		this['window'].update(text);
 	}
-}
+}import { Do, DoAll } from "Do.js";
 
 export class Sleeves {
 	constructor(ns, game) {
@@ -3856,6 +3978,59 @@ export class Sleeves {
 			await Do(this.ns, "ns.sleeve.travel", i, "Sector-12");
 			await Do(this.ns, "ns.sleeve.setToGymWorkout", i, "Powerhouse Gym", stat);
 		}
+	}
+	async startAGangFirst() {
+		let thresh = 0;
+		if (this.game.bitNodeN == 2) {
+			return;
+		}
+		if (0 == await (this.numSleeves)) {
+			return;
+		}
+		let sleeveIndex = [];
+		while (sleeveIndex.length < await (this.numSleeves)) {
+			sleeveIndex.push(sleeveIndex.length);
+		}
+		let done = false;
+        while (!done) {
+			done = true;
+			for (let i = 0 ; i < await (this.Numsleeves) ; i++) {
+				if (.75 > await Do(this.ns, "ns.formulas.work.crimeSuccessChance", await Do(this.ns, "ns.sleeve.getSleeve", i), "Homicide")) {
+					this.ns.tprint(i, " ", await Do(this.ns, "ns.formulas.work.crimeSuccessChance", await Do(this.ns, "ns.sleeve.getSleeve", i), "Homicide"));
+					done = false;
+					thresh += 10;
+					await this.trainCombatStatsUpTo(thresh, true, true);
+				}
+			}
+		}
+		for (let i = 0 ; i < await (this.Numsleeves) ; i++) {
+		    await Do(this.ns, "ns.sleeve.setToCommitCrime", i, "Homicide");
+		}
+		while (-54000 > await Do(this.ns, "ns.heart.break")) {
+            await this.ns.asleep(10000);
+			this.ns.tprint("Karma: ", await Do(this.ns, "ns.heart.break"));
+		}
+	}
+	async trainCombatStatsUpTo(goal, withSleeves = false, halfdexagi=false) {
+		let didSomething = false;
+		for (let stat of ["Strength", "Defense", "Dexterity", "Agility"]) {
+			for (let i = 0 ; i < await (this.numSleeves) ; i++) {
+				if ((halfdexagi && ["Dexterity", "Agility"].includes(stat) ? goal / 4 : goal) > ((await Do(this.ns, "ns.sleeve.getSleeve", i)).skills[stat.toLowerCase()])) {
+					await (this.game.Sleeves.trainWithMe(stat));
+					await this.Gym(stat, "Powerhouse Gym", false);
+					didSomething = true;
+				}
+				while ((halfdexagi && ["Dexterity", "Agility"].includes(stat) ? goal / 4 : goal) > ((await Do(this.ns, "ns.sleeve.getSleeve", i)).skills[stat.toLowerCase()])) {
+	    			await this.ns.asleep(0);
+		    		didSomething = true;
+			    }
+			}
+			await this.ns.asleep(1000);
+		}
+		if (withSleeves) {
+			await this.game.Sleeves.deShock();
+		}
+		return didSomething;
 	}
 	async bbCombatSort() {
 		return (async () => {
