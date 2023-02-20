@@ -23,7 +23,7 @@ export async function bn8(Game) {
     let report = {};
     let starttime = Date.now();
     while ((!await Do(Game.ns, "ns.stock.has4SDataTIXAPI", ""))) {
-        await Game.ns.asleep([6000-(Date.now()-starttime), 0].reduce((a, b => a > b ? a : b)));
+        await Game.ns.asleep([6000-(Date.now()-starttime), 0].reduce((a, b) => a > b ? a : b));
         if ((await (Game.StockMarket.portfolioValue)) + (await Do(Game.ns, "ns.getPlayer")).money > 25000000000 * ((await Do(Game.ns, "ns.getBitNodeMultipliers"))).FourSigmaMarketDataApiCost) {
             Game.ns.write('/temp/4s.js', "export async function main(ns) { for (let stock of ns.stock.getSymbols()) { ns.stock.getPosition(stock)[0] ? ns.stock.sellStock(stock, ns.stock.getPosition(stock)[0]) : 0; ns.stock.getPosition(stock)[2] ? ns.stock.sellShort(stock, ns.stock.getPosition(stock)[2]) : 0; } ns.stock.purchase4SMarketDataTixApi(); }",'w')
             await Game.ns.asleep(0);
