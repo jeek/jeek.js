@@ -15,6 +15,7 @@ export let makeNewWindow = async (title = "Default Window Title", theme) => {
       good = false;
     }
   }
+  await slp(2000);
   doc.head.innerHTML = `
   <title>${title}</title>
   <style>
