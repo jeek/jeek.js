@@ -2,9 +2,10 @@ import { Do, DoAll } from "Do.js";
 import { WholeGame } from "WholeGame.js";
 
 export class Sleeves {
-	constructor(ns, game) {
+	constructor(ns, Game) {
 		this.ns = ns;
-		this.game = game ? game : new WholeGame(ns);
+		this.Game = Game ? Game : new WholeGame(ns);
+		this.startingAGang = false;
 	}
 	get numSleeves() {
 		return (async () => {
@@ -26,8 +27,10 @@ export class Sleeves {
 		}
 	}
 	async startAGangFirst() {
+		this.startingAGang = true;
+		this.Game.Hacknet.goal = "Improve Gym Training";
 		let thresh = 0;
-		if (this.game.bitNodeN == 2) {
+		if (this.Game.bitNodeN == 2) {
 			return;
 		}
 		if (0 == await (this.numSleeves)) {
@@ -70,6 +73,8 @@ export class Sleeves {
             await this.ns.asleep(10000);
 			this.ns.tprint("Karma: ", await Do(this.ns, "ns.heart.break"));
 		}
+		this.startingAGang = false;
+		this.Game.Hacknet.goal = "Sell for Money";
 		for (let i = 0 ; i < await (this.numSleeves) ; i++) {
 			await Do(this.ns, "ns.sleeve.setToShockRecovery", i);
 		}
@@ -79,8 +84,8 @@ export class Sleeves {
 		for (let stat of ["Strength", "Defense", "Dexterity", "Agility"]) {
 			for (let i = 0 ; i < await (this.numSleeves) ; i++) {
 				if ((halfdexagi && ["Dexterity", "Agility"].includes(stat) ? goal / 4 : goal) > ((await Do(this.ns, "ns.sleeve.getSleeve", i)).skills[stat.toLowerCase()])) {
-					await (this.game.Sleeves.trainWithMe(stat));
-					await this.game.Player.Gym(stat, "Powerhouse Gym", false);
+					await (this.Game.Sleeves.trainWithMe(stat));
+					await this.Game.Player.Gym(stat, "Powerhouse Gym", false);
 					didSomething = true;
 				}
 				while ((halfdexagi && ["Dexterity", "Agility"].includes(stat) ? goal / 4 : goal) > ((await Do(this.ns, "ns.sleeve.getSleeve", i)).skills[stat.toLowerCase()])) {
@@ -94,7 +99,7 @@ export class Sleeves {
 			await this.ns.asleep(1000);
 		}
 		if (withSleeves) {
-			await this.game.Sleeves.deShock();
+			await this.Game.Sleeves.deShock();
 		}
 		return didSomething;
 	}
