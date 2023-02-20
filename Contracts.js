@@ -668,11 +668,11 @@ export class Contracts {
 				let success = await Do(this.ns, "ns.codingcontract.attempt", solutions[0].data[0], solutions[0].data[1], solutions[0].data[2]);
 			    if (success.length > 0) {
 					delete this.contracts[solutions[0].data[1]];
-					this.log("Succeeded at " + types[0] + ": " + success);
+					this.log("Succeeded at " + solutions[0].data[3] + ": " + success);
 					done = true;
 				} else {
-					this.log("Failed at " + types[0]);
-					this.log("Failed at " + types[0], " ", types[1](this.contracts[contract].data, this.ns));
+					this.log("Failed at " + solutions[0].data[3]);
+					this.log("Failed at " + solutions[0].data[3], " ", types[1](this.contracts[solutions[0].data[1]].data, this.ns));
 					//this.ns.exit();
 				}
 				solutions.shift();
