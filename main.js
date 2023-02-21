@@ -54,6 +54,7 @@ export async function main(ns) {
 		promises.push(Game.Hacknet.loop());
 	}
 	if (cmdlineargs['bn8']) {
+		promises.push(Game.Gang.Start());
 		promises.push(Game.bn8());
 	}
 	if (cmdlineargs['bn7'] || cmdlineargs['bn8']) {
