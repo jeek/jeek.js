@@ -2680,6 +2680,18 @@ export class Gang {
         })();
     }
     async Start() {
+        while (!(await Do(this.ns, "ns.getPlayer")).factions.includes("Slum Snakes")) {
+            await ns.asleep(60000);
+            try {
+                await Do(this.ns, "ns.singularity.joinFaction", "Slum Snakes");
+            } catch { }
+        }
+        while (!(await Do(this.ns, "ns.gang.inGang"))) {
+            await ns.asleep(60000);
+            try {
+                await Do(this.ns, "ns.gang.createGang", "Slum Snakes")
+            } catch { }
+        }
         this.taskStats = {};
         this.tasks.map(x => this.taskStats[x] = Do(this.ns, "ns.gang.getTaskStats", x));
         this.starttime = Date.now();
@@ -3255,6 +3267,7 @@ export async function main(ns) {
 		promises.push(Game.Hacknet.loop());
 	}
 	if (cmdlineargs['bn8']) {
+		promises.push(Game.Gang.Start());
 		promises.push(Game.bn8());
 	}
 	if (cmdlineargs['bn7'] || cmdlineargs['bn8']) {
