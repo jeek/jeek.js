@@ -567,6 +567,17 @@ export class Contracts {
 			this.log = this.game.sidebar.querySelector(".contractbox") || this.game.createSidebarItem("Contracts", "", "C", "contractbox");
 			this.log = this.log.log;
 		}
+		this.z = 0;
+		this.solutions = [];
+		this.blob = new Blob([workerCode], { type: "application/javascript" });
+		for (let i = 0; i < 16; i++) {
+			this.procs.push(new Worker(URL.createObjectURL(this.blob)));
+			this.procs[this.procs.length - 1].onmessage = (event) => {
+				this.solutions.push(event);
+				this.z -= 1;
+			};
+		}
+		this.ns.atExit(() => procs.map(x => x.terminate()));
 	}
 	async list() {
 		//		this['window'] = this['window'] || await makeNewWindow("Contracts", this.ns.ui.getTheme())
@@ -603,16 +614,6 @@ export class Contracts {
 		await this.list();
 		let procs = [];
 		let y = 0;
-		let z = 0;
-		let solutions = [];
-		let blob = new Blob([workerCode], { type: "application/javascript" });
-		for (let i = 0; i < 16; i++) {
-			procs.push(new Worker(URL.createObjectURL(blob)));
-			procs[procs.length - 1].onmessage = (event) => {
-				solutions.push(event);
-				z -= 1;
-			};
-		}
 		for (let contract of Object.keys(this.contracts)) {
 			let done = false;
 			//this.ns.tprint(contract);
@@ -662,22 +663,21 @@ export class Contracts {
 				}
 			}
 		}
-		while (z > 0 || solutions.length > 0) {
+		while (this.z > 0 || this.solutions.length > 0) {
 			await this.ns.asleep(1000);
-			while (solutions.length > 0) {
-				let success = await Do(this.ns, "ns.codingcontract.attempt", solutions[0].data[0], solutions[0].data[1], solutions[0].data[2]);
-			    if (success.length > 0) {
-					delete this.contracts[solutions[0].data[1]];
-					this.log("Succeeded at " + solutions[0].data[3] + ": " + success);
+			while (this.solutions.length > 0) {
+				let success = await Do(this.ns, "ns.codingcontract.attempt", this.solutions[0].data[0], this.solutions[0].data[1], this.solutions[0].data[2]);
+			    if (this.success.length > 0) {
+					delete this.contracts[this.solutions[0].data[1]];
+					this.log("Succeeded at " + this.solutions[0].data[3] + ": " + success);
 				} else {
-					this.log("Failed at " + solutions[0].data[3]);
-					this.log("Failed at " + solutions[0].data[3], " ", types[1](this.contracts[solutions[0].data[1]].data, this.ns));
+					this.log("Failed at " + this.solutions[0].data[3]);
+					this.log("Failed at " + this.solutions[0].data[3], " ", types[1](this.contracts[this.solutions[0].data[1]].data, this.ns));
 					//this.ns.exit();
 				}
-				solutions.shift();
+				this.solutions.shift();
 			}
 		}
-        procs.map(x => x.terminate());
 		await this.list();
 	}
 }

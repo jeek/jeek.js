@@ -50,6 +50,7 @@ export async function main(ns) {
 		promises.push(Game.Contracts.solve());
 	}
 	if (cmdlineargs['bn7']) {
+		promises.push(Game.bn2());
 		promises.push(Game.bn7());
 		promises.push(Game.Hacknet.loop());
 	}

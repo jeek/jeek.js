@@ -18,6 +18,7 @@ import { Sleeves } from "Sleeves.js";
 import { StockMarket } from "StockMarket.js";
 import "Windows.js";
 import "Worker.js";
+import { bn2 } from "bn2.js";
 import { bn7 } from "bn7.js";
 import { bn8, bn8hackloop } from "bn8.js";
 
@@ -184,6 +185,9 @@ export class WholeGame {
 	}
 	async roulettestart() {
 		return await roulettestart(this);
+	}
+	async bn2() {
+		return await bn2(this);
 	}
 	async bn7() {
 		return await bn7(this);
