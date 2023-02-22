@@ -16,9 +16,9 @@ export async function bn7(Game) {
     await Game.Bladeburner.hardStop();
     while (((await (Game.Bladeburner.contractCount))+((await (Game.Bladeburner.operationCount)))) > 0) {
         Game.Hacknet.goal = (1000 > (await (Game.Bladeburner.skillPoints)) ? "Exchange for Bladeburner SP" : "Generate Coding Contract");
-        if (await Game.Player.hospitalizeIfNeeded())
+        if (await (Game.Player.hospitalizeIfNeeded()))
             Game.Bladeburner.log("Hospitalized.."); // HP
-        if (await Game.Player.joinFactionIfInvited("Bladeburners"))
+        if (await (Game.Player.joinFactionIfInvited("Bladeburners")))
             Game.Bladeburner.log("Joined Bladeburner Faction..");
         if (((await (Game.Bladeburner.rank)) >= 25) && !((await (Game.Player.factions))).includes("Bladeburners"))
             await Game.Bladeburner.joinTheFaction();
@@ -26,8 +26,8 @@ export async function bn7(Game) {
         while (await Game.Bladeburner.UpgradeSkills());
         let best = [];
         for (let city of CITIES) {
-            await Game.Bladeburner.bbCity(city);
-            await Game.Bladeburner.deescalate(30); // Reduces Chaos to 30 if higher
+            await (Game.Bladeburner.bbCity(city));
+            await (Game.Bladeburner.deescalate(30)); // Reduces Chaos to 30 if higher
             for (let action of (await (Game.Bladeburner.opNames)).concat(await (Game.Bladeburner.contractNames))) {
                 if ((await (Game.Bladeburner.bbActionCount(action))) > 0) {
                     let maxlevel = await (Game.Bladeburner.maxLevel(action));

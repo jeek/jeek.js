@@ -87,6 +87,7 @@ export class Sleeves {
 				}
 			}
 		}
+		this.startingAGang = false;
 		for (let i = 0; i < await (this.numSleeves); i++) {
 			await Do(this.ns, "ns.sleeve.setToCommitCrime", i, "Homicide");
 		}
@@ -94,7 +95,6 @@ export class Sleeves {
 			await this.ns.asleep(10000);
 			this.log("Homiciding, Karma: " + (await Do(this.ns, "ns.heart.break")).toString());
 		}
-		this.startingAGang = false;
 		this.Game.Hacknet.goal = "Sell for Money";
 		this.log("You have -54000 Karma. Start a Gang.");
 		for (let i = 0; i < await (this.numSleeves); i++) {
