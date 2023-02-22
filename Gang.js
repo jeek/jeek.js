@@ -18,7 +18,7 @@ export class Gang {
         }
         // Caching of functions that do not change
         this.tasknames = Do(this.ns, "ns.gang.getTaskNames");
-        this.taskstats = (async (this) => {
+        this.taskstats = (async () => {
 			try {
                 await (this.tasknames);
                 let taskstats = {};
@@ -29,9 +29,9 @@ export class Gang {
 			} catch (e) {
 				return null;
 			}
-		})(this);
+		})();
         this.equipnames = Do(this.ns, "ns.gang.getEquipNames");
-        this.equipstats = (async (this) => {
+        this.equipstats = (async () => {
 			try {
                 await (this.equipnames);
                 let equipstats = {};
@@ -42,7 +42,7 @@ export class Gang {
 			} catch (e) {
 				return null;
 			}
-		})(this);
+		})();
     }
     // Game API Functions
     async ['ascendMember'](memberName) {
