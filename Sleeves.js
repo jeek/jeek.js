@@ -63,13 +63,14 @@ export class Sleeves {
 		while (!done) {
 			done = true;
 			for (let i = 0; i < await (this.numSleeves); i++) {
-				if ((await Do(this.ns, "ns.sleeve.getSleeve", i)).shock > 97.5) {
+				if ((await Do(this.ns, "ns.sleeve.getSleeve", i)).shock > 90) {
 					for (let j = 0; j < await (this.numSleeves); j++) {
 						done = false;
-						await Do(this.ns, "ns.sleeve.setToShockRecovery", j);
+						Do(this.ns, "ns.sleeve.setToShockRecovery", j);
 					}
 				}
-				while ((await Do(this.ns, "ns.sleeve.getSleeve", i)).shock > 97.5) {
+				while ((await Do(this.ns, "ns.sleeve.getSleeve", i)).shock > 90) {
+					done = false;
 					await this.ns.asleep(1000);
 				}
 			}
