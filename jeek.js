@@ -3910,9 +3910,11 @@ export class Servers {
 		if (this.ns.flags(cmdlineflags)['logbox']) {
 			let layout = [[],['home']];
 			let purchasedServers = await Do(this.ns, "ns.getPurchasedServers");
+			let scans = {};
 			for (let i = 1 ; i < layout.length ; i++) {
 				for (let j = 0 ; j < layout[i].length ; j++) {
-                    let possible = await Do(this.ns, "ns.scan", layout[i][j]);
+                    scans[layout[i][j]] = await Do(this.ns, "ns.scan", layout[i][j]);
+					let possible = await Do(this.ns, "ns.scan", layout[i][j]);
 					for (let server of possible) {
 						let addThis = true;
 						if (i > 0 && layout[i-1].includes(server)) {
@@ -3936,6 +3938,7 @@ export class Servers {
 							}
 							if (layout[i][j] == 'home' && (await Do(this.ns, "ns.scan", server)).length==1) {
     							layout[i-1].push(server);
+								scans[server] = await Do(this.ns, "ns.scan", server);
 							} else {
     							layout[i+1].push(server);
 	    					}
@@ -3949,7 +3952,17 @@ export class Servers {
 			}
 			let c = document.getElementById("serverbox");
 			let ctx = c.getContext("2d");
+			let minsec = {};
+			let sec = {};
+			let maxmon = {};
+			let mon = {};
+			await Promise.all(Object.values(scans));
 			while (true) {
+				Object.keys(scans).map(x => minsec[x] = Do(this.ns, "ns.getServerMinSecurityLevel", x));
+				Object.keys(scans).map(x => sec[x] = Do(this.ns, "ns.getServerSecurityLevel", x));
+				Object.keys(scans).map(x => mon[x] = Do(this.ns, "ns.getServerMoneyAvailable", x));
+				Object.keys(scans).map(x => maxmon[x] = Do(this.ns, "ns.getServerMaxMoney", x));
+
 				ctx = c.getContext("2d");
 				ctx.beginPath();
 				ctx.fillStyle = "#000000";
@@ -3964,7 +3977,7 @@ export class Servers {
 					    }
 					    let myY = heights[i];
 				    	if (i + 1 < layout.length) {
-    				    	let connectTo = (await Do(this.ns, "ns.scan", server)).filter(x => layout[i+1].includes(x));
+    				    	let connectTo = scans[server].filter(x => layout[i+1].includes(x));
 	    				    for (let target of connectTo) {
 		    				    let theirX = 375;
 			    	    		if (layout[i + 1].length > 1) {
@@ -3980,7 +3993,7 @@ export class Servers {
 					    	}
 				    	}
 						ctx = c.getContext("2d");
-				        let security = ((await Do(this.ns, "ns.getServerSecurityLevel", server))-(await Do(this.ns, "ns.getServerMinSecurityLevel", server))) / (99 - await Do(this.ns, "ns.getServerMinSecurityLevel", server));
+				        let security = ((await (sec[server]))-(await (minsec[server]))) / (99 - (await minsec[server]));
 					    ctx.beginPath();
 					    ctx.strokeStyle = "#FF0000";
 					    ctx.fillStyle = "#FF0000";
@@ -3989,7 +4002,7 @@ export class Servers {
 					    ctx.fill();
 
 						ctx = c.getContext("2d");
-				        let money = (await Do(this.ns, "ns.getServerMoneyAvailable", server)) / (await Do(this.ns, "ns.getServerMaxMoney", server));
+				        let money = (await (mon[server])) / (await (maxmon[server]));
 					    ctx.beginPath();
 					    ctx.strokeStyle = "#00FF00";
 					    ctx.fillStyle = "#00FF00";
