@@ -61,7 +61,7 @@ export class Servers {
 			while (heights.length < layout.length) {
 				heights.push(heights[heights.length-1] + 950/layout.length);
 			}
-			let c = document.getElementById("serverbox");
+			let c = eval("document").getElementById("serverbox");
 			let ctx = c.getContext("2d");
 			let minsec = {};
 			let sec = {};
