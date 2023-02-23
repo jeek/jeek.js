@@ -3950,7 +3950,7 @@ export class Servers {
 			while (heights.length < layout.length) {
 				heights.push(heights[heights.length-1] + 950/layout.length);
 			}
-			let c = document.getElementById("serverbox");
+			let c = eval("document").getElementById("serverbox");
 			let ctx = c.getContext("2d");
 			let minsec = {};
 			let sec = {};
@@ -3962,6 +3962,12 @@ export class Servers {
 				Object.keys(scans).map(x => sec[x] = Do(this.ns, "ns.getServerSecurityLevel", x));
 				Object.keys(scans).map(x => mon[x] = Do(this.ns, "ns.getServerMoneyAvailable", x));
 				Object.keys(scans).map(x => maxmon[x] = Do(this.ns, "ns.getServerMaxMoney", x));
+				for (let server of Object.keys(scans)) {
+					await minsec[server];
+					await sec[server];
+					await mon[server];
+					await maxmon[server]; 
+				}
 
 				ctx = c.getContext("2d");
 				ctx.beginPath();
