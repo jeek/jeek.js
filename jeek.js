@@ -574,6 +574,7 @@ export class Bladeburner {
 		await this.ns.asleep(1000);
 	}
 }
+
 // Set the members to their tasks.
 async function bn2setTasks(Game, memberData, settings) {
     if (!await (Game['Gang']['inGang']())) {
@@ -769,7 +770,7 @@ export async function bn2(Game, settings={}) {
     settings['minimumRespect'] = settings['minimumRespect'] ?? 0;
     settings['traffickChance'] = settings['traffickChance'] ?? .8;
     settings['wantedPenaltyThreshold'] = settings['wantedPenaltyThreshold'] ?? .9;
-    let equip = await (Game['Gang']['getEquipmentNames']);
+    let equip = await (Game['Gang']['getEquipmentNames']());
     let equipCost = [...equip, {}].reduce((a, b) => b[a] = Game['Gang']['getEquipmentCost'](a));
     await Promise.all(Object.values(equipCost));
     equip.sort((a, b) => { return equipCost[a] - equipCost[b] });
@@ -825,6 +826,7 @@ export async function bn2(Game, settings={}) {
         }
     }
 }
+
 export async function bn7(Game) {
     Game.Bladeburner.raid = false;
     Game.Bladeburner.sting = false;
@@ -969,6 +971,7 @@ export async function bn7(Game) {
     await Game.Bladeburner.inciteViolence();
 }
 }
+
 export async function bn8(Game) {
     let shorts = false;
     let stall = {};
@@ -2190,7 +2193,9 @@ export class Contracts {
 			this.log = this.game.sidebar.querySelector(".contractbox") || this.game.createSidebarItem("Contracts", "", "C", "contractbox");
 			this.log = this.log.log;
 		}
+		this.y = 0;
 		this.z = 0;
+		this.procs = [];
 		this.solutions = [];
 		this.blob = new Blob([workerCode], { type: "application/javascript" });
 		for (let i = 0; i < 16; i++) {
@@ -2200,7 +2205,7 @@ export class Contracts {
 				this.z -= 1;
 			};
 		}
-		this.ns.atExit(() => procs.map(x => x.terminate()));
+		this.ns.atExit(() => this.procs.map(x => x.terminate()));
 	}
 	async list() {
 		//		this['window'] = this['window'] || await makeNewWindow("Contracts", this.ns.ui.getTheme())
@@ -2235,8 +2240,6 @@ export class Contracts {
 	}
 	async solve() {
 		await this.list();
-		let procs = [];
-		let y = 0;
 		for (let contract of Object.keys(this.contracts)) {
 			let done = false;
 			//this.ns.tprint(contract);
@@ -2275,9 +2278,9 @@ export class Contracts {
 				if (!done) {
 					if (this.contracts[contract].type === types[0]) {
 						this.log("Starting " + types[0] + " on " + this.contracts[contract].server);
-						procs[y % 16].postMessage([types[1], this.contracts[contract].data, contract, this.contracts[contract].server]);
-						z += 1;
-						y += 1;
+						this.procs[this.y % 16].postMessage([types[1], this.contracts[contract].data, contract, this.contracts[contract].server]);
+						this.z += 1;
+						this.y += 1;
 						await this.ns.asleep(0);
 						//						let starttime = Date.now();
 						//						this.times[types[0]].push(Date.now() - starttime);
@@ -2693,7 +2696,14 @@ export class Gang {
             this.log = this.log.log;
         }
         // Caching of functions that do not change
-        this.tasknames = Do(this.ns, "ns.gang.getTaskNames");
+        this.tasknames = (async () => {
+            try {
+                while (!await Do(this.ns, "ns.gang.inGang")) {
+                    await this.ns.asleep(10000);
+                }
+                return await Do(this.ns, "ns.gang.getTaskNames");
+            } catch {}
+        })();
         this.taskstats = (async () => {
 			try {
                 await (this.tasknames);
@@ -2706,13 +2716,20 @@ export class Gang {
 				return null;
 			}
 		})();
-        this.equipnames = Do(this.ns, "ns.gang.getEquipNames");
+        this.equipnames = (async () => {
+            try {
+                while (!await Do(this.ns, "ns.gang.inGang")) {
+                    await this.ns.asleep(10000);
+                }
+                return await Do(this.ns, "ns.gang.getEquipmentNames");
+            } catch {}
+        })();
         this.equipstats = (async () => {
 			try {
                 await (this.equipnames);
                 let equipstats = {};
                 for (let task of this.equipnames) {
-                    equipstats[task] = Do(this.ns, "ns.gang.getEquipStats", task);
+                    equipstats[task] = Do(this.ns, "ns.gang.getEquipmentStats", task);
                 }
                 return equipstats;
 			} catch (e) {
@@ -3348,7 +3365,7 @@ export async function main(ns) {
 		promises.push(Game.Contracts.solve());
 	}
 	if (cmdlineargs['bn7']) {
-		promises.push(Game.bn2());
+		promises.push(Game.bn2 ());
 		promises.push(Game.bn7());
 		promises.push(Game.Hacknet.loop());
 	}
