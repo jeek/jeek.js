@@ -140,7 +140,7 @@ export class Gang {
             return;
         }
         // Recruit as many members as possible.
-        let usedNames = await (this['getMemberNames']);
+        let usedNames = await (this['getMemberNames']());
         while (await Do(this.ns, "ns.gang.recruitMember", names.filter(x => !usedNames.includes(x))[0])) {
             this.log("New member " + names.filter(x => !usedNames.includes(x))[0] + " recruited.");
             usedNames.push(names.filter(x => !usedNames.includes(x))[0]);
