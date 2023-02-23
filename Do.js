@@ -46,9 +46,7 @@ export async function Do(ns, command, ...args) {
 		await ns.asleep(0);
     	pid = ns.run(progname + ".js", 1, JSON.stringify(args));
 	}
-	while (ns.peek(pid) == "NULL PORT DATA") {
-		await ns.asleep(0);
-	}
+	await ns.getPortHandle(pid).nextWrite();
 	let answer = JSON.parse(ns.readPort(pid));
 	return answer;
 }
