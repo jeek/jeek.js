@@ -108,8 +108,8 @@ export class Sleeves {
 		for (let stat of ["Strength", "Defense", "Dexterity", "Agility"]) {
 			for (let i = 0; i < await (this.numSleeves); i++) {
 				if ((halfdexagi && ["Dexterity", "Agility"].includes(stat) ? goal / 4 : goal) > ((await Do(this.ns, "ns.sleeve.getSleeve", i)).skills[stat.toLowerCase()])) {
-					await (this.Game.Sleeves.trainWithMe(stat));
-					await this.Game.Player.Gym(stat, "Powerhouse Gym", false);
+					(this.Game.Sleeves.trainWithMe(stat));
+					this.Game.Player.Gym(stat, "Powerhouse Gym", false);
 					didSomething = true;
 				}
 				while ((halfdexagi && ["Dexterity", "Agility"].includes(stat) ? goal / 4 : goal) > ((await Do(this.ns, "ns.sleeve.getSleeve", i)).skills[stat.toLowerCase()])) {
@@ -117,7 +117,6 @@ export class Sleeves {
 					didSomething = true;
 				}
 			}
-			await this.ns.asleep(1000);
 		}
 		if (withSleeves) {
 			await this.Game.Sleeves.deShock();
