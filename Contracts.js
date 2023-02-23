@@ -667,7 +667,7 @@ export class Contracts {
 			await this.ns.asleep(1000);
 			while (this.solutions.length > 0) {
 				let success = await Do(this.ns, "ns.codingcontract.attempt", this.solutions[0].data[0], this.solutions[0].data[1], this.solutions[0].data[2]);
-			    if (this.success.length > 0) {
+			    if (success.length > 0) {
 					delete this.contracts[this.solutions[0].data[1]];
 					this.log("Succeeded at " + this.solutions[0].data[3] + ": " + success);
 				} else {
