@@ -582,7 +582,7 @@ async function bn2setTasks(Game, memberData, settings) {
     }
     let gangInfo = await (Game['Gang']['getGangInformation'])
     let members = Object.keys(memberData);
-    minimumDefense = members.length * 500;
+    let minimumDefense = members.length * 500;
     let nextTask = {};
 /*    for (let member of members) {
         if (gangInfo.wantedLevel >= settings.wantedThreshold && gangInfo.wantedPenalty <= settings.wantedPenaltyThreshold) {
@@ -695,7 +695,7 @@ async function bn2ascendMembers(Game, memberData, settings) {
         let ascendable = [...members];
         ascendable = ascendable.filter(x => (["hack_exp", "str_exp", "def_exp", "dex_exp", "agi_exp", "cha_exp"].map(y => memberData[x][y] > 1000).reduce((a, b) => a || b)));
         let ascResult = {};
-        ascendable.map(x => ascResult[x] = Do(Game.ns, "ns.gang.getAscensionResult", x));
+        ascendable.map(x => ascResult[x] = Game['Gang']['getAscensionResult'](x));
         await Promise.all(Object.values(ascResult));
         let check = {};
         ascendable.forEach(x => check[x] = 1.66-.62/Math.exp(((2/memberData[x].agi_asc_mult)**2.24)));
@@ -722,7 +722,7 @@ async function bn2getGear(Game, memberData, settings) {
     if ((await Do(Game.ns, "ns.fileExists", "SQLInject.exe")) || members.length < 12) {
         let equip = await (Game['Gang']['getEquipmentNames']())
         let equipCost = {};
-        equip.map(x => equipCost[x] = Game['Gang']['ns.gang.getEquipmentCost'](x));
+        equip.map(x => equipCost[x] = Game['Gang']['getEquipmentCost'](x));
         for (let j = 0; j < equip.length; j++) {
             for (let i of members) {
                 let total = memberData[i] + memberData[i] + memberData[i] + memberData[i].cha + memberData[i]['hack'];
@@ -771,17 +771,19 @@ export async function bn2(Game, settings={}) {
     settings['traffickChance'] = settings['traffickChance'] ?? .8;
     settings['wantedPenaltyThreshold'] = settings['wantedPenaltyThreshold'] ?? .9;
     let equip = await (Game['Gang']['getEquipmentNames']());
-    let equipCost = [...equip, {}].reduce((a, b) => b[a] = Game['Gang']['getEquipmentCost'](a));
+    let equipCost = {}
+    equip.map(x => equipCost[x] = Game['Gang']['getEquipmentCost'](x));
     await Promise.all(Object.values(equipCost));
     equip.sort((a, b) => { return equipCost[a] - equipCost[b] });
 
-    clashTime = Date.now(); // Placeholder, set for real during first loop
+    let clashTime = Date.now(); // Placeholder, set for real during first loop
 
     await (Game['Gang']['recruitMembers'](settings.membernames));
     while (true) {
-        let members = Game['Gang']['getMemberNames'];
-        equipCost = [...(await (Game['Gang']['getEquipmentNames']())), {}].reduce((a, b) => b[a] = Game['Gang']['getEquipmentCost'](a));
-        let memberData = [...(await members), {}].reduce((a, b) => b[a] = Game['Gang']['getMemberInformation'](a));
+        let members = Game['Gang']['getMemberNames']();
+        equip.map(x => equipCost[x] = Game['Gang']['getEquipmentCost'](x));
+        let memberData = {};
+        (await members).map(x => memberData[x] = Game['Gang']['getMemberInformation'](x));
         await Promise.all(Object.values(equipCost));
         await Promise.all(Object.values(memberData));
         let nextTask = bn2setTasks(Game, memberData, settings);
@@ -795,17 +797,17 @@ export async function bn2(Game, settings={}) {
         }
 
         // Clash time
-        members.map(x => Game['Gang']['setMemberTask'](x, "Territory Warfare"));
+        (await members).map(x => Game['Gang']['setMemberTask'](x, "Territory Warfare"));
 
-        let othergangs = await (Game['Gang']['getOtherGangInformation']);
-        let oldterritory = 100 * (await (Game['Gang']['getGangInformation'])).territory;
-        let startpower = (await (Game['Gang']['getGangInformation'])).power;
+        let othergangs = await (Game['Gang']['getOtherGangInformation']());
+        let oldterritory = 100 * (await (Game['Gang']['getGangInformation']())).territory;
+        let startpower = (await (Game['Gang']['getGangInformation'])()).power;
         if (Object.keys(othergangs).filter(x => othergangs[x].territory > 0).length > 0) {
             let chances = {}
             Object.keys(othergangs).map(x => chances[x] = Game['Gang']['getChanceToWinClash'](x))
             await Promise.all(Object.values(chances));
             let total = Object.keys(othergangs).map(x => chances[x] * othergangs[x].territory).reduce((a, b) => a + b);
-            if ((total / (1 - (await (Game['Gang']['getGangInformation']())).territory) >= settings['clashTarget']) || (Object.keys(clashChance).every(x => chances[x] >= settings['clashTarget'])));
+            if ((total / (1 - (await (Game['Gang']['getGangInformation']())).territory) >= settings['clashTarget']) || (Object.keys(chances).every(x => chances[x] >= settings['clashTarget'])));
                 Game['Gang']['setTerritoryWarfare'](true);
 
         }
@@ -820,9 +822,9 @@ export async function bn2(Game, settings={}) {
 
         Game['Gang']['setTerritoryWarfare'](false);
         await nextTask;
-        members.map(x => Game['Gang']['setMemberTask'](x, nextTask[x] ?? "Train Combat"));
-        if (oldterritory != 100 * (await (Game['Gang']['getGangInformation'])).territory) {
-            Game['Gang'].log("Territory now " + 100 * (await (Game['Gang']['getGangInformation'])).territory.toString());
+        (await members).map(x => Game['Gang']['setMemberTask'](x, nextTask[x] ?? "Train Combat"));
+        if (oldterritory != 100 * (await (Game['Gang']['getGangInformation']())).territory) {
+            Game['Gang'].log("Territory now " + 100 * (await (Game['Gang']['getGangInformation']())).territory.toString());
         }
     }
 }
@@ -2817,7 +2819,7 @@ export class Gang {
             return;
         }
         // Recruit as many members as possible.
-        let usedNames = await (this['getMemberNames']);
+        let usedNames = await (this['getMemberNames']());
         while (await Do(this.ns, "ns.gang.recruitMember", names.filter(x => !usedNames.includes(x))[0])) {
             this.log("New member " + names.filter(x => !usedNames.includes(x))[0] + " recruited.");
             usedNames.push(names.filter(x => !usedNames.includes(x))[0]);
@@ -4204,8 +4206,8 @@ export class Sleeves {
 		for (let stat of ["Strength", "Defense", "Dexterity", "Agility"]) {
 			for (let i = 0; i < await (this.numSleeves); i++) {
 				if ((halfdexagi && ["Dexterity", "Agility"].includes(stat) ? goal / 4 : goal) > ((await Do(this.ns, "ns.sleeve.getSleeve", i)).skills[stat.toLowerCase()])) {
-					await (this.Game.Sleeves.trainWithMe(stat));
-					await this.Game.Player.Gym(stat, "Powerhouse Gym", false);
+					(this.Game.Sleeves.trainWithMe(stat));
+					this.Game.Player.Gym(stat, "Powerhouse Gym", false);
 					didSomething = true;
 				}
 				while ((halfdexagi && ["Dexterity", "Agility"].includes(stat) ? goal / 4 : goal) > ((await Do(this.ns, "ns.sleeve.getSleeve", i)).skills[stat.toLowerCase()])) {
@@ -4213,7 +4215,6 @@ export class Sleeves {
 					didSomething = true;
 				}
 			}
-			await this.ns.asleep(1000);
 		}
 		if (withSleeves) {
 			await this.Game.Sleeves.deShock();
