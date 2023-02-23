@@ -1,3 +1,5 @@
+import { WholeGame } from "WholeGame.js";
+
 // Set the members to their tasks.
 async function bn2setTasks(Game, memberData, settings) {
     if (!await (Game['Gang']['inGang']())) {
@@ -193,7 +195,7 @@ export async function bn2(Game, settings={}) {
     settings['minimumRespect'] = settings['minimumRespect'] ?? 0;
     settings['traffickChance'] = settings['traffickChance'] ?? .8;
     settings['wantedPenaltyThreshold'] = settings['wantedPenaltyThreshold'] ?? .9;
-    let equip = await (Game['Gang']['getEquipmentNames']);
+    let equip = await (Game['Gang']['getEquipmentNames']());
     let equipCost = [...equip, {}].reduce((a, b) => b[a] = Game['Gang']['getEquipmentCost'](a));
     await Promise.all(Object.values(equipCost));
     equip.sort((a, b) => { return equipCost[a] - equipCost[b] });

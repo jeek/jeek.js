@@ -567,7 +567,9 @@ export class Contracts {
 			this.log = this.game.sidebar.querySelector(".contractbox") || this.game.createSidebarItem("Contracts", "", "C", "contractbox");
 			this.log = this.log.log;
 		}
+		this.y = 0;
 		this.z = 0;
+		this.procs = [];
 		this.solutions = [];
 		this.blob = new Blob([workerCode], { type: "application/javascript" });
 		for (let i = 0; i < 16; i++) {
@@ -577,7 +579,7 @@ export class Contracts {
 				this.z -= 1;
 			};
 		}
-		this.ns.atExit(() => procs.map(x => x.terminate()));
+		this.ns.atExit(() => this.procs.map(x => x.terminate()));
 	}
 	async list() {
 		//		this['window'] = this['window'] || await makeNewWindow("Contracts", this.ns.ui.getTheme())
@@ -612,8 +614,6 @@ export class Contracts {
 	}
 	async solve() {
 		await this.list();
-		let procs = [];
-		let y = 0;
 		for (let contract of Object.keys(this.contracts)) {
 			let done = false;
 			//this.ns.tprint(contract);
@@ -652,9 +652,9 @@ export class Contracts {
 				if (!done) {
 					if (this.contracts[contract].type === types[0]) {
 						this.log("Starting " + types[0] + " on " + this.contracts[contract].server);
-						procs[y % 16].postMessage([types[1], this.contracts[contract].data, contract, this.contracts[contract].server]);
-						z += 1;
-						y += 1;
+						this.procs[this.y % 16].postMessage([types[1], this.contracts[contract].data, contract, this.contracts[contract].server]);
+						this.z += 1;
+						this.y += 1;
 						await this.ns.asleep(0);
 						//						let starttime = Date.now();
 						//						this.times[types[0]].push(Date.now() - starttime);

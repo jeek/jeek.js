@@ -1,3 +1,5 @@
+import { WholeGame } from "WholeGame.js";
+
 export async function bn8(Game) {
     let shorts = false;
     let stall = {};

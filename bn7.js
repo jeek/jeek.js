@@ -1,3 +1,5 @@
+import { WholeGame } from "WholeGame.js";
+
 export async function bn7(Game) {
     Game.Bladeburner.raid = false;
     Game.Bladeburner.sting = false;

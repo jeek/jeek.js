@@ -17,7 +17,14 @@ export class Gang {
             this.log = this.log.log;
         }
         // Caching of functions that do not change
-        this.tasknames = Do(this.ns, "ns.gang.getTaskNames");
+        this.tasknames = (async () => {
+            try {
+                while (!await Do(this.ns, "ns.gang.inGang")) {
+                    await this.ns.asleep(10000);
+                }
+                return await Do(this.ns, "ns.gang.getTaskNames");
+            } catch {}
+        })();
         this.taskstats = (async () => {
 			try {
                 await (this.tasknames);
@@ -30,13 +37,20 @@ export class Gang {
 				return null;
 			}
 		})();
-        this.equipnames = Do(this.ns, "ns.gang.getEquipNames");
+        this.equipnames = (async () => {
+            try {
+                while (!await Do(this.ns, "ns.gang.inGang")) {
+                    await this.ns.asleep(10000);
+                }
+                return await Do(this.ns, "ns.gang.getEquipmentNames");
+            } catch {}
+        })();
         this.equipstats = (async () => {
 			try {
                 await (this.equipnames);
                 let equipstats = {};
                 for (let task of this.equipnames) {
-                    equipstats[task] = Do(this.ns, "ns.gang.getEquipStats", task);
+                    equipstats[task] = Do(this.ns, "ns.gang.getEquipmentStats", task);
                 }
                 return equipstats;
 			} catch (e) {
