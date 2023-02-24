@@ -17,46 +17,8 @@ export class Gang {
             this.log = this.log.log;
         }
         // Caching of functions that do not change
-        this.tasknames = (async () => {
-            try {
-                while (!await Do(this.ns, "ns.gang.inGang")) {
-                    await this.ns.asleep(10000);
-                }
-                return await Do(this.ns, "ns.gang.getTaskNames");
-            } catch {}
-        })();
-        this.taskstats = (async () => {
-			try {
-                await (this.tasknames);
-                let taskstats = {};
-                for (let task of this.tasknames) {
-                    taskstats[task] = Do(this.ns, "ns.gang.getTaskStats", task);
-                }
-                return taskstats;
-			} catch (e) {
-				return null;
-			}
-		})();
-        this.equipnames = (async () => {
-            try {
-                while (!await Do(this.ns, "ns.gang.inGang")) {
-                    await this.ns.asleep(10000);
-                }
-                return await Do(this.ns, "ns.gang.getEquipmentNames");
-            } catch {}
-        })();
-        this.equipstats = (async () => {
-			try {
-                await (this.equipnames);
-                let equipstats = {};
-                for (let task of this.equipnames) {
-                    equipstats[task] = Do(this.ns, "ns.gang.getEquipmentStats", task);
-                }
-                return equipstats;
-			} catch (e) {
-				return null;
-			}
-		})();
+        this.taskstats = {};
+        this.equipstats = {};
     }
     // Game API Functions
     async ['ascendMember'](memberName) {
@@ -87,11 +49,12 @@ export class Gang {
         return await Do(this.ns, "ns.gang.getEquipmentCost", equipName);
     }
     async ['getEquipmentNames']() {
-        return await this.equipnames;
+        this.equipnames = this.equipnames ?? await Do(this.ns, "ns.gang.getEquipmentNames");
+        return this.equipnames;
     }
     async ['getEquipmentStats'](equipName) {
-        await this.equipstats;
-        return await (this.equipstats[equipName]);
+        this.equipstats[equipName] = this.equipstats[equipName] ?? await Do(this.ns, "ns.gang.getEquipmentStats", equipName);
+        return this.equipstats[equipName];
     }
     async ['getEquipmentType'](equipName) {
         return await Do(this.ns, "ns.gang.getEquipmentType", equipName);
@@ -109,11 +72,12 @@ export class Gang {
         return await Do(this.ns, "ns.gang.getOtherGangInformation");
     }
     async ['getTaskNames']() {
-        return await (this.tasknames);
+        this.tasknames = this.tasknames ?? await Do(this.ns, "ns.gang.getTaskNames");
+        return this.tasknames;
     }
     async ['getTaskStats'](name) {
-        await this.taskstats;
-        return await (this.taskstats[name]);
+        this.taskstats[name] = this.taskstats[name] ?? await Do(this.ns, "ns.gang.getTaskStats", name);
+        return this.taskstats[name];
     }
     async ['inGang']() {
         return await Do(this.ns, "ns.gang.inGang");
@@ -147,8 +111,8 @@ export class Gang {
         }
     }
     async Start(faction = this.settings.faction) {
+        this.Game.Sleeves.startAGangFirst();
         if (!(await Do(this.ns, "ns.getPlayer")).factions.includes(faction)) {
-            this.Game.Sleeves.startAGangFirst();
             while (!(await Do(this.ns, "ns.getPlayer")).factions.includes(faction)) {
                 await this.ns.asleep(60000);
                 try {
