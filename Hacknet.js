@@ -29,7 +29,7 @@ export class Hacknet {
 					this.log("Spent hashes on " + this.goal);
 			}
 		    if (this.game.Sleeves.startingAGang) {
-				if (await Do(this.ns, "ns.hacknet.spendHashes", "Improve Training")) {
+				if (await Do(this.ns, "ns.hacknet.spendHashes", "Improve Gym Training")) {
                     this.log("Spent hashes on Improve Gym Training")
 				}
 			}
