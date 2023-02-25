@@ -404,11 +404,14 @@ export async function bn8hackloop(Game) {
                             pid = Game.ns.run((await Do(Game.ns, "ns.stock.getForecast", i)) > .5 ? "/temp/hack.js" : "/temp/hackstock.js", threads, stockMapping[i]);
                         }
                         while (await Do(Game.ns, "ns.isRunning", pid)) { await Game.ns.asleep(0); }
+                    } else {
+                        Game.ns.asleep(0);
                     }
                     while ((await Do(Game.ns, "ns.getServerMinSecurityLevel", stockMapping[i])) < (await Do(Game.ns, "ns.getServerSecurityLevel", stockMapping[i]))) {
                         //            ns.tprint("Weaken " + i + " " + mapping[i], " ", ns.stock.getForecast(i));
                         let threads = Math.floor(((await Do(Game.ns, "ns.getServerMaxRam", "home")) - (await Do(Game.ns, "ns.getServerUsedRam", "home")) - buffer) / filesize["weaken.js"]);
                         let pid = Game.ns.run("/temp/weaken.js", threads, stockMapping[i]);
+                        Game.ns.asleep(0);
                         while (pid == 0 && threads > 1) {
                             await Game.ns.asleep(0);
                             threads -= 1;

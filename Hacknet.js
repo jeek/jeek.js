@@ -28,6 +28,15 @@ export class Hacknet {
 				while (await Do(this.ns, "ns.hacknet.spendHashes", this.goal))
 					this.log("Spent hashes on " + this.goal);
 			}
+			if (await Do(this.ns, "ns.corporation.hasCorporation")) {
+				if (await Do(this.ns, "ns.hacknet.spendHashes", "Sell for Corporation Funds")) {
+                    this.log("Spent hashes on Corp Funds")
+				}
+				if (await Do(this.ns, "ns.hacknet.spendHashes", "Exchange for Corporation Research")) {
+                    this.log("Spent hashes on Corp Research")
+				}
+			}
+
 		    if (this.game.Sleeves.startingAGang) {
 				if (await Do(this.ns, "ns.hacknet.spendHashes", "Improve Gym Training")) {
                     this.log("Spent hashes on Improve Gym Training")

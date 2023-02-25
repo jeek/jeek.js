@@ -120,16 +120,23 @@ async function bn2setTasks(Game, memberData, taskStats, settings) {
 
 async function bn2ascendMembers(Game, memberData, settings) {
     let members = Object.keys(memberData);
+    let gangInfo = await (Game['Gang']['getGangInformation']());
     let avgrespect = members.map(x => memberData[x].earnedRespect).reduce((a, b) => a + b, 0) / members.length;
     if (avgrespect >= settings.minimumRespect) {
         let ascendable = [...members];
         ascendable = ascendable.filter(x => (["hack_exp", "str_exp", "def_exp", "dex_exp", "agi_exp", "cha_exp"].map(y => memberData[x][y] > 1000).reduce((a, b) => a || b)));
         let ascResult = {};
-        ascendable.map(x => ascResult[x] = Game['Gang']['getAscensionResult'](x));
-        await Promise.all(Object.values(ascResult));
+        for (let member of ascendable) {
+            ascResult[member] = await (Game['Gang']['getAscensionResult'](member));
+        }
         let check = {};
-        ascendable.forEach(x => check[x] = 1.66-.62/Math.exp(((2/memberData[x].agi_asc_mult)**2.24)));
-        ascendable = ascendable.filter(x => check[x] < ascResult[x]['agi']);
+        if (gangInfo.territory > .98) {
+            ascendable.forEach(x => check[x] = 1.66-.62/Math.exp(((2/memberData[x].agi_asc_mult)**2.24)));
+            ascendable = ascendable.filter(x => check[x] < ascResult[x]['agi']);
+        } else {
+            ascendable.forEach(x => check[x] = 1.66-.62/Math.exp(((2/memberData[x].str_asc_mult)**2.24)));
+            ascendable = ascendable.filter(x => check[x] < ascResult[x]['str']);
+        }
         ascendable = ascendable.filter(x => memberData[x].respectGain < avgrespect);
         ascendable.sort((a, b) => check[b] - check[a]);
         if (ascendable.length > 0) {
@@ -153,18 +160,20 @@ async function bn2getGear(Game, memberData, settings) {
         let equip = await (Game['Gang']['getEquipmentNames']())
         let equipCost = {};
         equip.map(x => equipCost[x] = Game['Gang']['getEquipmentCost'](x));
+        for (let x of Object.keys(equipCost)) {
+            equipCost[x] = await equipCost[x];
+        }
+        equip.sort((a, b) => equipCost[b] - equipCost[a]);
         for (let j = 0; j < equip.length; j++) {
             for (let i of members) {
-                let total = memberData[i] + memberData[i] + memberData[i] + memberData[i].cha + memberData[i]['hack'];
+                let total = memberData[i].str + memberData[i].dex + memberData[i].def + memberData[i].cha + memberData[i]['hack'];
                 // Buy the good stuff only once the terrorism stats are over 700.
                 if (total >= 700) {
                     if ((await (equipCost[equip[j]])) < funds) {
                         if (await (Game['Gang']['purchaseEquipment'](i, equip[j]))) {
-                            Game.log(i + " now owns " + equip[j]);
+                            Game['Gang'].log(i + " now owns " + equip[j]);
                             funds -= equipCost[equip[j]];
-                            i = -1;
                             memberData[i] = await (Game['Gang']['getMemberInformation'](i));
-                            members.sort((a, b) => { return memberData[a].str_mult - memberData[b].str_mult; });
                         }
                     }
                 } else {
@@ -241,7 +250,7 @@ export async function bn2(Game, settings={}) {
         let startpower = (await (Game['Gang']['getGangInformation'])()).power;
         if (Object.keys(othergangs).filter(x => othergangs[x].territory > 0).length > 0) {
             let chances = {}
-            Object.keys(othergangs).map(x => chances[x] = Game['Gang']['getChanceToWinClash'](x))
+            Object.keys(othergangs).filter(x => othergangs[x].territory > 0).map(x => chances[x] = Game['Gang']['getChanceToWinClash'](x))
             await Promise.all(Object.values(chances));
             let total = Object.keys(othergangs).map(x => chances[x] * othergangs[x].territory).reduce((a, b) => a + b);
             if ((total / (1 - (await (Game['Gang']['getGangInformation']())).territory) >= settings['clashTarget']) || (Object.keys(chances).every(x => chances[x] >= settings['clashTarget'])));

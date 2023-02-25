@@ -111,8 +111,8 @@ export class Gang {
         }
     }
     async Start(faction = this.settings.faction) {
-        this.Game.Sleeves.startAGangFirst();
         if (!(await Do(this.ns, "ns.getPlayer")).factions.includes(faction)) {
+            this.Game.Sleeves.startAGangFirst();
             while (!(await Do(this.ns, "ns.getPlayer")).factions.includes(faction)) {
                 await this.ns.asleep(60000);
                 try {

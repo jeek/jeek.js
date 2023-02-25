@@ -14,7 +14,7 @@ export async function bn7(Game) {
         let zc = 1;
     while (await Game.Bladeburner.UpgradeSkills(zc))
         zc += 1;
-            await Game.Sleeves.bbEverybody("Field analysis");
+    await Game.Sleeves.bbEverybody("Field analysis");
     await Game.Bladeburner.hardStop();
     while (((await (Game.Bladeburner.contractCount))+((await (Game.Bladeburner.operationCount)))) > 0) {
         Game.Hacknet.goal = (1000 > (await (Game.Bladeburner.skillPoints)) ? "Exchange for Bladeburner SP" : "Generate Coding Contract");
