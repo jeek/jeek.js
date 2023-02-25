@@ -1,5 +1,6 @@
 import { Augmentations } from "Augmentations.js";
 import { Bladeburner } from "Bladeburner.js";
+import { BuildProcess } from "BuildProcess.js";
 import { CacheServer } from "CacheServer.js";
 import { Casino, roulettestart } from "Casino.js";
 import { Contracts } from "Contracts.js";

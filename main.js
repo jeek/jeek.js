@@ -16,6 +16,8 @@ const cmdlineflags = [
 	["popemall", false], // Get access to all possible servers
 	["endlessass", false], // Endless Assassinations (CHEAT)
 	["help", "none"],
+	["cloneandbuild", false], // Clone and build
+	["build", false]
 ];
 
 import { WholeGame } from "WholeGame.js"
@@ -33,6 +35,15 @@ export async function main(ns) {
 	let promises = [];
 	if (cmdlineargs['help'] != "none") {
 		Game.Jeekipedia.lookup(cmdlineargs['help']);
+	}
+	if (cmdlineargs['cloneandbuild']) {
+		await (Game.BuildProcess.doitall());
+		ns.exit();
+	}
+	if (cmdlineargs['build']) {
+		await (Game.BuildProcess.build());
+		await (Game.BuildProcess.transpile());
+		ns.exit();
 	}
 	if (cmdlineargs['endlessass']) {
 		promises.push(Game.Debug.endlessAss());
