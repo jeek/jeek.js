@@ -43,6 +43,7 @@ export class WholeGame {
 		}
 		this.slp = ms => new Promise(r => setTimeout(r, ms));
 		this.Servers = new Servers(ns, this);
+		this.BuildProcess = new BuildProcess(ns);
 		this.Debug = new DebugStuff(ns, this);
 		this.Contracts = new Contracts(ns, this);
 		this.Hacknet = new Hacknet(ns, this);
