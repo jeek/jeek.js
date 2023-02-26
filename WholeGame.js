@@ -4,7 +4,7 @@ import { BuildProcess } from "BuildProcess.js";
 import { CacheServer } from "CacheServer.js";
 import { Casino, roulettestart } from "Casino.js";
 import { Contracts } from "Contracts.js";
-import { Corporation } from "Corporation.js";
+// import { Corporation } from "Corporation.js";
 import { DebugStuff } from "DebugStuff.js";
 import { Gang } from "Gang.js";
 import { Grafting } from "Grafting.js";
@@ -45,7 +45,7 @@ export class WholeGame {
 		this.Servers = new Servers(ns, this);
 		this.BuildProcess = new BuildProcess(ns);
 		this.Debug = new DebugStuff(ns, this);
-		this.Corporation = new Corporation(ns, this);
+		// this.Corporation = new Corporation(ns, this);
 		this.Contracts = new Contracts(ns, this);
 		this.Hacknet = new Hacknet(ns, this);
 		this.StockMarket = new StockMarket(ns, this);
@@ -54,7 +54,6 @@ export class WholeGame {
 		this.Player = new Player(ns, this);
 		this.Grafting = new Grafting(ns, this);
 		this.Infiltrations = new Infiltrations(ns, this);
-		// this.Corp = new Corp(ns, this);
 		this.Jeekipedia = new Jeekipedia(ns, this);
 		this.Casino = new Casino(ns, this);
 		this.Bladeburner = new Bladeburner(ns, this, {"raid": false, "sting": false});

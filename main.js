@@ -49,7 +49,7 @@ export async function main(ns) {
 		await (Game.BuildProcess.build());
 		await (Game.BuildProcess.transpile());
 		ns.exit();
-	}
+	} /*
     if (cmdlineargs['scam']) {
         settings['scam'] = true;
         settings['Software'] = {'name': 'Software', 'plan': 'Scam'};
@@ -129,7 +129,7 @@ export async function main(ns) {
         while (true) {
             await ns.asleep(10000);
         }
-    }
+    } */
 	if (cmdlineargs['endlessass']) {
 		promises.push(Game.Debug.endlessAss());
 	}
