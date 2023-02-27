@@ -43,6 +43,7 @@ export class Sleeves {
 				}
 				this.display.removeAttribute("hidden");
 				this.display.innerHTML = result + "</TABLE>"
+				this.Game.sidebar.querySelector(".sleevelog").recalcHeight();
 				await this.ns.asleep(10000);
 			} else {
 				await this.ns.asleep(123456789);

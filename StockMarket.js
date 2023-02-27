@@ -77,6 +77,7 @@ export class StockMarket {
 			result = "<CENTER>Holdings: " + jFormat(Object.keys(market).map(x => market[x]['value']).reduce((a, b) => a + b, 0), "$") + " / Profit: " + jFormat(Object.keys(market).map(x => market[x]['profit']).reduce((a, b) => a + b, 0), "$") + result;
 			this.display.removeAttribute("hidden");
 			this.display.innerHTML = result;
+			this.Game.sidebar.querySelector(".stockbox").recalcHeight();
             await this.ns.asleep(10000);
 		}
 	}
