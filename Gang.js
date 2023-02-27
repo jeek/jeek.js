@@ -25,7 +25,7 @@ export class Gang {
     async displayBoxUpdate() {
         while (this.ns.flags(cmdlineflags)['logbox']) {
             let result = "";
-            memberData = {};
+            let memberData = {};
             for (let member of await Do(this.ns, "ns.gang.getMemberNames")) {
                 memberData[member] = await Do(this.ns, "ns.gang.getMemberInformation", member);
             }
