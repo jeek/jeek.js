@@ -1,6 +1,7 @@
 import { Do, DoAll, DoAllComplex } from "Do.js";
 import { makeNewWindow } from "Windows.js";
 import { WholeGame } from "WholeGame.js";
+import { jFormat } from "helpers.js";
 
 const stockMapping = {
 	"ECP": "ecorp",
@@ -38,16 +39,46 @@ const stockMapping = {
 }
 
 export class StockMarket {
-	constructor(ns, game) {
+	constructor(ns, Game) {
 		helperScripts(ns);
 		this.ns = ns;
-		this.game = game ? game : new WholeGame(ns);
+		this.Game = Game ?? new WholeGame(ns);
 		this.liquidate = false;
 		this.log = ns.tprint.bind(ns);
         if (ns.flags(cmdlineflags)['logbox']) {
-            this.log = this.game.sidebar.querySelector(".stockbox") || this.game.createSidebarItem("Stocks", "", "S", "stockbox");
+            this.log = this.Game.sidebar.querySelector(".stockbox") || this.Game.createSidebarItem("Stocks", "", "S", "stockbox");
+			this.display = this.Game.sidebar.querySelector(".stockbox").querySelector(".display");
 			this.log = this.log.log;
+			this.displayBoxUpdate();
         }
+	}
+	async displayBoxUpdate() {
+		while (this.ns.flags(cmdlineflags)['logbox']) {
+			let result = "<TABLE BORDER=1 CELLPADDING=0 CELLSPACING=0 WIDTH=100%>";
+			result += "<TR><TH>sym</TH><TH>position</TH><TH>profit</TH><TH>value</TH></TR>";
+			let market = await (this.market);
+			let keys = Object.keys(market).sort((a, b) => market[b].profit - market[a].profit);
+            for (let stock of keys) {
+                if (market[stock]['position'][0] > 0 || market[stock]['position'][2] > 0) {
+                    result += "<TR><TD>" + stock + "</TD>";
+					let pos = [];
+					if (market[stock]['position'][0] > 0) {
+						pos.push("<RIGHT>" + market[stock]['position'][0].toString() + " L</RIGHT>");
+					}
+					if (market[stock]['position'][2] > 0) {
+						pos.push("<RIGHT>" + market[stock]['position'][2].toString() + " S</RIGHT>");
+					}
+					result += "<TD ALIGN=RIGHT>" + pos.join("<BR>") + "</TD>";
+					result += "<TD ALIGN=RIGHT>" + jFormat(market[stock]['profit'], "$") + "</TD>";
+					result += "<TD ALIGN=RIGHT>" + jFormat(market[stock]['value'], "$") + "</TD></TR>";
+				}
+			}
+			result += "</TABLE>";
+			result = "<CENTER>Holdings: " + jFormat(Object.keys(market).map(x => market[x]['value']).reduce((a, b) => a + b, 0), "$") + " / Profit: " + jFormat(Object.keys(market).map(x => market[x]['profit']).reduce((a, b) => a + b, 0), "$") + result;
+			this.display.removeAttribute("hidden");
+			this.display.innerHTML = result;
+            await this.ns.asleep(10000);
+		}
 	}
 	get symbols() {
 		return (async () => {

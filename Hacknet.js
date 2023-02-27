@@ -1,16 +1,45 @@
 import { Do } from "Do.js";
 import { WholeGame } from "WholeGame.js";
+import { jFormat } from "helpers.js";
 
 export class Hacknet {
-	constructor(ns, game, goal = "") {
+	constructor(ns, Game, goal = "") {
 		this.ns = ns;
-		this.game = game ? game : new WholeGame(ns);
+		this.Game = Game ?? new WholeGame(ns);
 		this.log = ns.tprint.bind(ns);
 		this.goal = goal;
 		this.start = Date.now();
 		if (ns.flags(cmdlineflags)['logbox']) {
-			this.log = this.game.sidebar.querySelector(".hacknetbox") || this.game.createSidebarItem("Hacknet", "", "H", "hacknetbox");
+			this.log = this.Game.sidebar.querySelector(".hacknetbox") || this.Game.createSidebarItem("Hacknet", "", "H", "hacknetbox");
+			this.display = this.Game.sidebar.querySelector(".hacknetbox").querySelector(".display");
 			this.log = this.log.log;
+			this.displayUpdate();
+		}
+	}
+	async displayUpdate() {
+		while (this.ns.flags(cmdlineflags)['logbox']) {
+			let result = "";
+			let totalProd = 0;
+			if ((await Do(this.ns, "ns.hacknet.numNodes")) > 0) {
+				result += "<TABLE BORDER=1 CELLPADDING=0 CELLSPACING=0 WIDTH=100%>";
+				result += "<TH>id</TH><TH>level</TH><TH>ram</TH><TH>cores</TH><TH>cache</TH><TH>prod/s</TH></TR>";
+				let rowData = {};
+				for (let i = 0 ; i < await Do(this.ns, "ns.hacknet.numNodes") ; i++) {
+					let mydata = await Do(this.ns, "ns.hacknet.getNodeStats", i);
+                    let thisrow = "<TD ALIGN=CENTER>" + [mydata.level, mydata.ram, mydata.cores, mydata.cache, jFormat(mydata.production)].join("</TD><TD ALIGN=CENTER>") + "</TD>";
+					totalProd += mydata.production;
+					rowData[thisrow] = (rowData[thisrow] ?? []).concat([i]);
+				}
+				let rowSort = Object.keys(rowData).sort((a, b) => rowData[a][0] - rowData[b][0]);
+				for (let row of rowSort) {
+					result += "<TR><TD ALIGN=CENTER>" + rowData[row].join(" ") + "</TD>" + row + "</TR>";
+				}
+				result += "</TABLE>";
+			}
+			this.display.removeAttribute("hidden");
+			let header = "<center><h2>hashes: " + jFormat(await Do(this.ns, "ns.hacknet.numHashes")) + "/" + jFormat(await Do(this.ns, "ns.hacknet.hashCapacity")) + "</h2>prod: " + jFormat(totalProd) + "/s</center><br>";
+			this.display.innerHTML = header + result + "next node: " + jFormat(await Do(this.ns, "ns.hacknet.getPurchaseNodeCost"), "$");
+			await this.ns.asleep(10000);
 		}
 	}
 	async loop() {
@@ -37,13 +66,13 @@ export class Hacknet {
 				}
 			}
 
-		    if (this.game.Sleeves.startingAGang) {
+		    if (this.Game.Sleeves.startingAGang) {
 				if (await Do(this.ns, "ns.hacknet.spendHashes", "Improve Gym Training")) {
                     this.log("Spent hashes on Improve Gym Training")
 				}
 			}
     		// Pay for yourself, Hacknet
-    		if (!this.game.Sleeves.startingAGang) {
+    		if (!this.Game.Sleeves.startingAGang) {
 	    		if ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses < -1e9) {
 		    		if (0 > ((await Do(this.ns, "ns.getMoneySources")).sinceInstall['hacknet']) + ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses)) {
 			    		if (4 <= (await Do(this.ns, "ns.hacknet.numHashes", ""))) {
