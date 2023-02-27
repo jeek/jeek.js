@@ -31,7 +31,9 @@ export class Sleeves {
 			if (this.ns.flags(cmdlineflags)['logbox']) {
 				for (let i = 0; i < await (this.numSleeves); i++) {
 					let me = await Do(this.ns, "ns.sleeve.getSleeve", i);
-					result += "<TR><TD>" + i.toString() + "</TD><TD ALIGN=CENTER>" + [me.skills.hacking.toString(), me.skills.strength.toString(), me.skills.defense.toString(), me.skills.dexterity.toString(), me.skills.agility.toString(), me.skills.intelligence.toString(), Math.ceil(me.shock).toString()].join("</TD><TD ALIGN=CENTER>") + "</TD></TR>";
+					let task = "";
+					try { task = Object.values(await Do(this.ns, "ns.sleeve.getTask", i)).join(" / ") } catch { };
+					result += "<TR><TD ALIGN=CENTER VALIGN=CENTER ROWSPAN=2>" + i.toString() + "</TD><TD ALIGN=CENTER>" + [me.skills.hacking.toString(), me.skills.strength.toString(), me.skills.defense.toString(), me.skills.dexterity.toString(), me.skills.agility.toString(), me.skills.intelligence.toString(), Math.ceil(me.shock).toString()].join("</TD><TD ALIGN=CENTER>") + "</TD></TR><TR><TD COLSPAN=7>" + task + "</TD></TR>";
 				}
 				this.display.removeAttribute("hidden");
 				this.display.innerHTML = result + "</TABLE>"
