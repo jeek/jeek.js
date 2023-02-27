@@ -246,7 +246,7 @@ export async function bn2(Game, settings={}) {
         (await members).map(x => Game['Gang']['setMemberTask'](x, "Territory Warfare"));
 
         let othergangs = await (Game['Gang']['getOtherGangInformation']());
-        let oldterritory = 100 * (await (Game['Gang']['getGangInformation']())).territory;
+        let oldterritory = Math.floor(100 * (await (Game['Gang']['getGangInformation']())).territory);
         let startpower = (await (Game['Gang']['getGangInformation'])()).power;
         if (Object.keys(othergangs).filter(x => othergangs[x].territory > 0).length > 0) {
             let chances = {}
@@ -269,7 +269,7 @@ export async function bn2(Game, settings={}) {
         Game['Gang']['setTerritoryWarfare'](false);
         nextTask = await nextTask;
         (await members).map(x => Game['Gang']['setMemberTask'](x, nextTask[x] ?? "Train Combat"));
-        if (oldterritory != 100 * (await (Game['Gang']['getGangInformation']())).territory) {
+        if (oldterritory != Math.floor(100 * (await (Game['Gang']['getGangInformation']())).territory)) {
             Game['Gang'].log("Territory now " + 100 * (await (Game['Gang']['getGangInformation']())).territory.toString());
         }
     }
