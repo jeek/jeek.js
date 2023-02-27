@@ -249,6 +249,9 @@ export class Server {
 						pids.shift();
 					}
 				}
+				if ((await this.hackDifficulty) > (await this.minDifficulty)) {
+					await this.ns.asleep(0);
+				}
 			}
 			pids = await serverList.reduce(async (promise, server) => {
 				let w = await promise;
@@ -270,6 +273,9 @@ export class Server {
 					pids.shift();
 				}
 			}
+		    if ((await this.moneyAvailable) < (await this.moneyMax)) {
+				await this.ns.asleep(0);
+		    }
 		}
 		while ((await this.hackDifficulty) > (await this.minDifficulty)) {
 			pids = await serverList.reduce(async (promise, server) => {
@@ -291,6 +297,9 @@ export class Server {
 				if (!await Do(this.ns, "ns.isRunning", pids[0])) {
 					pids.shift();
 				}
+			}
+			if ((await this.hackDifficulty) > (await this.minDifficulty)) {
+				await this.ns.asleep(0);
 			}
 		}
 	}
