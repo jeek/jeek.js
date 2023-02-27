@@ -37,7 +37,9 @@ export class Gang {
             result += "</TABLE>";
 			this.display.removeAttribute("hidden");
 			this.display.innerHTML = result;
-			this.Game.sidebar.querySelector(".gangbox").recalcHeight();        }
+			this.Game.sidebar.querySelector(".gangbox").recalcHeight(); 
+            await this.ns.asleep(10000);
+       }
     }
     // Game API Functions
     async ['ascendMember'](memberName) {
