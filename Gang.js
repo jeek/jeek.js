@@ -14,11 +14,30 @@ export class Gang {
         this.settings.faction = this.settings.faction ?? "Slum Snakes";
         if (this.ns.flags(cmdlineflags)['logbox']) {
             this.log = this.Game.sidebar.querySelector(".gangbox") || this.Game.createSidebarItem("Gang", "", "G", "gangbox");
-            this.log = this.log.log;
+			this.display = this.Game.sidebar.querySelector(".gangbox").querySelector(".display");
+			this.log = this.log.log;
+			this.displayBoxUpdate();
         }
         // Caching of functions that do not change
         this.taskstats = {};
         this.equipstats = {};
+    }
+    async displayBoxUpdate() {
+        while (this.ns.flags(cmdlineflags)['logbox']) {
+            result = "";
+            memberData = {};
+            for (let member of await Do(this.ns, "ns.gang.getMemberNames")) {
+                memberData[member] = await Do(this.ns, "ns.gang.getMemberInformation", member);
+            }
+            let memberNames = Object.keys(memberData).sort((a, b) => memberData[b].earnedRespect - memberData[a].earnedRespect);
+            result = "<TABLE BORDER=1 CELLSPACING=0 CELLPADDING=0 WIDTH=100%>";
+            for (let member of memberNames) {
+                result += "<TR><TD>" + member + "</TD><TD>" + memberData[member].earnedRespect + "</TD><TD>" + memberData[member].hack + memberData[member].str  + "</TD><TD>" + memberData[member].def  + "</TD><TD>" + memberData[member].dex  + "</TD><TD>" + memberData[member].agi + "</TD><TD>" + memberData[member].cha + "</TD><TD>" + memberData[member].task + "</TD></TR>"; 
+            }
+            result += "</TABLE>";
+			this.display.removeAttribute("hidden");
+			this.display.innerHTML = result;
+			this.Game.sidebar.querySelector(".stockbox").recalcHeight();        }
     }
     // Game API Functions
     async ['ascendMember'](memberName) {
