@@ -67,10 +67,14 @@ export class WholeGame {
 	elemFromHTML = html => new Range().createContextualFragment(html).firstElementChild;
 	createItem = (title, content, icon, ...classes) => {
 		let sidebar = this.doc.querySelector(".sb");
-		let item = sidebar.appendChild(this.elemFromHTML(`<div class="${classes.join(" ")}"><div class="head"><a class="icon">${icon}</a><span class=title>${title}</span><a class="icon collapser">\ueab7</a><a class="icon close">\ueab8</a></div><div class="body">${content}</div></div>`));
+		let item = sidebar.appendChild(this.elemFromHTML(`<div class="${classes.join(" ")}"><div class="head"><a class="icon">${icon}</a><span class=title>${title}</span><a class="icon collapser">\ueab7</a><a class="icon close">\ueab8</a></div><div class="body"><div class="display" hidden></div>${content}</div></div>`));
 		Object.assign(item, {
 			head: item.querySelector(".head"),
 			body: item.querySelector(".body"),
+			display: () => {
+				item.querySelector(".display").removeAttribute("hidden");
+				return item.querySelector(".display");
+			},
 			toggleType: () => ["box", "sbitem"].forEach(cl => item.classList.toggle(cl)),
 			logTarget: item.querySelector(".log"),
 			log: (html, timestamp = true) => {
