@@ -33,7 +33,7 @@ export class Gang {
             let memberNames = Object.keys(memberData).sort((a, b) => memberData[b].earnedRespect - memberData[a].earnedRespect);
             result = "<TABLE BORDER=1 CELLSPACING=0 CELLPADDING=0 WIDTH=100%>";
             for (let member of memberNames) {
-                result += "<TR><TD>" + member + "</TD><TD>" + jFormat(memberData[member].earnedRespect) + "</TD><TD>" + memberData[member].hack + "</TD><TD>" + memberData[member].str  + "</TD><TD>" + memberData[member].def  + "</TD><TD>" + memberData[member].dex  + "</TD><TD>" + memberData[member].agi + "</TD><TD>" + memberData[member].cha + "</TD><TD>" + memberData[member].task + "</TD></TR>"; 
+                result += "<TR><TD>" + member + "</TD><TD>" + jFormat(memberData[member].earnedRespect) + "</TD><TD>" + memberData[member]['hack'] + "</TD><TD>" + memberData[member].str  + "</TD><TD>" + memberData[member].def  + "</TD><TD>" + memberData[member].dex  + "</TD><TD>" + memberData[member].agi + "</TD><TD>" + memberData[member].cha + "</TD><TD>" + memberData[member].task + "</TD></TR>"; 
             }
             result += "</TABLE>";
 			this.display.removeAttribute("hidden");
