@@ -7,8 +7,8 @@ export class Sleeves {
 		this.Game = Game ? Game : new WholeGame(ns);
 		this.startingAGang = false;
 		if (this.ns.flags(cmdlineflags)['logbox']) {
-			this.log = this.Game.sidebar.querySelector(".sleevelog") || this.Game.createSidebarItem("Sleeve Log", "", "S", "sleevelog");
-			this.display = this.log.display;
+			this.log = this.Game.sidebar.querySelector(".sleevelog") || this.Game.createSidebarItem("Sleeves", "", "S", "sleevelog");
+			this.display = this.Game.sidebar.querySelector(".sleevelog").querySelector(".display");
 			this.log = this.log.log;
 		}
 	}
@@ -27,14 +27,14 @@ export class Sleeves {
 	}
 	async SleeveInfoLog() {
 		while (true) {
-			let result = [];
+			let result = "<TABLE BORDER=1 CELLSPACING=0 WIDTH=100% CELLPADDING=0><TR><th>id</th><th>hack</th><th>str</th><th>def</th><th>dex</th><th>agi</th><th>int</th><th>shk</th></tr>";
 			if (this.ns.flags(cmdlineflags)['logbox']) {
 				for (let i = 0; i < await (this.numSleeves); i++) {
 					let me = await Do(this.ns, "ns.sleeve.getSleeve", i);
-					result.push(JSON.stringify([me.skills.hacking.toString(), me.skills.strength.toString(), me.skills.defense.toString(), me.skills.dexterity.toString(), me.skills.agility.toString(), me.skills.intelligence.toString(), me.shock.toString()].join("/"), false));
-					try { this.log2(JSON.stringify(Object.values(await Do(this.ns, "ns.sleeve.getTask", i)).join("/")), false) } catch { };
+					result += "<TR><TD>" + i.toString() + "</TD><TD ALIGN=CENTER>" + [me.skills.hacking.toString(), me.skills.strength.toString(), me.skills.defense.toString(), me.skills.dexterity.toString(), me.skills.agility.toString(), me.skills.intelligence.toString(), Math.ceil(me.shock).toString()].join("</TD><TD ALIGN=CENTER>") + "</TD></TR>";
 				}
-				this.display.innerHTML = result.join("<BR>")
+				this.display.removeAttribute("hidden");
+				this.display.innerHTML = result + "</TABLE>"
 				await this.ns.asleep(10000);
 			} else {
 				await this.ns.asleep(123456789);
