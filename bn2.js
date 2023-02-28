@@ -120,6 +120,10 @@ async function bn2setTasks(Game, memberData, taskStats, settings) {
 
 async function bn2ascendMembers(Game, memberData, settings) {
     let members = Object.keys(memberData);
+    if (await (Game.hours) < 12)
+    if (members.length < 12 && members.length <= (await (Game.hours))) {
+        return;
+    }
     let gangInfo = await (Game['Gang']['getGangInformation']());
     let avgrespect = members.map(x => memberData[x].earnedRespect).reduce((a, b) => a + b, 0) / members.length;
     if (avgrespect >= settings.minimumRespect) {

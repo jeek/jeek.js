@@ -169,6 +169,15 @@ export class WholeGame {
 			}
 		})();
 	}
+	get hours() {
+		return (async () => {
+			try {
+				return Math.floor((await (this.Player.playtimeSinceLastAug))/3600000);
+			} catch (e) {
+				return 1;
+			}
+		})();
+	}
 	async winGame() {
 		let parent = {};
 		let path = ["The-Cave"];
