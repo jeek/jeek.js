@@ -1,6 +1,6 @@
 import { Augmentations } from "Augmentations.js";
 import { Bladeburner } from "Bladeburner.js";
-import { BuildProcess } from "BuildProcess.js";
+// import { BuildProcess } from "BuildProcess.js";
 import { CacheServer } from "CacheServer.js";
 import { Casino, roulettestart } from "Casino.js";
 import { Contracts } from "Contracts.js";
@@ -43,7 +43,7 @@ export class WholeGame {
 		}
 		this.slp = ms => new Promise(r => setTimeout(r, ms));
 		this.Servers = new Servers(ns, this);
-		this.BuildProcess = new BuildProcess(ns);
+		// this.BuildProcess = new BuildProcess(ns);
 		this.Debug = new DebugStuff(ns, this);
 		// this.Corporation = new Corporation(ns, this);
 		this.Contracts = new Contracts(ns, this);
