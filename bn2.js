@@ -134,8 +134,8 @@ async function bn2ascendMembers(Game, memberData, settings) {
         }
         let check = {};
         if (gangInfo.territory > .98) {
-            ascendable.forEach(x => check[x] = 1.66-.62/Math.exp(((2/memberData[x].agi_asc_mult)**2.24)));
-            ascendable = ascendable.filter(x => check[x] < ascResult[x]['agi']);
+            ascendable.forEach(x => check[x] = 1.66-.62/Math.exp(((2/memberData[x].cha_asc_mult)**2.24)));
+            ascendable = ascendable.filter(x => check[x] < ascResult[x]['cha']);
         } else {
             ascendable.forEach(x => check[x] = 1.66-.62/Math.exp(((2/memberData[x].str_asc_mult)**2.24)));
             ascendable = ascendable.filter(x => check[x] < ascResult[x]['str']);
@@ -192,7 +192,7 @@ async function bn2getGear(Game, memberData, settings) {
 export async function bn2(Game, settings={}) {
     settings['faction'] = settings['faction'] ?? "Slum Snakes";
     settings['membernames'] = settings['membernames'] ?? [];
-    while (settings.membernames.length < 12) {
+    while (settings.membernames.length < 13) {
         settings['membernames'].push([
             'Rat',
             'Ox',
@@ -205,7 +205,8 @@ export async function bn2(Game, settings={}) {
             'Monkey',
             'Rooster',
             'Dog',
-            'Pig'].filter(x => !settings.membernames.includes(x))[0]);
+            'Pig',
+            'Emu'].filter(x => !settings.membernames.includes(x))[0]);
     }
     await Game['Gang']['Start'](settings['faction']);
     settings['wantedThreshold'] = settings['wantedThreshold'] ?? 10;

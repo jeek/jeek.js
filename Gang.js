@@ -127,9 +127,13 @@ export class Gang {
         }
         // Recruit as many members as possible.
         let usedNames = await (this['getMemberNames']());
+        if (usedNames.length == 12)
+            return;
         while (await Do(this.ns, "ns.gang.recruitMember", names.filter(x => !usedNames.includes(x))[0])) {
             this.log("New member " + names.filter(x => !usedNames.includes(x))[0] + " recruited.");
             usedNames.push(names.filter(x => !usedNames.includes(x))[0]);
+            if (usedNames.length == 12)
+                return;
         }
     }
     async Start(faction = this.settings.faction) {
