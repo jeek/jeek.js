@@ -114,7 +114,7 @@ export class Gang {
         return await Do(this.ns, "ns.gang.setMemberTask", memberName, taskName);
     }
     async ['setTerritoryWarfare'](engage) {
-        return await Do(this.ns, "ns.gang.setTerritoryWarfare");
+        return await Do(this.ns, "ns.gang.setTerritoryWarfare", engage);
     }
     // jeek.js additions
     async canAscend(memberName) {
