@@ -120,7 +120,6 @@ async function bn2setTasks(Game, memberData, taskStats, settings) {
 
 async function bn2ascendMembers(Game, memberData, settings) {
     let members = Object.keys(memberData);
-    if (await (Game.hours) < 12)
     if (members.length < 12 && members.length <= (await (Game.hours))) {
         return;
     }

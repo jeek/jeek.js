@@ -163,7 +163,7 @@ export class WholeGame {
 	get bitNodeN() {
 		return (async () => {
 			try {
-				return (await (this.Player.bitNodeN));
+				return (await Do(this.ns, "ns.getPlayer")).bitNodeN;
 			} catch (e) {
 				return 1;
 			}
@@ -172,7 +172,7 @@ export class WholeGame {
 	get hours() {
 		return (async () => {
 			try {
-				return Math.floor((await (this.Player.playtimeSinceLastAug))/3600000);
+				return Math.floor(((await Do(this.ns, "ns.getPlayer")).playtimeSinceLastAug)/3600000);
 			} catch (e) {
 				return 1;
 			}
