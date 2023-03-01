@@ -24,6 +24,11 @@ export class Gang {
         this.equipstats = {};
     }
     async displayBoxUpdate() {
+        if (this.ns.flags(cmdlineflags)['logbox']) {
+            while (!await Do(this.ns, "ns.gang.inGang")) {
+                await this.ns.asleep(1000);
+            }
+        }
         while (this.ns.flags(cmdlineflags)['logbox']) {
             let result = "";
             let memberData = {};

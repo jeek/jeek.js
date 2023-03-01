@@ -672,7 +672,7 @@ export class Contracts {
 					this.log("Succeeded at " + this.solutions[0].data[3] + ": " + success);
 				} else {
 					this.log("Failed at " + this.solutions[0].data[3]);
-					this.log("Failed at " + this.solutions[0].data[3], " ", types[1](this.contracts[this.solutions[0].data[1]].data, this.ns));
+					//this.log("Failed at " + this.solutions[0].data[3], " ", types[1](this.contracts[this.solutions[0].data[1]].data, this.ns));
 					//this.ns.exit();
 				}
 				this.solutions.shift();
