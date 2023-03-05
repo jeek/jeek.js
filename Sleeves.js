@@ -183,7 +183,7 @@ export class Sleeves {
 				await Do(this.ns, "ns.sleeve.setToCommitCrime", i, "Mug");
 			}
 			for (let i = 0; i < await (this.numSleeves); i++) {
-				if (.30 > await Do(this.ns, "ns.formulas.work.crimeSuccessChance", await Do(this.ns, "ns.sleeve.getSleeve", i), "Homicide")) {
+				while (.30 > await Do(this.ns, "ns.formulas.work.crimeSuccessChance", await Do(this.ns, "ns.sleeve.getSleeve", i), "Homicide")) {
 					await this.ns.asleep(100);
 				}
 			}
