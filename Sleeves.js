@@ -100,6 +100,40 @@ export class Sleeves {
         }
       }
     }
+    if (true) {
+      done = false;
+      let mults = await Do(this.ns, "ns.getBitNodeMultipliers");
+      while (!done) {
+        done = true;
+        let lastupdate = "";
+        for (let i = 0; i < await (this.numSleeves); i++) {
+          if (.75 > await Do(this.ns, "ns.formulas.work.crimeSuccessChance", await Do(this.ns, "ns.sleeve.getSleeve", i), "Mug")) {
+            let bestGym = {};
+            let scores = [];
+            for (let stat of ["Strength", "Dexterity", "Defense", "Agility"]) {
+              bestGym[stat] = await Do(this.ns, "ns.sleeve.getSleeve", i);
+              bestGym[stat]["exp"][stat.toLowerCase()] += 200 * bestGym[stat]["mults"][stat.toLowerCase() + "_exp"];
+              for (let stat2 of ["Strength", "Dexterity", "Defense", "Agility"]) {
+                bestGym[stat]["skills"][stat2.toLowerCase()] = Math.max(bestGym[stat]["mults"][stat2.toLowerCase()] * (32 * Math.log(bestGym[stat]["exp"][stat2.toLowerCase()] + 534.5) - 200), 1) * mults[stat + "LevelMultiplier"];
+              }
+              scores.push([stat, await Do(this.ns, "ns.formulas.work.crimeSuccessChance", bestGym[stat], "Mug")]);
+            }
+            scores = scores.sort((a, b) => b[1] - a[1]);
+            if (scores[0][0] != lastupdate) {
+              this.trainWithMe(scores[0][0]);
+              this.Game.Player.Gym(scores[0][0], "Powerhouse Gym", false);
+              lastupdate = scores[0][0];
+            }
+            let start = (await Do(this.ns, "ns.sleeve.getSleeve", i))["skills"][lastupdate.toLowerCase()];
+            while (start == (await Do(this.ns, "ns.sleeve.getSleeve", i))["skills"][lastupdate.toLowerCase()]) {
+              await this.ns.asleep(100);
+            }
+            this.log(i.toString() + " Success Rate: " + (await Do(this.ns, "ns.formulas.work.crimeSuccessChance", await Do(this.ns, "ns.sleeve.getSleeve", i), "Mug")).toString() + " ");
+            done = false;
+          }
+        }
+    }
+      }
     // This is what Saint_Garmo does. It doesn't work well for me.
 	if (false) {
     done = false;

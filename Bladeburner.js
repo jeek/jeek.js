@@ -56,6 +56,12 @@ export class Bladeburner {
 			}
 		})();
 	}
+    async ['getActionAutolevel'](name) {
+		return await Do(this.ns, "ns.bladeburner.getActionAutoLevel", this.bbTypes[name], name);
+	}
+    async ['getActionCountRemaining'](name) {
+		return await Do(this.ns, "ns.bladeburner.getActionCountRemaining", this.bbType[name], name);
+	}
 	async getChance(name) {
 		return await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", this.bbTypes[name], name);
 	}
