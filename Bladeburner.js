@@ -18,14 +18,16 @@ export class Bladeburner {
 			this.log = this.Game.sidebar.querySelector(".bladebox") || this.Game.createSidebarItem("Bladeburner", "", "B", "bladebox");
 			this.log = this.log.log;
 		}
-		this.types();
-	}
-	async types() {
 		this.bbTypes = {};
-		(await Do(this.ns, "ns.bladeBurner.getBlackOpNames")).forEach(x => this.bbTypes[x] = "Black Op");
-		(await Do(this.ns, "ns.bladeBurner.getOperationNames")).forEach(x => this.bbTypes[x] = "Operation");
-		(await Do(this.ns, "ns.bladeBurner.getContractNames")).forEach(x => this.bbTypes[x] = "Contract");
-
+		(async () => {
+			(await Do(this.ns, "ns.bladeburner.getBlackOpNames")).forEach(x => this.bbTypes[x] = "Black Op");
+		});
+		(async () => {
+			(await Do(this.ns, "ns.bladeburner.getOperationNames")).forEach(x => this.bbTypes[x] = "Operation");
+		});
+		(async () => {
+			(await Do(this.ns, "ns.bladeburner.getContractNames")).forEach(x => this.bbTypes[x] = "Contract");
+		});
 	}
 	get chaosHere() {
 		return (async () => {
@@ -55,18 +57,28 @@ export class Bladeburner {
 		})();
 	}
     async ['getActionAutolevel'](name) {
+        while (Object.keys(this.bbTypes).length == 0)
+		    await this.ns.asleep(0);
 		return await Do(this.ns, "ns.bladeburner.getActionAutoLevel", this.bbTypes[name], name);
 	}
     async ['getActionCountRemaining'](name) {
-		return await Do(this.ns, "ns.bladeburner.getActionCountRemaining", this.bbType[name], name);
+        while (Object.keys(this.bbTypes).length == 0)
+		    await this.ns.asleep(0);
+		return await Do(this.ns, "ns.bladeburner.getActionCountRemaining", this.bbTypes[name], name);
 	}
 	async getChance(name) {
+        while (Object.keys(this.bbTypes).length == 0)
+		    await this.ns.asleep(0);
 		return await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", this.bbTypes[name], name);
 	}
 	async maxLevel(name) {
+        while (Object.keys(this.bbTypes).length == 0)
+		    await this.ns.asleep(0);
 		return await Do(this.ns, "ns.bladeburner.getActionMaxLevel", this.bbTypes[name], name);
 	}
 	async setLevel(name, level) {
+        while (Object.keys(this.bbTypes).length == 0)
+		    await this.ns.asleep(0);
 		return await Do(this.ns, "ns.bladeburner.setActionLevel", this.bbTypes[name], name, level);
 	}
 	async fieldAnal() {
@@ -76,19 +88,27 @@ export class Bladeburner {
 		return await Do(this.ns, "ns.bladeburner.joinBladeburnerDivision");
 	}
 	async successChance(op) {
+        while (Object.keys(this.bbTypes).length == 0)
+		    await this.ns.asleep(0);
 		if (op != 0 && op != "")
     		return await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", this.bbTypes[op], op);
 		return 0;
 	}
 	async teamSize(op, size) {
+        while (Object.keys(this.bbTypes).length == 0)
+		    await this.ns.asleep(0);
 		if (op != 0 && op != "")
 		    return await Do(this.ns, "ns.bladeburner.setTeamSize", this.bbTypes[op], op, size);
 		return false;
 	}
 	async setAutoLevel(op, level) {
+        while (Object.keys(this.bbTypes).length == 0)
+		    await this.ns.asleep(0);
 		return await Do(this.ns, "ns.bladeburner.setActionAutolevel", this.bbTypes[op], op, level);
 	}
 	async actionStart(op) {
+        while (Object.keys(this.bbTypes).length == 0)
+		    await this.ns.asleep(0);
 		return await Do(this.ns, "ns.bladeburner.startAction", this.bbTypes[op], op);
 	}
 	isKillOp(nextOp) {
@@ -161,7 +181,7 @@ export class Bladeburner {
 			try {
 				return await (this.Game.Player.hasAug("The Blade's Simulacrum"));
 			} catch (e) {
-				return [];
+				return false;
 			}
 		})();
 	}
@@ -180,12 +200,18 @@ export class Bladeburner {
 		return await Do(this.ns, "ns.bladeburner.getActionCountRemaining", "Operation", operation);
 	}
 	async repGain(action, level) {
+        while (Object.keys(this.bbTypes).length == 0)
+		    await this.ns.asleep(0);
 		return await Do(this.ns, "ns.bladeburner.getActionRepGain", this.bbTypes[action], action, level);
 	}
 	async bbActionTime(action) {
+        while (Object.keys(this.bbTypes).length == 0)
+		    await this.ns.asleep(0);
 		return await Do(this.ns, "ns.bladeburner.getActionTime", this.bbTypes[action], action);
 	}
 	async bbActionCount(action) {
+        while (Object.keys(this.bbTypes).length == 0)
+		    await this.ns.asleep(0);
 		return await Do(this.ns, "ns.bladeburner.getActionCountRemaining", this.bbTypes[action], action);
 	}
 	async inciteViolence() {
@@ -239,6 +265,8 @@ export class Bladeburner {
 		})();
 	}
 	async actionCount(op) {
+        while (Object.keys(this.bbTypes).length == 0)
+		    await this.ns.asleep(0);
 		return await Do(this.ns, "ns.bladeburner.getActionCountRemaining", this.bbTypes[op], op);
 	}
 	get operationCount() {
@@ -311,6 +339,8 @@ export class Bladeburner {
 		})();
 	}
 	async actionMaxLevel(op) {
+        while (Object.keys(this.bbTypes).length == 0)
+		    await this.ns.asleep(0);
 		return await Do(this.ns, "ns.bladeburner.getActionMaxLevel", this.bbTypes[op], op);
 	}
 	async createDisplay() {
