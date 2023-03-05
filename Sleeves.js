@@ -135,6 +135,7 @@ export class Sleeves {
       }
 	}
     }
+	await Do(this.ns, "ns.singularity.commitCrime", "Homicide", false);
 	done = false;
 	while (!done) {
 		done = true;
