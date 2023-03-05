@@ -74,7 +74,7 @@ export class Sleeves {
   }
   async startAGangFirst() {
     this.log("Starting a Gang")
-    this.startingAGang = true;
+    //this.startingAGang = true;
     this.Game.Hacknet.goal = "Improve Gym Training";
     let thresh = 0;
     if (this.Game.bitNodeN == 2) {
@@ -154,7 +154,7 @@ export class Sleeves {
 			}
 		}
 	}
-    this.startingAGang = false;
+    //this.startingAGang = false;
     for (let i = 0; i < await (this.numSleeves); i++) {
       await Do(this.ns, "ns.sleeve.setToCommitCrime", i, "Homicide");
     }
