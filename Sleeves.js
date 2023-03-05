@@ -88,18 +88,20 @@ export class Sleeves {
     while (!done) {
       done = true;
       for (let i = 0; i < await (this.numSleeves); i++) {
-        if ((await Do(this.ns, "ns.sleeve.getSleeve", i)).shock > 90) {
+        if ((await Do(this.ns, "ns.sleeve.getSleeve", i)).shock > 85) {
           for (let j = 0; j < await (this.numSleeves); j++) {
             done = false;
             Do(this.ns, "ns.sleeve.setToShockRecovery", j);
           }
         }
-        while ((await Do(this.ns, "ns.sleeve.getSleeve", i)).shock > 90) {
+        while ((await Do(this.ns, "ns.sleeve.getSleeve", i)).shock > 85) {
           done = false;
           await this.ns.asleep(1000);
         }
       }
     }
+    // This is what Saint_Garmo does. It doesn't work well for me.
+	if (false) {
     done = false;
     let mults = await Do(this.ns, "ns.getBitNodeMultipliers");
     while (!done) {
@@ -131,7 +133,27 @@ export class Sleeves {
           done = false;
         }
       }
+	}
     }
+	done = false;
+	while (!done) {
+		done = true;
+		for (let i = 0; i < await (this.numSleeves); i++) {
+			if (.30 > await Do(this.ns, "ns.formulas.work.crimeSuccessChance", await Do(this.ns, "ns.sleeve.getSleeve", i), "Homicide")) {
+				done = false;
+			}
+		}
+		if (!done) {
+			for (let i = 0; i < await (this.numSleeves); i++) {
+				await Do(this.ns, "ns.sleeve.setToCommitCrime", i, "Mug");
+			}
+			for (let i = 0; i < await (this.numSleeves); i++) {
+				if (.30 > await Do(this.ns, "ns.formulas.work.crimeSuccessChance", await Do(this.ns, "ns.sleeve.getSleeve", i), "Homicide")) {
+					await this.ns.asleep(100);
+				}
+			}
+		}
+	}
     this.startingAGang = false;
     for (let i = 0; i < await (this.numSleeves); i++) {
       await Do(this.ns, "ns.sleeve.setToCommitCrime", i, "Homicide");
