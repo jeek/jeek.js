@@ -3,39 +3,6 @@ import { makeNewWindow } from "Windows.js";
 import { WholeGame } from "WholeGame.js";
 import { CITIES } from "data.js";
 
-let bbTypes = {
-	"Tracking": "Contract",
-	"Bounty Hunter": "Contract",
-	"Retirement": "Contract",
-	"Investigation": "Operation",
-	"Undercover Operation": "Operation",
-	"Sting Operation": "Operation",
-	"Raid": "Operation",
-	"Stealth Retirement Operation": "Operation",
-	"Assassination": "Operation",
-	"Operation Typhoon": "Black Op",
-	"Operation X": "Black Op",
-	"Operation Titan": "Black Op",
-	"Operation Ares": "Black Op",
-	"Operation Archangel": "Black Op",
-	"Operation Juggernaut": "Black Op",
-	"Operation Red Dragon": "Black Op",
-	"Operation K": "Black Op",
-	"Operation Deckard": "Black Op",
-	"Operation Tyrell": "Black Op",
-	"Operation Wallace": "Black Op",
-	"Operation Hyron": "Black Op",
-	"Operation Ion Storm": "Black Op",
-	"Operation Annihilus": "Black Op",
-	"Operation Ultron": "Black Op",
-	"Operation Centurion": "Black Op",
-	"Operation Vindictus": "Black Op",
-	"Operation Daedalus": "Black Op",
-	"Operation Zero": "Black Op",
-	"Operation Shoulder of Orion": "Black Op",
-	"Operation Morpheus": "Black Op"
-}
-
 export class Bladeburner {
 	constructor(ns, Game, settings = {}) {
 		this.ns = ns;
@@ -51,6 +18,16 @@ export class Bladeburner {
 			this.log = this.Game.sidebar.querySelector(".bladebox") || this.Game.createSidebarItem("Bladeburner", "", "B", "bladebox");
 			this.log = this.log.log;
 		}
+		this.bbTypes = {};
+		(async () => {
+			(await Do(this.ns, "ns.bladeBurner.getBlackOpNames")).forEach(x => this.bbTypes[x] = "Black Op");
+		});
+		(async () => {
+			(await Do(this.ns, "ns.bladeBurner.getOperationNames")).forEach(x => this.bbTypes[x] = "Operation");
+		});
+		(async () => {
+			(await Do(this.ns, "ns.bladeBurner.getContractNames")).forEach(x => this.bbTypes[x] = "Contract");
+		});
 	}
 	get chaosHere() {
 		return (async () => {
@@ -80,13 +57,13 @@ export class Bladeburner {
 		})();
 	}
 	async getChance(name) {
-		return await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", bbTypes[name], name);
+		return await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", this.bbTypes[name], name);
 	}
 	async maxLevel(name) {
-		return await Do(this.ns, "ns.bladeburner.getActionMaxLevel", bbTypes[name], name);
+		return await Do(this.ns, "ns.bladeburner.getActionMaxLevel", this.bbTypes[name], name);
 	}
 	async setLevel(name, level) {
-		return await Do(this.ns, "ns.bladeburner.setActionLevel", bbTypes[name], name, level);
+		return await Do(this.ns, "ns.bladeburner.setActionLevel", this.bbTypes[name], name, level);
 	}
 	async fieldAnal() {
 		return await Do(this.ns, "ns.bladeburner.startAction", "General", "Field Analysis");
@@ -96,19 +73,19 @@ export class Bladeburner {
 	}
 	async successChance(op) {
 		if (op != 0 && op != "")
-    		return await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", bbTypes[op], op);
+    		return await Do(this.ns, "ns.bladeburner.getActionEstimatedSuccessChance", this.bbTypes[op], op);
 		return 0;
 	}
 	async teamSize(op, size) {
 		if (op != 0 && op != "")
-		    return await Do(this.ns, "ns.bladeburner.setTeamSize", bbTypes[op], op, size);
+		    return await Do(this.ns, "ns.bladeburner.setTeamSize", this.bbTypes[op], op, size);
 		return false;
 	}
 	async setAutoLevel(op, level) {
-		return await Do(this.ns, "ns.bladeburner.setActionAutolevel", bbTypes[op], op, level);
+		return await Do(this.ns, "ns.bladeburner.setActionAutolevel", this.bbTypes[op], op, level);
 	}
 	async actionStart(op) {
-		return await Do(this.ns, "ns.bladeburner.startAction", bbTypes[op], op);
+		return await Do(this.ns, "ns.bladeburner.startAction", this.bbTypes[op], op);
 	}
 	isKillOp(nextOp) {
 		if (["Operation Typhoon", "Operation X", "Operation Titan", "Operation Ares", "Operation Archangel", "Operation Juggernaut", "Operation Red Dragon", "Operation K", "Operation Deckard", "Operation Tyrell", "Operation Wallace", "Operation Hyron", "Operation Ion Storm", "Operation Annihilus", "Operation Ultron"].includes(nextOp)) {
@@ -199,13 +176,13 @@ export class Bladeburner {
 		return await Do(this.ns, "ns.bladeburner.getActionCountRemaining", "Operation", operation);
 	}
 	async repGain(action, level) {
-		return await Do(this.ns, "ns.bladeburner.getActionRepGain", bbTypes[action], action, level);
+		return await Do(this.ns, "ns.bladeburner.getActionRepGain", this.bbTypes[action], action, level);
 	}
 	async bbActionTime(action) {
-		return await Do(this.ns, "ns.bladeburner.getActionTime", bbTypes[action], action);
+		return await Do(this.ns, "ns.bladeburner.getActionTime", this.bbTypes[action], action);
 	}
 	async bbActionCount(action) {
-		return await Do(this.ns, "ns.bladeburner.getActionCountRemaining", bbTypes[action], action);
+		return await Do(this.ns, "ns.bladeburner.getActionCountRemaining", this.bbTypes[action], action);
 	}
 	async inciteViolence() {
 		let city = Object.entries(await DoAll(this.ns, "ns.bladeburner.getCityEstimatedPopulation", CITIES)).sort((a, b) => b[1] - a[1])[0][0]
@@ -258,7 +235,7 @@ export class Bladeburner {
 		})();
 	}
 	async actionCount(op) {
-		return await Do(this.ns, "ns.bladeburner.getActionCountRemaining", bbTypes[op], op);
+		return await Do(this.ns, "ns.bladeburner.getActionCountRemaining", this.bbTypes[op], op);
 	}
 	get operationCount() {
 		return (async () => {
@@ -330,7 +307,7 @@ export class Bladeburner {
 		})();
 	}
 	async actionMaxLevel(op) {
-		return await Do(this.ns, "ns.bladeburner.getActionMaxLevel", bbTypes[op], op);
+		return await Do(this.ns, "ns.bladeburner.getActionMaxLevel", this.bbTypes[op], op);
 	}
 	async createDisplay() {
 		this.bbWindow = await makeNewWindow("Bladeburner", this.ns.ui.getTheme());
@@ -349,6 +326,7 @@ export class Bladeburner {
 	async updateDisplay() {
 		if (!await Do(this.ns, "ns.bladeburner.joinBladeburnerDivision")) {
 			this.bbWindow.update("<H1>Not in Bladeburner yet</H1>");
+			await this.ns.asleep(1000);
 			return;
 		}
 		let myrank = await Do(this.ns, "ns.bladeburner.getRank");
