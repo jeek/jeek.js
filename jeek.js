@@ -472,16 +472,14 @@ export class Bladeburner {
 			this.log = this.Game.sidebar.querySelector(".bladebox") || this.Game.createSidebarItem("Bladeburner", "", "B", "bladebox");
 			this.log = this.log.log;
 		}
+		this.types();
+	}
+	async types() {
 		this.bbTypes = {};
-		(async () => {
-			(await Do(this.ns, "ns.bladeBurner.getBlackOpNames")).forEach(x => this.bbTypes[x] = "Black Op");
-		});
-		(async () => {
-			(await Do(this.ns, "ns.bladeBurner.getOperationNames")).forEach(x => this.bbTypes[x] = "Operation");
-		});
-		(async () => {
-			(await Do(this.ns, "ns.bladeBurner.getContractNames")).forEach(x => this.bbTypes[x] = "Contract");
-		});
+		(await Do(this.ns, "ns.bladeBurner.getBlackOpNames")).forEach(x => this.bbTypes[x] = "Black Op");
+		(await Do(this.ns, "ns.bladeBurner.getOperationNames")).forEach(x => this.bbTypes[x] = "Operation");
+		(await Do(this.ns, "ns.bladeBurner.getContractNames")).forEach(x => this.bbTypes[x] = "Contract");
+
 	}
 	get chaosHere() {
 		return (async () => {
@@ -5938,7 +5936,7 @@ export class Sleeves {
 				await Do(this.ns, "ns.sleeve.setToCommitCrime", i, "Mug");
 			}
 			for (let i = 0; i < await (this.numSleeves); i++) {
-				if (.30 > await Do(this.ns, "ns.formulas.work.crimeSuccessChance", await Do(this.ns, "ns.sleeve.getSleeve", i), "Homicide")) {
+				while (.30 > await Do(this.ns, "ns.formulas.work.crimeSuccessChance", await Do(this.ns, "ns.sleeve.getSleeve", i), "Homicide")) {
 					await this.ns.asleep(100);
 				}
 			}
