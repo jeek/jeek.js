@@ -1204,6 +1204,7 @@ export async function bn2(Game, settings={}) {
             await Game.ns.asleep(Math.floor((clashTime-Date.now())/2));
         }
 
+        members = Game['Gang']['getMemberNames']();
         // Clash time
         (await members).map(x => Game['Gang']['setMemberTask'](x, "Territory Warfare"));
 
@@ -1226,12 +1227,12 @@ export async function bn2(Game, settings={}) {
         while ((await (Game['Gang']['getGangInformation'])()).power === startpower) {
             await Game.ns.asleep(0);
         }
-
         // Set the goal time for the next clash at 19 seconds from now.
         clashTime = Date.now() + 19000;
 
         Game['Gang']['setTerritoryWarfare'](false);
         nextTask = await nextTask;
+        members = Game['Gang']['getMemberNames']();
         (await members).map(x => Game['Gang']['setMemberTask'](x, nextTask[x] ?? "Train Combat"));
         if (oldterritory != Math.floor(100 * (await (Game['Gang']['getGangInformation']())).territory)) {
             Game['Gang'].log("Territory now " + 100 * (await (Game['Gang']['getGangInformation']())).territory.toString());
