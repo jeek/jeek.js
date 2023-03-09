@@ -16,12 +16,12 @@ import { Player } from "Player.js";
 import { ProcessList } from "ProcessList.js";
 import { Servers } from "Servers.js";
 import { Sleeves } from "Sleeves.js";
-import { StockMarket } from "StockMarket.js";
+import { StockMarket } from "StockMarketv2.js";
 import "Windows.js";
 import "Worker.js";
 import { bn2 } from "bn2.js";
 import { bn7 } from "bn7.js";
-import { bn8, bn8hackloop } from "bn8.js";
+import { bn8, bn8hackloop } from "bn8v2.js";
 
 export class WholeGame {
 	constructor(ns) {
