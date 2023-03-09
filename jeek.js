@@ -1846,6 +1846,292 @@ export async function bn8hackloop(Game) {
             }
         }
     }
+}import { WholeGame } from "WholeGame.js";
+
+export async function bn8(Game) {
+    let shorts = false;
+    let stall = {};
+    let prices = [];
+    let symbols = await (Game.StockMarket.symbols);
+    let tickPrice = 0;
+    let filesize = {
+        "grow.js": await Do(Game.ns, "ns.getScriptRam", "/temp/grow.js"),
+        "growstock.js": await Do(Game.ns, "ns.getScriptRam", "/temp/growstock.js"),
+        "hack.js": await Do(Game.ns, "ns.getScriptRam", "/temp/back.js"),
+        "hackstock.js": await Do(Game.ns, "ns.getScriptRam", "/temp/hackstock.js"),
+        "weaken.js": await Do(Game.ns, "ns.getScriptRam", "/temp/weaken.js")
+    }
+    let maxram = {};
+    let neededports = {};
+    let reqhackinglevel = {};
+    maxram["home"] = await (Game.Servers['home'].maxRam);
+    for (let server of Object.keys(stockMapping)) {
+        neededports[stockMapping[server]] = await Do(Game.ns, "ns.getServerNumPortsRequired", stockMapping[server]);
+        reqhackinglevel[stockMapping[server]] = await Do(Game.ns, "ns.getServerRequiredHackingLevel", stockMapping[server]);
+    }
+    let scores = {};
+    let report = {};
+    let starttime = Date.now();
+    Game.bn8hackloop();
+    let z = 0;
+    while (true) {
+            if ((!await Do(Game.ns, "ns.stock.has4SDataTIXAPI", ""))) {
+                if ((await (Game.StockMarket.portfolioValue)) + (await Do(Game.ns, "ns.getPlayer")).money > 25000000000 * ((await Do(Game.ns, "ns.getBitNodeMultipliers"))).FourSigmaMarketDataApiCost) {
+                    Game.ns.write('/temp/4s.js', "export async function main(ns) { for (let stock of ns.stock.getSymbols()) { ns.stock.getPosition(stock)[0] ? ns.stock.sellStock(stock, ns.stock.getPosition(stock)[0]) : 0; ns.stock.getPosition(stock)[2] ? ns.stock.sellShort(stock, ns.stock.getPosition(stock)[2]) : 0; } ns.stock.purchase4SMarketDataTixApi(); }",'w')
+                    await Game.ns.asleep(0);
+                    Game.ns.run('/temp/4s.js');
+                };
+            }
+            for (let program of [
+            ["BruteSSH.exe", "ns.brutessh"],
+            ["FTPCrack.exe", "ns.ftpcrack"],
+            ["relaySMTP.exe", "ns.relaysmtp"],
+            ["HTTPWorm.exe", "ns.httpworm"],
+            ["SQLInject.exe", "ns.sqlinject"]]) {
+            if (await Do(Game.ns, "ns.singularity.purchaseTor", "")) {
+                let cost = await Do(Game.ns, "ns.singularity.getDarkwebProgramCost", program[0]);
+                if ((0 < cost) && (cost * 2 < await (Game.Player.money))) {
+                    await Do(Game.ns, "ns.singularity.purchaseProgram", program[0]);
+                }
+            }
+        }
+        let files = await Do(Game.ns, "ns.ls", "home");
+        let zz = 0;
+        if (files.includes("BruteSSH.exe")) {
+            zz += 1;
+        }
+        if (files.includes("SQLInject.exe")) {
+            zz += 1;
+        }
+        if (files.includes("HTTPWorm.exe")) {
+            zz += 1;
+        }
+        if (files.includes("FTPCrack.exe")) {
+            zz += 1;
+        }
+        if (files.includes("relaySMTP.exe")) {
+            zz += 1;
+        }
+        if (zz >= 5 && ((await (Game.Player.hacking)) > 3000) && (await Do(Game.ns, "ns.singularity.getOwnedAugmentations")).includes("The Red Pill")) {
+            await Game.winGame();
+        }
+        while (tickPrice == await Do(Game.ns, "ns.stock.getPurchaseCost", 'ECP', 1, "Long")) {
+            await Game.ns.asleep(0);
+        }
+        tickPrice = await Do(Game.ns, "ns.stock.getPurchaseCost", 'ECP', 1, "Long");
+
+        if (8 == await (Game.Player.bitNodeN))
+            await (Game.Grafting.checkIn());
+
+        while ((await Do(Game.ns, "ns.singularity.getUpgradeHomeRamCost")) * 2 < await Do(Game.ns, "ns.getServerMoneyAvailable", "home") && await Do(Game.ns, "ns.singularity.upgradeHomeRam", ""));
+        let chances = {};
+        let portvalue = 0;
+        for (let stock of symbols) {
+            chances[stock] = (-.5 + await (Game['StockMarket'].forecast(stock))) * (await (Game['StockMarket'].volatility(stock))) * (await Do(Game.ns, "ns.stock.getPrice", stock));
+        }
+        symbols = symbols.sort((a, b) => { return chances[b] - chances[a] });
+        z = 1 - z;
+        for (let stock of symbols) {
+            if (z == 1 && !Game.StockMarket.liquidate) {
+                let data = await Do(Game.ns, "ns.stock.getPosition", stock);
+                if (chances[stock] > 0) {
+                    let shares = Math.floor((-100000 + await Do(Game.ns, "ns.getServerMoneyAvailable", 'home')) / (await Do(Game.ns, "ns.stock.getAskPrice", stock)));
+                    shares = Math.min(((await Do(Game.ns, "ns.stock.getMaxShares", stock))) - data[0] - data[2], shares);
+                    //						if (shares > 100 && (200000 < await Do(Game.ns, "ns.getServerMoneyAvailable", "home"))) {
+                    //							ns.toast("Trying to buy " + shares.toString() + " of " + stock);
+                    //						}
+                    while ((shares * (await Do(Game.ns, "ns.stock.getBidPrice", stock)) > 200000) && (!await Do(Game.ns, "ns.stock.buyStock", stock, shares))) {
+                        shares = Math.floor(shares * .99);
+                    }
+                    if (shares * (await Do(Game.ns, "ns.stock.getBidPrice", stock)) > 200000) {
+                        if (shares > 0) Game.StockMarket.log("Bought " + shares.toString() + " of " + stock);
+                    }
+                } else {
+                    if (data[0] > 0) {
+                        Do(Game.ns, "ns.stock.sellStock", stock, data[0]);
+                        if (data[0] > 0) Game.StockMarket.log("Sold " + data[0].toString() + " of " + stock);
+                    }
+                }
+            }
+            portvalue += (await Do(Game.ns, "ns.stock.getPosition", stock))[0] * (await Do(Game.ns, "ns.stock.getPrice", stock));
+
+        }
+        symbols = symbols.reverse();
+        for (let stock of symbols) {
+            if (0 == z && !Game.StockMarket.liquidate) {
+                let data = await Do(Game.ns, "ns.stock.getPosition", stock);
+                if (chances[stock] < 0) {
+                    let shares = Math.floor((-100000 + await Do(Game.ns, "ns.getServerMoneyAvailable", 'home')) / (await Do(Game.ns, "ns.stock.getAskPrice", stock)));
+                    shares = Math.min(((await Do(Game.ns, "ns.stock.getMaxShares", stock))) - data[0] - data[2], shares);
+                    //						if (shares > 100 && (200000 < await Do(Game.ns, "ns.getServerMoneyAvailable", "home"))) {
+                    //							ns.toast("Trying to short " + shares.toString() + " of " + stock);
+                    //						}
+                    while ((shares * (await Do(Game.ns, "ns.stock.getBidPrice", stock)) > 200000) && (!await Do(Game.ns, "ns.stock.buyShort", stock, shares))) {
+                        shares *= .99;
+                    }
+                    if (shares * (await Do(Game.ns, "ns.stock.getBidPrice", stock)) > 200000) {
+                        if (shares > 0) Game.StockMarket.log("Shorted " + shares.toString() + " of " + stock);
+                    }
+                } else {
+                    if (data[2] > 0) {
+                        //							ns.toast("Unshorting " + stock);
+                        Do(Game.ns, "ns.stock.sellShort", stock, data[2]);
+                        if (data[2] > 0) Game.StockMarket.log("Unshorted " + data[2].toString() + " of " + stock);
+                    }
+                }
+            }
+            let data = await Do(Game.ns, "ns.stock.getPosition", stock);
+            portvalue += (data[2] * (2 * data[3] - await Do(Game.ns, "ns.stock.getAskPrice", stock)));
+        }
+        //			ns.tprint(z ? "Long " : "Short", " ", ns.nFormat((await Do(ns, "ns.getServerMoneyAvailable", "home")) + portvalue, "$0.000a"));
+        //			ns.toast(ns.nFormat((await Do(ns, "ns.getServerMoneyAvailable", "home")) + portvalue, "$0.000a"));
+        let ownedAugs = await Do(Game.ns, "ns.singularity.getOwnedAugmentations");
+        let playerhack = (await Do(Game.ns, "ns.getPlayer")).skills.hacking;
+        if (8 == await (Game.Player.bitNodeN)) {
+            if (playerhack > 3000 && ownedAugs.length >= 30 && !ownedAugs.includes("The Red Pill")) {
+                while (((await (Game.Player.money)) > 100e9) && (!((await Do(Game.ns, "ns.singularity.checkFactionInvitations")).includes("Daedalus"))) && (!((await Do(Game.ns, "ns.getPlayer")).factions.includes("Daedalus")))) {
+                    await Game.ns.asleep(1000);
+                }
+                if ((await Do(Game.ns, "ns.singularity.checkFactionInvitations")).includes("Daedalus")) {
+                    await Do(Game.ns, "ns.singularity.joinFaction", "Daedalus");
+                }
+                if ((await Do(Game.ns, "ns.getPlayer")).factions.includes("Daedalus")) {
+                    if ((await Do(Game.ns, "ns.singularity.getFactionRep", "Daedalus")) < ((await Do(Game.ns, "ns.singularity.getAugmentationRepReq", "The Red Pill")))) {
+                        if ((await Do(Game.ns, "ns.getPlayer")).money > 1e9) {
+                            await Do(Game.ns, "ns.singularity.donateToFaction", "Daedalus", Math.floor(.1 * ((await Do(Game.ns, "ns.getPlayer")).money)));
+                        }
+                    }
+                    if ((await Do(Game.ns, "ns.singularity.getFactionRep", "Daedalus")) >= ((await Do(Game.ns, "ns.singularity.getAugmentationRepReq", "The Red Pill")))) {
+                        await Do(Game.ns, "ns.singularity.purchaseAugmentation", "Daedalus", "The Red Pill");
+                    }
+                }
+            }
+            if (playerhack > 3000 && ownedAugs.length >= 30 && !ownedAugs.includes("The Red Pill") && ((await Do(Game.ns, "ns.singularity.getOwnedAugmentations", true))).includes("The Red Pill")) {
+                await Game.SoftReset();
+            }
+        }
+    }
+}
+export async function bn8hackloop(Game) {
+    let filesize = {
+        "grow.js": await Do(Game.ns, "ns.getScriptRam", "/temp/grow.js"),
+        "growstock.js": await Do(Game.ns, "ns.getScriptRam", "/temp/growstock.js"),
+        "hack.js": await Do(Game.ns, "ns.getScriptRam", "/temp/back.js"),
+        "hackstock.js": await Do(Game.ns, "ns.getScriptRam", "/temp/hackstock.js"),
+        "weaken.js": await Do(Game.ns, "ns.getScriptRam", "/temp/weaken.js")
+    }
+    let minsec = await DoAll(Game.ns, "ns.getServerMinSecurityLevel", Object.keys(stockMapping).map(x => stockMapping[x]));
+    let volatility = {};
+    for (let stock of await (Game['Stockmarket'].symbols)) {
+        volatility[stock] = await Game['StockMarket'].volatility(stock);
+    }
+    let player = await Do(Game.ns, "ns.getPlayer");
+    let serverdata = await DoAll(Game.ns, "ns.getServer", Object.values(stockMapping));
+    let weakentime = {};
+    for (let server of Object.values(stockMapping)) {
+        weakentime[server] = await Do(Game.ns, "ns.formulas.hacking.weakenTime", await Do(Game.ns, "ns.getServer", server), player);
+    }
+    for (let i of Object.keys(stockMapping).sort((a, b) => { return weakentime[stockMapping[a]] - weakentime[stockMapping[b]] })) {
+        //    for (let i of Object.keys(mapping).sort((a, b) => { return minsec[a] - minsec[b] })) {
+        let files = await Do(Game.ns, "ns.ls", "home");
+        let z = 0;
+        if (files.includes("BruteSSH.exe")) {
+            await Do(Game.ns, "ns.brutessh", stockMapping[i]);
+            z += 1;
+        }
+        if (files.includes("SQLInject.exe")) {
+            await Do(Game.ns, "ns.sqlinject", stockMapping[i]);
+            z += 1;
+        }
+        if (files.includes("HTTPWorm.exe")) {
+            await Do(Game.ns, "ns.httpworm", stockMapping[i]);
+            z += 1;
+        }
+        if (files.includes("FTPCrack.exe")) {
+            await Do(Game.ns, "ns.ftpcrack", stockMapping[i]);
+            z += 1;
+        }
+        if (files.includes("relaySMTP.exe")) {
+            await Do(Game.ns, "ns.relaysmtp", stockMapping[i]);
+            z += 1;
+        }
+        let buffer = 10;
+        if (1e6 < await Do(Game.ns, "ns.getServerMaxRam", "home")) {
+            buffer = 100;
+        }
+        if ((z >= await Do(Game.ns, "ns.getServerNumPortsRequired", stockMapping[i])) && ((await Do(Game.ns, "ns.getPlayer")).skills.hacking) >= ((await Do(Game.ns, "ns.getServerRequiredHackingLevel", stockMapping[i])))) {
+            await Do(Game.ns, "ns.nuke", stockMapping[i]);
+            await (Game.Servers[stockMapping[i]].prep());
+            while ((await (Game['StockMarket'].forecast(i))) > .1 && (await (Game['StockMarket'].forecast(i))) < .9) {
+                while (minsec[i] < await Do(Game.ns, "ns.getServerSecurityLevel", stockMapping[i])) {
+                    let threads = Math.max(1, Math.floor(((await Do(Game.ns, "ns.getServerMaxRam", "home")) - (await Do(Game.ns, "ns.getServerUsedRam", "home")) - buffer) / filesize["weaken.js"]));
+                    let pid = Game.ns.run("/temp/weaken.js", threads, stockMapping[i]);
+                    while (pid == 0 && threads > 1) {
+                        await Game.ns.asleep(0);
+                        threads -= 1;
+                        pid = Game.ns.run("/temp/weaken.js", threads, stockMapping[i]);
+                    }
+                    while (await Do(Game.ns, "ns.isRunning", pid)) { await Game.ns.asleep(0); }
+                }
+                while ((await Do(Game.ns, "ns.getServerMoneyAvailable", stockMapping[i])) * 4 / 3 > (await Do(Game.ns, "ns.getServerMaxMoney", stockMapping[i]))) {
+                    let threads = Math.floor(((await Do(Game.ns, "ns.getServerMaxRam", "home")) - (await Do(Game.ns, "ns.getServerUsedRam", "home")) - buffer) / filesize["hackstock.js"]);
+                    if (threads > 0) {
+                        let pid = Game.ns.run((await (Game['StockMarket'].forecast(i))) > .5 ? "/temp/hack.js" : "/temp/hackstock.js", threads, stockMapping[i]);
+                        while (pid == 0 && threads > 0) {
+                            await Game.ns.asleep(0);
+                            threads -= 1;
+                            pid = Game.ns.run((await (Game['StockMarket'].forecast(i))) > .5 ? "/temp/hack.js" : "/temp/hackstock.js", threads, stockMapping[i]);
+                        }
+                        while (await Do(Game.ns, "ns.isRunning", pid)) { await Game.ns.asleep(0); }
+                    } else {
+                        Game.ns.asleep(0);
+                    }
+                    while ((await Do(Game.ns, "ns.getServerMinSecurityLevel", stockMapping[i])) < (await Do(Game.ns, "ns.getServerSecurityLevel", stockMapping[i]))) {
+                        let threads = Math.floor(((await Do(Game.ns, "ns.getServerMaxRam", "home")) - (await Do(Game.ns, "ns.getServerUsedRam", "home")) - buffer) / filesize["weaken.js"]);
+                        let pid = Game.ns.run("/temp/weaken.js", threads, stockMapping[i]);
+                        Game.ns.asleep(0);
+                        while (pid == 0 && threads > 1) {
+                            await Game.ns.asleep(0);
+                            threads -= 1;
+                            pid = Game.ns.run("/temp/weaken.js", threads, stockMapping[i]);
+                        }
+                        while (await Do(Game.ns, "ns.isRunning", pid)) { await Game.ns.asleep(0); }
+                    }
+                }
+                while ((await Do(Game.ns, "ns.getServerMoneyAvailable", stockMapping[i])) < (await Do(Game.ns, "ns.getServerMaxMoney", stockMapping[i]))) {
+                    let threads = Math.floor(((await Do(Game.ns, "ns.getServerMaxRam", "home")) - (await Do(Game.ns, "ns.getServerUsedRam", "home")) - buffer) / filesize["growstock.js"]);
+                    let pid = threads > 0 ? Game.ns.run((await (Game['StockMarket'].forecast(i))) > .5 ? "/temp/growstock.js" : "/temp/grow.js", threads, stockMapping[i]) : 0;
+                    while (pid == 0 && threads > 0) {
+                        await Game.ns.asleep(0);
+                        threads -= 1;
+                        pid = Game.ns.run((await (Game['StockMarket'].forecast(i))) > .5 ? "/temp/growstock.js" : "/temp/grow.js", threads, stockMapping[i]);
+                    }
+                    while (await Do(Game.ns, "ns.isRunning", pid)) { await Game.ns.asleep(0); }
+                    while ((await Do(Game.ns, "ns.getServerMinSecurityLevel", stockMapping[i])) < (await Do(Game.ns, "ns.getServerSecurityLevel", stockMapping[i]))) {
+                        let threads = Math.floor(((await Do(Game.ns, "ns.getServerMaxRam", "home")) - (await Do(Game.ns, "ns.getServerUsedRam", "home")) - buffer) / filesize["weaken.js"]);
+                        let pid = Game.ns.run("/temp/weaken.js", threads, stockMapping[i]);
+                        while (pid == 0 && threads > 1) {
+                            await Game.ns.asleep(0);
+                            threads -= 1;
+                            pid = Game.ns.run("/temp/weaken.js", threads, stockMapping[i]);
+                        }
+                        while (await Do(Game.ns, "ns.isRunning", pid)) { await Game.ns.asleep(0); }
+                    }
+                }
+                while ((await Do(Game.ns, "ns.getServerMinSecurityLevel", stockMapping[i])) < (await Do(Game.ns, "ns.getServerSecurityLevel", stockMapping[i]))) {
+                    let threads = Math.floor(((await Do(Game.ns, "ns.getServerMaxRam", "home")) - (await Do(Game.ns, "ns.getServerUsedRam", "home")) - buffer) / filesize["weaken.js"]);
+                    let pid = Game.ns.run("/temp/weaken.js", threads, stockMapping[i]);
+                    while (pid == 0 && threads > 1) {
+                        await Game.ns.asleep(0);
+                        threads -= 1;
+                        pid = Game.ns.run("/temp/weaken.js", threads, stockMapping[i]);
+                    }
+                    while (await Do(Game.ns, "ns.isRunning", pid)) { await Game.ns.asleep(0); }
+                }
+                await Game.ns.asleep(0);
+            }
+        }
+    }
 }export class BuildProcess {
 	constructor(ns, settings = {}) {
         this.ns = ns;
@@ -5960,7 +6246,8 @@ export class Sleeves {
       }
 	}
     }
-	await Do(this.ns, "ns.singularity.commitCrime", "Homicide", false);
+  if (!await (this.Game['Gang']['inGang']))
+   	await Do(this.ns, "ns.singularity.commitCrime", "Homicide", false);
 	done = false;
 	while (!done) {
 		done = true;
@@ -6368,6 +6655,347 @@ export class StockMarket {
 				let forecast = -100 + 200 * data[stock]['forecast'];
 				myupdate += td((forecast < 0 ? "<FONT COLOR='" + this.ns.ui.getTheme()['error'] + "'>" : "") + jFormat(forecast), "RIGHT");
 			}
+			if (Object.keys(stockMapping).includes(stock)) {
+				myupdate += "<TD>" + stockMapping[stock] + "<BR><SMALL>";
+				myupdate += "$$$: " + Math.floor(100 * (servermoneyavailable[stockMapping[stock]]) / (servermaxmoney[stockMapping[stock]])).toString() + "%<BR>";
+				myupdate += "Sec: " + Math.floor((100 * serverminsecuritylevel[stockMapping[stock]]) / (serversecuritylevel[stockMapping[stock]])).toString() + "%</TD>";
+			} else {
+				myupdate += td("&nbsp;");
+			}
+			myupdate += "</TR>";
+			if (!this.ns.flags(cmdlineflags)['stockfilter'] || (data[stock]['position'][0] + data[stock]['position'][2]) > 0) {
+				if (has4s) {
+					updates.push([-data[stock]['forecast'], myupdate])
+				} else {
+					updates.push([data[stock]['price'], myupdate]);
+				}
+				totalProfit += data[stock]['profit'];
+			}
+		}
+		updates = updates.sort((a, b) => { return a[0] - b[0]; })
+		for (let anUpdate of updates) {
+			update += anUpdate[1];
+		}
+		update += "</TABLE>";
+		update = "<H1>Holdings: " + jFormat(await this.portfolioValue, "$") + (totalProfit < 0 ? "<FONT COLOR='" + this.ns.ui.getTheme()['error'] + "'>" : "<FONT>") + " (Profit: " + jFormat(totalProfit, "$") + ")</FONT></H1> " + "<a href=\"#\" onClick='window.opener.listenUpStonk(\"this.liquidate=!this.liquidate\")'>" + (this.liquidate ? "Liquidating" : "<FONT COLOR='" + this.ns.ui.getTheme()['error'] + "'>Click to liquidate</FONT>") + "</A>" + "<BR>" + update;
+		this.stockWindow.update(update);
+		await this.ns.asleep(1000);
+	}
+}
+
+const stockMapping = {
+	"ECP": "ecorp",
+	"MGCP": "megacorp",
+	"BLD": "blade",
+	"CLRK": "clarkinc",
+	"OMTK": "omnitek",
+	"FSIG": "4sigma",
+	"KGI": "kuai-gong",
+	"FLCM": "fulcrumtech",
+	"STM": "stormtech",
+	"DCOMM": "defcomm",
+	"HLS": "helios",
+	"VITA": "vitalife",
+	"ICRS": "icarus",
+	"UNV": "univ-energy",
+	"AERO": "aerocorp",
+	"OMN": "omnia",
+	"SLRS": "solaris",
+	"GPH": "global-pharm",
+	"NVMD": "nova-med",
+	"LXO": "lexo-corp",
+	"RHOC": "rho-construction",
+	"APHE": "alpha-ent",
+	"SYSC": "syscore",
+	"CTK": "computek",
+	"NTLK": "netlink",
+	"OMGA": "omega-net",
+	"FNS": "foodnstuff",
+	"JGN": "joesguns",
+	"SGC": "sigma-cosmetics",
+	"CTYS": "catalyst",
+	"MDYN": "microdyne",
+	"TITN": "titan-labs"
+}
+
+export class StockMarket {
+	constructor(ns, Game) {
+		helperScripts(ns);
+		this.ns = ns;
+		this.Game = Game ?? new WholeGame(ns);
+		this.liquidate = false;
+		this.log = ns.tprint.bind(ns);
+        if (ns.flags(cmdlineflags)['logbox']) {
+            this.log = this.Game.sidebar.querySelector(".stockbox") || this.Game.createSidebarItem("Stocks", "", "S", "stockbox");
+			this.display = this.Game.sidebar.querySelector(".stockbox").querySelector(".display");
+			this.log = this.log.log;
+			this.displayBoxUpdate();
+        }
+		this.myvol = {};
+		this.myhist = {};
+		this.myfore = {};
+        this.Start();
+	}
+	async Start() {
+		let symbols = await (this.symbols);
+        for (let stock of symbols) {
+			this.myvol[stock] = 1;
+			this.myfore[stock] = .5;
+			this.myhist[stock] = [await (this.price(stock))];
+		}
+        let canary = this.myhist[symbols[0]][0];
+		while (true) {
+			while (canary == this.myhist[symbols[0]][this.myhist[symbols[0]].length-1]) {
+				await this.ns.asleep(100);
+			}
+			for (let stock of symbols) {
+				let newprice = await (this.price(stock));
+                this.myvol[stock] = Math.max(this.myvol[stock], newprice / this.myhist[stock][this.myhist[stock].length-1], this.myhist[stock][this.myhist[stock].length-1] / newprice);
+				this.myhist[stock].push(newprice);
+				if (this.myhist[stock].length > 76) {
+					this.myhist[stock].shift();
+				}
+				let a = 0;
+				let b = 0;
+				for (let i = 0 ; i + 1 < this.myhist[stock].length ; i++) {
+                    if (this.myhist[stock][i] < this.myhist[stock][i+1]) {
+						a += 1;
+					}
+					b += 1;
+				}
+				this.myfore[stock] = a / (a + b);
+			}
+		}
+	}
+	async displayBoxUpdate() {
+		while (this.ns.flags(cmdlineflags)['logbox']) {
+			let result = "<TABLE BORDER=1 CELLPADDING=0 CELLSPACING=0 WIDTH=100%>";
+			result += "<TR><TH>sym</TH><TH>position</TH><TH>profit</TH><TH>value</TH></TR>";
+			let market = await (this.market);
+			let keys = Object.keys(market).sort((a, b) => market[b].profit - market[a].profit);
+            for (let stock of keys) {
+                if (market[stock]['position'][0] > 0 || market[stock]['position'][2] > 0) {
+                    result += "<TR><TD>" + stock + "</TD>";
+					let pos = [];
+					if (market[stock]['position'][0] > 0) {
+						pos.push("<RIGHT>" + market[stock]['position'][0].toString() + " L</RIGHT>");
+					}
+					if (market[stock]['position'][2] > 0) {
+						pos.push("<RIGHT>" + market[stock]['position'][2].toString() + " S</RIGHT>");
+					}
+					result += "<TD ALIGN=RIGHT>" + pos.join("<BR>") + "</TD>";
+					result += "<TD ALIGN=RIGHT>" + jFormat(market[stock]['profit'], "$") + "</TD>";
+					result += "<TD ALIGN=RIGHT>" + jFormat(market[stock]['value'], "$") + "</TD></TR>";
+				}
+			}
+			result += "</TABLE>";
+			result = "<CENTER>Holdings: " + jFormat(Object.keys(market).map(x => market[x]['value']).reduce((a, b) => a + b, 0), "$") + " / Profit: " + jFormat(Object.keys(market).map(x => market[x]['profit']).reduce((a, b) => a + b, 0), "$") + result;
+			this.display.removeAttribute("hidden");
+			this.display.innerHTML = result;
+			this.Game.sidebar.querySelector(".stockbox").recalcHeight();
+            await this.ns.asleep(10000);
+		}
+	}
+	get symbols() {
+		return (async () => {
+			try {
+				return (await Do(this.ns, "ns.stock.getSymbols"));
+			} catch (e) {
+				return [];
+			}
+		})();
+	}
+	async price(stock) {
+		return await Do(this.ns, "ns.stock.getPrice", stock);
+	}
+	async askprice(stock) {
+		return await Do(this.ns, "ns.stock.getAskPrice", stock);
+	}
+	async bidprice(stock) {
+		return await Do(this.ns, "ns.stock.getBidPrice", stock);
+	}
+	async volatility(stock) {
+		if (await Do(this.ns, "ns.stock.has4SDataTIXAPI", "")) 
+    		return await Do(this.ns, "ns.stock.getVolatility", stock);
+		return this.myvol[stock];
+	}
+	async forecast(stock) {
+		if (await Do(this.ns, "ns.stock.has4SDataTIXAPI", "")) 
+			return await Do(this.ns, "ns.stock.getForecast", stock);
+		return this.myfore[stock];
+	}
+	company(stock) {
+		return stockSymbolToCompany[stock];
+	}
+	async position(stock) {
+		return await Do(this.ns, "ns.stock.getPosition", stock);
+	}
+	async longsalevalue(stock) {
+		return await Do(this.ns, "ns.stock.getSaleGain", stock, this.position(stock)[0], "Long");
+	}
+	async shortsalevalue(stock) {
+		return await Do(this.ns, "ns.stock.getSaleGain", stock, this.position(stock)[2], "Short");
+	}
+	async value(stock) {
+		let pos = await this.position(stock);
+		return await Do(this.ns, "ns.stock.getSaleGain", stock, pos[0], "Long") + await Do(this.ns, "ns.stock.getSaleGain", stock, pos[2], "Short");
+	}
+	async profit(stock) {
+		let pos = await this.position(stock);
+		return await Do(this.ns, "ns.stock.getSaleGain", stock, pos[0], "Long") + await Do(this.ns, "ns.stock.getSaleGain", stock, pos[2], "Short") - pos[0] * pos[1] - pos[2] * pos[3];
+	}
+	server(stock) {
+		if (Object.keys(stockMapping).includes(stock))
+			return stockMapping[stock];
+		return null;
+	}
+	async stockData(stock) {
+		let answer = {
+			'symbol': stock,
+			'company': this.company(stock),
+			'price': await this.price(stock),
+			'askprice': await this.askprice(stock),
+			'bidprice': await this.bidprice(stock),
+			'position': await this.position(stock),
+			'volatility': await this.volatility(stock),
+			'forecast': await this.forecast(stock)
+		}
+		answer['longsalevalue'] = await Do(this.ns, "ns.stock.getSaleGain", stock, answer['position'][0], "Long");
+		answer['shortsalevalue'] = await Do(this.ns, "ns.stock.getSaleGain", stock, answer['position'][2], "Short");
+		answer['value'] = answer['longsalevalue'] + answer['shortsalevalue'];
+
+		answer['profit'] = answer['longsalevalue'] + answer['shortsalevalue'] - answer['position'][0] * answer['position'][1] - answer['position'][2] * answer['position'][3];
+		answer['server'] = this.server(stock);
+		return answer;
+	}
+	get portfolioValue() {
+		return (async () => {
+			try {
+				let value = 0;
+				let data = await this.market;
+				return Object.keys(data).map(x => data[x]['value']).reduce((a, b) => a + b);
+			} catch (e) {
+				return 0;
+			}
+		})();
+	}
+	get market() {
+		return (async () => {
+			try {
+				let answer = {};
+				let symbols = await this.symbols;
+				Object.entries(stockSymbolToCompany).map(x => answer[x[0]] = { 'company': x[1] });
+				Object.entries(await DoAll(this.ns, "ns.stock.getPosition", symbols)).map(x => answer[x[0]]['position'] = x[1]);
+				Object.entries(await DoAll(this.ns, "ns.stock.getPrice", symbols)).map(x => answer[x[0]]['price'] = x[1]);
+				Object.entries(await DoAll(this.ns, "ns.stock.getAskPrice", symbols)).map(x => answer[x[0]]['askprice'] = x[1]);
+				Object.entries(await DoAll(this.ns, "ns.stock.getBidPrice", symbols)).map(x => answer[x[0]]['bidprice'] = x[1]);
+				if (await Do(this.ns, "ns.stock.has4SDataTIXAPI", "")) {
+					Object.entries(await DoAll(this.ns, "ns.stock.getVolatility", symbols)).map(x => answer[x[0]]['volatility'] = x[1]);
+					Object.entries(await DoAll(this.ns, "ns.stock.getForecast", symbols)).map(x => answer[x[0]]['forecast'] = x[1]);
+				} else {
+					symbols.map(x => answer[x]['volatility'] = this.myvol[x]);
+					symbols.map(x => answer[x]['forecast'] = this.myfore[x]);	
+				}
+				Object.entries(await DoAllComplex(this.ns, "ns.stock.getSaleGain", symbols.map(x => [x, answer[x]['position'][0], "Long"]))).map(x => [x[0].split(',')[0], x[1]]).map(x => answer[x[0]]['longsalevalue'] = x[1]);
+				Object.entries(await DoAllComplex(this.ns, "ns.stock.getSaleGain", symbols.map(x => [x, answer[x]['position'][2], "Short"]))).map(x => [x[0].split(',')[0], x[1]]).map(x => answer[x[0]]['shortsalevalue'] = x[1]);
+				symbols.map(x => answer[x]['value'] = answer[x]['longsalevalue'] + answer[x]['shortsalevalue']);
+				symbols.map(x => answer[x]['profit'] = answer[x]['value'] - answer[x]['position'][0] * answer[x]['position'][1] - answer[x]['position'][2] * answer[x]['position'][3]);
+				symbols.map(x => answer[x]['server'] = stockMapping[x] ? stockMapping[x] : null);
+				return answer;
+			} catch (e) {
+				this.ns.tprint(e);
+				return [];
+			}
+		})();
+	}
+	get symbols() {
+		return (async () => {
+			try {
+				return (await Do(this.ns, "ns.stock.getSymbols"));
+			} catch (e) {
+				return [];
+			}
+		})();
+	}
+	async createDisplay() {
+		if (!(await Do(this.ns, "ns.stock.hasTIXAPIAccess"))) {
+			return;
+		}
+		eval('window').listenUpStonk = (message) => { globalThis.stockQueue.push(message); };
+		if (typeof globalThis.stockQueue === 'undefined') {
+			globalThis.stockQueue = [];
+		}
+		this.stockWindow = await makeNewWindow("Stocks", this.ns.ui.getTheme());
+		this.lastPrice = await Do(this.ns, "ns.stock.getPrice", "ECP");
+	}
+	async updateDisplay() {
+		if (this.lastPrice == await Do(this.ns, "ns.stock.getPrice", "ECP")) {
+			await this.ns.asleep(0);
+			return;
+		}
+		this.lastPrice = await Do(this.ns, "ns.stock.getPrice", "ECP");
+		while (globalThis.stockQueue.length > 0) {
+			let cmd = globalThis.stockQueue.shift();
+			try { await eval(cmd) } catch (e) { this.ns.tprint(e) }
+		}
+		let bn = (await Do(this.ns, "ns.getPlayer")).bitNodeN;
+		if (this.liquidate) {
+			let data = await this.market;
+			for (let stock of Object.keys(data)) {
+				if (data[stock]['position'][0] > 0) {
+					await Do(this.ns, "ns.stock.sellStock", stock, data[stock]['position'][0]);
+				}
+				if (data[stock]['position'][2] > 0) {
+					await Do(this.ns, "ns.stock.sellShort", stock, data[stock]['position'][2]);
+				}
+			}
+		}
+		let sourcefiles = [];
+		let servermoneyavailable = await DoAll(this.ns, "ns.getServerMoneyAvailable", Object.values(stockMapping));
+		let servermaxmoney = await DoAll(this.ns, "ns.getServerMaxMoney", Object.values(stockMapping));
+		let serverminsecuritylevel = await DoAll(this.ns, "ns.getServerMinSecurityLevel", Object.values(stockMapping));
+		let serversecuritylevel = await DoAll(this.ns, "ns.getServerSecurityLevel", Object.values(stockMapping));
+		if (bn != 8) {
+			sourcefiles = await Do(this.ns, "ns.singularity.getOwnedSourceFiles");
+		}
+		let totalProfit = 0;
+		let update = "";
+		update += "<TABLE BORDER=1 CELLPADDING=0 CELLSPACING=0 WIDTH=100%>";
+		update += "<TR><TH>Company</TH><TH>Price</TH><TH>Long</TH>";
+		if ((bn == 8) || ((sourcefiles).filter(x => x.n == 8 && x.lvl >= 2))) {
+			update += "<TH>Short</TH>"
+		}
+		update += "<TH>Profit</TH>"
+		let has4s = await Do(this.ns, "ns.stock.has4SDataTIXAPI");
+		update += "<TH>Volatility</TH><TH>Forecast</TH>";
+		update += "<TH>Server</TH></TR>"
+		let updates = [];
+		let data = await this.market;
+		for (let stock of Object.keys(data)) {
+			let myupdate = "";
+			myupdate += "<TR VALIGN=TOP><TD>" + stock + "<BR><SMALL>"
+			myupdate += data[stock]['company'] + "</TD>";
+			myupdate += td(jFormat(data[stock]['price'], "$") + "<BR><SMALL>" + jFormat(data[stock]['askprice'], "$") + "<BR>" + jFormat(data[stock]['bidprice'], "$"), "RIGHT");
+			if (data[stock]['position'][0] > 0) {
+				myupdate += td(jFormat(data[stock]['position'][0]) + "<BR><SMALL>" + jFormat(data[stock]['position'][1], "$") + (data[stock]['longsalevalue'] != 0 ? "<BR><a href=\"#\" onClick='window.opener.listenUpStonk(\"Do(this.ns, \\\"ns.stock.sellStock\\\", \\\"" + stock + "\\\", " + data[stock]['position'][0] + ")\")'>" + jFormat(data[stock]['longsalevalue'], "$") + "</A>" : ""), "RIGHT");
+			} else {
+				myupdate += td("&nbsp;");
+			}
+			if ((bn == 8) || (sourcefiles.filter(x => x.n == 8 && x.lvl >= 2))) {
+				if (data[stock]['position'][2] > 0) {
+					myupdate += td(jFormat(data[stock]['position'][2]) + "<BR><SMALL>" + jFormat(data[stock]['position'][3], "$") + (data[stock]['shortsalevalue'] != 0 ? "<BR>" + "<a href=\"#\" onClick='window.opener.listenUpStonk(\"Do(this.ns, \\\"ns.stock.sellShort\\\", \\\"" + stock + "\\\", " + data[stock]['position'][2] + ")\")'>" + jFormat(data[stock]['shortsalevalue'], "$") + "</A>" : ""), "RIGHT");
+				} else {
+					myupdate += td("&nbsp;");
+				}
+			}
+			if (data[stock]['profit'] != 0) {
+				myupdate += td((data[stock]['profit'] < 0 ? "<FONT COLOR='" + this.ns.ui.getTheme()['error'] + "'>" : "") + jFormat(data[stock]['profit'], "$"), "RIGHT");
+			} else {
+				myupdate += td("&nbsp;");
+			}
+			myupdate += td((this.ns.nFormat(100 * data[stock]['volatility'], "0.00")), "RIGHT");
+			let forecast = -100 + 200 * data[stock]['forecast'];
+			myupdate += td((forecast < 0 ? "<FONT COLOR='" + this.ns.ui.getTheme()['error'] + "'>" : "") + jFormat(forecast), "RIGHT");
 			if (Object.keys(stockMapping).includes(stock)) {
 				myupdate += "<TD>" + stockMapping[stock] + "<BR><SMALL>";
 				myupdate += "$$$: " + Math.floor(100 * (servermoneyavailable[stockMapping[stock]]) / (servermaxmoney[stockMapping[stock]])).toString() + "%<BR>";
