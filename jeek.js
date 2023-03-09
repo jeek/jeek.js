@@ -6753,7 +6753,7 @@ export class StockMarket {
 				let newprice = await (this.price(stock));
                 this.myvol[stock] = Math.max(this.myvol[stock], newprice / this.myhist[stock][this.myhist[stock].length-1], this.myhist[stock][this.myhist[stock].length-1] / newprice);
 				this.myhist[stock].push(newprice);
-				if (this.myhist[stock].length > 76) {
+				if (this.myhist[stock].length > 38) {
 					this.myhist[stock].shift();
 				}
 				let a = 0;
