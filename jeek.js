@@ -474,12 +474,21 @@ export class Bladeburner {
 		}
 		this.bbTypes = {};
 		(async () => {
+			while (!await Do(this.ns, "ns.bladeburner.joinBladeburnerDivision")) {
+				await this.ns.asleep(100);
+			}
 			(await Do(this.ns, "ns.bladeburner.getBlackOpNames")).forEach(x => this.bbTypes[x] = "Black Op");
 		})();
 		(async () => {
+			while (!await Do(this.ns, "ns.bladeburner.joinBladeburnerDivision")) {
+				await this.ns.asleep(100);
+			}
 			(await Do(this.ns, "ns.bladeburner.getOperationNames")).forEach(x => this.bbTypes[x] = "Operation");
 		})();
 		(async () => {
+			while (!await Do(this.ns, "ns.bladeburner.joinBladeburnerDivision")) {
+				await this.ns.asleep(100);
+			}
 			(await Do(this.ns, "ns.bladeburner.getContractNames")).forEach(x => this.bbTypes[x] = "Contract");
 		})();
 	}
