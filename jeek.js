@@ -475,13 +475,13 @@ export class Bladeburner {
 		this.bbTypes = {};
 		(async () => {
 			(await Do(this.ns, "ns.bladeburner.getBlackOpNames")).forEach(x => this.bbTypes[x] = "Black Op");
-		});
+		})();
 		(async () => {
 			(await Do(this.ns, "ns.bladeburner.getOperationNames")).forEach(x => this.bbTypes[x] = "Operation");
-		});
+		})();
 		(async () => {
 			(await Do(this.ns, "ns.bladeburner.getContractNames")).forEach(x => this.bbTypes[x] = "Contract");
-		});
+		})();
 	}
 	get chaosHere() {
 		return (async () => {
@@ -1283,8 +1283,8 @@ export async function bn7(Game) {
                 }
               }
               await (Game.Bladeburner.setLevel(action, level));
-              if (bbTypes[action] == "Contract" || (await (Game.Bladeburner.getChance(action)))[0] > .95)
-                best.push([level, bbTypes[action], action, city, (await (Game.Bladeburner.bbActionCount(action))) * ((await (Game.Bladeburner.getChance(action))).reduce((a, b) => (a + b) / 2) * (await (Game.Bladeburner.repGain(action, level))) / (await (Game.Bladeburner.bbActionTime(action))))]);
+              if (Game.Bladeburner.bbTypes[action] == "Contract" || (await (Game.Bladeburner.getChance(action)))[0] > .95)
+                best.push([level, Game.Bladeburner.bbTypes[action], action, city, (await (Game.Bladeburner.bbActionCount(action))) * ((await (Game.Bladeburner.getChance(action))).reduce((a, b) => (a + b) / 2) * (await (Game.Bladeburner.repGain(action, level))) / (await (Game.Bladeburner.bbActionTime(action))))]);
             }
             await (Game.Bladeburner.setLevel(action, maxlevel))
           }
@@ -1344,7 +1344,15 @@ export async function bn7(Game) {
           await Game.Sleeves.bbDo(shox[cur], "Infiltrate synthoids");
           let ii = 0;
           for (let i = cur + 1; i < shox.length; i++) {
-            await Game.Sleeves.bbDo(shox[i], cityChaos < 20 ? "Field analysis" : "Diplomacy");
+            if (cityChaos < 20) {
+              if (0 < await (Game['Sleeves']['getSleeve'](shox[i]))) {
+                await Game.Sleeves.deShock(shox[i]);
+              } else {
+                await Game.Sleeves.idle(shox[i]);
+              }
+            } else {
+                await Game.Sleeves.bbDo(shox[i], "Diplomacy");
+            }
             ii += 1;
           }
         }
@@ -6061,6 +6069,11 @@ export class Sleeves {
       await Do(this.ns, "ns.sleeve.setToShockRecovery", i);
     }
   }
+  async idle() {
+    for (let i = 0; i < await (this.numSleeves); i++) {
+      await Do(this.ns, "ns.sleeve.setToIdle", i);
+    }
+  }
   async bbDo(i, action, contract = null) {
     if (contract != null) {
       await Do(this.ns, "ns.sleeve.setToBladeburnerAction", i, action, contract);
@@ -6072,6 +6085,9 @@ export class Sleeves {
     for (let i = 0; i < await (this.Game.Sleeves.numSleeves); i++) {
       await this.bbDo(i, action, contract);
     }
+  }
+  async ['getSleeve'](i) {
+    return await Do(this.ns, "ns.sleeve.getSleeve", i);
   }
 }import { Do, DoAll, DoAllComplex } from "Do.js";
 
