@@ -273,15 +273,17 @@ export class Sleeves {
       }
     }
   }
-  async deShock() {
-    for (let i = 0; i < await (this.numSleeves); i++) {
+  async deShock(i=-2) {
+    if (i > -1) {
       await Do(this.ns, "ns.sleeve.setToShockRecovery", i);
+    } else {
+      for (let i = 0; i < await (this.numSleeves); i++) {
+        await Do(this.ns, "ns.sleeve.setToShockRecovery", i);
+      }
     }
   }
-  async idle() {
-    for (let i = 0; i < await (this.numSleeves); i++) {
-      await Do(this.ns, "ns.sleeve.setToIdle", i);
-    }
+  async idle(i) {
+    await Do(this.ns, "ns.sleeve.setToIdle", i);
   }
   async bbDo(i, action, contract = null) {
     if (contract != null) {
