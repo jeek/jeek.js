@@ -278,6 +278,11 @@ export class Sleeves {
       await Do(this.ns, "ns.sleeve.setToShockRecovery", i);
     }
   }
+  async idle() {
+    for (let i = 0; i < await (this.numSleeves); i++) {
+      await Do(this.ns, "ns.sleeve.setToIdle", i);
+    }
+  }
   async bbDo(i, action, contract = null) {
     if (contract != null) {
       await Do(this.ns, "ns.sleeve.setToBladeburnerAction", i, action, contract);
@@ -289,5 +294,8 @@ export class Sleeves {
     for (let i = 0; i < await (this.Game.Sleeves.numSleeves); i++) {
       await this.bbDo(i, action, contract);
     }
+  }
+  async ['getSleeve'](i) {
+    return await Do(this.ns, "ns.sleeve.getSleeve", i);
   }
 }

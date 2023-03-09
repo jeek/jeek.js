@@ -44,8 +44,8 @@ export async function bn7(Game) {
                 }
               }
               await (Game.Bladeburner.setLevel(action, level));
-              if (bbTypes[action] == "Contract" || (await (Game.Bladeburner.getChance(action)))[0] > .95)
-                best.push([level, bbTypes[action], action, city, (await (Game.Bladeburner.bbActionCount(action))) * ((await (Game.Bladeburner.getChance(action))).reduce((a, b) => (a + b) / 2) * (await (Game.Bladeburner.repGain(action, level))) / (await (Game.Bladeburner.bbActionTime(action))))]);
+              if (Game.Bladeburner.bbTypes[action] == "Contract" || (await (Game.Bladeburner.getChance(action)))[0] > .95)
+                best.push([level, Game.Bladeburner.bbTypes[action], action, city, (await (Game.Bladeburner.bbActionCount(action))) * ((await (Game.Bladeburner.getChance(action))).reduce((a, b) => (a + b) / 2) * (await (Game.Bladeburner.repGain(action, level))) / (await (Game.Bladeburner.bbActionTime(action))))]);
             }
             await (Game.Bladeburner.setLevel(action, maxlevel))
           }
@@ -105,7 +105,15 @@ export async function bn7(Game) {
           await Game.Sleeves.bbDo(shox[cur], "Infiltrate synthoids");
           let ii = 0;
           for (let i = cur + 1; i < shox.length; i++) {
-            await Game.Sleeves.bbDo(shox[i], cityChaos < 20 ? "Field analysis" : "Diplomacy");
+            if (cityChaos < 20) {
+              if (0 < await (Game['Sleeves']['getSleeve'](shox[i]))) {
+                await Game.Sleeves.deShock(shox[i]);
+              } else {
+                await Game.Sleeves.idle(shox[i]);
+              }
+            } else {
+                await Game.Sleeves.bbDo(shox[i], "Diplomacy");
+            }
             ii += 1;
           }
         }

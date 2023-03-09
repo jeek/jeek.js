@@ -21,13 +21,13 @@ export class Bladeburner {
 		this.bbTypes = {};
 		(async () => {
 			(await Do(this.ns, "ns.bladeburner.getBlackOpNames")).forEach(x => this.bbTypes[x] = "Black Op");
-		});
+		})();
 		(async () => {
 			(await Do(this.ns, "ns.bladeburner.getOperationNames")).forEach(x => this.bbTypes[x] = "Operation");
-		});
+		})();
 		(async () => {
 			(await Do(this.ns, "ns.bladeburner.getContractNames")).forEach(x => this.bbTypes[x] = "Contract");
-		});
+		})();
 	}
 	get chaosHere() {
 		return (async () => {
