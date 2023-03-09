@@ -1327,15 +1327,15 @@ export async function bn7(Game) {
         await (Game.Sleeves.bbEverybody("Field Analysis"));
         let shox = await Game.Sleeves.bbCombatSort();
         let cur = 0;
-        if ((await Game.Bladeburner.actionCount("Retirement")) >= 30) {
+        if ((await (Game.Bladeburner.actionCount("Retirement"))) >= 30) {
           await Game.Sleeves.bbDo(shox[cur], "Take on contracts", best.filter(x => x[2] == "Retirement").reverse()[0][2]);
           cur += 1;
         }
-        if ((await Game.Bladeburner.actionCount("Bounty Hunter")) >= 30) {
+        if ((await (Game.Bladeburner.actionCount("Bounty Hunter"))) >= 30) {
           await Game.Sleeves.bbDo(shox[cur], "Take on contracts", best.filter(x => x[2] == "Bounty Hunter").reverse()[0][2]);
           cur += 1;
         }
-        if ((await Game.Bladeburner.actionCount("Tracking")) >= 100) {
+        if ((await (Game.Bladeburner.actionCount("Tracking"))) >= 100) {
           await Game.Sleeves.bbDo(shox[cur], "Take on contracts", best.filter(x => x[2] == "Tracking").reverse()[0][2]);
           cur += 1;
         }
@@ -1345,7 +1345,7 @@ export async function bn7(Game) {
           let ii = 0;
           for (let i = cur + 1; i < shox.length; i++) {
             if (cityChaos < 20) {
-              if (0 < await (Game['Sleeves']['getSleeve'](shox[i]))) {
+              if (0 < (await (Game['Sleeves']['getSleeve'](shox[i]))).shock) {
                 await Game.Sleeves.deShock(shox[i]);
               } else {
                 await Game.Sleeves.idle(shox[i]);
@@ -6064,15 +6064,17 @@ export class Sleeves {
       }
     }
   }
-  async deShock() {
-    for (let i = 0; i < await (this.numSleeves); i++) {
+  async deShock(i=-2) {
+    if (i > -1) {
       await Do(this.ns, "ns.sleeve.setToShockRecovery", i);
+    } else {
+      for (let i = 0; i < await (this.numSleeves); i++) {
+        await Do(this.ns, "ns.sleeve.setToShockRecovery", i);
+      }
     }
   }
-  async idle() {
-    for (let i = 0; i < await (this.numSleeves); i++) {
-      await Do(this.ns, "ns.sleeve.setToIdle", i);
-    }
+  async idle(i) {
+    await Do(this.ns, "ns.sleeve.setToIdle", i);
   }
   async bbDo(i, action, contract = null) {
     if (contract != null) {
