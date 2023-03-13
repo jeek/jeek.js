@@ -2032,7 +2032,7 @@ export async function bn8hackloop(Game) {
     }
     let minsec = await DoAll(Game.ns, "ns.getServerMinSecurityLevel", Object.keys(stockMapping).map(x => stockMapping[x]));
     let volatility = {};
-    for (let stock of await (Game['Stockmarket'].symbols)) {
+    for (let stock of await (Game['StockMarket'].symbols)) {
         volatility[stock] = await Game['StockMarket'].volatility(stock);
     }
     let player = await Do(Game.ns, "ns.getPlayer");
@@ -6749,18 +6749,19 @@ export class StockMarket {
 	async Start() {
 		let symbols = await (this.symbols);
         for (let stock of symbols) {
-			this.myvol[stock] = 1;
+			this.myvol[stock] = 0;
 			this.myfore[stock] = .5;
 			this.myhist[stock] = [await (this.price(stock))];
 		}
         let canary = this.myhist[symbols[0]][0];
 		while (true) {
-			while (canary == this.myhist[symbols[0]][this.myhist[symbols[0]].length-1]) {
+			while (canary == await (this.price(symbols[0]))) {
 				await this.ns.asleep(100);
 			}
+			canary = this.myhist[symbols[0]][this.myhist[symbols[0]].length-1];
 			for (let stock of symbols) {
 				let newprice = await (this.price(stock));
-                this.myvol[stock] = Math.max(this.myvol[stock], newprice / this.myhist[stock][this.myhist[stock].length-1], this.myhist[stock][this.myhist[stock].length-1] / newprice);
+                this.myvol[stock] = Math.max(this.myvol[stock], newprice / this.myhist[stock][this.myhist[stock].length-1]-1, this.myhist[stock][this.myhist[stock].length-1] / newprice - 1);
 				this.myhist[stock].push(newprice);
 				if (this.myhist[stock].length > 38) {
 					this.myhist[stock].shift();
@@ -6773,7 +6774,7 @@ export class StockMarket {
 					}
 					b += 1;
 				}
-				this.myfore[stock] = a / (a + b);
+				this.myfore[stock] = a / b * 2;
 			}
 		}
 	}
@@ -6893,7 +6894,7 @@ export class StockMarket {
 		return (async () => {
 			try {
 				let answer = {};
-				let symbols = await this.symbols;
+				let symbols = await (this.symbols);
 				Object.entries(stockSymbolToCompany).map(x => answer[x[0]] = { 'company': x[1] });
 				Object.entries(await DoAll(this.ns, "ns.stock.getPosition", symbols)).map(x => answer[x[0]]['position'] = x[1]);
 				Object.entries(await DoAll(this.ns, "ns.stock.getPrice", symbols)).map(x => answer[x[0]]['price'] = x[1]);
@@ -7015,11 +7016,7 @@ export class StockMarket {
 			}
 			myupdate += "</TR>";
 			if (!this.ns.flags(cmdlineflags)['stockfilter'] || (data[stock]['position'][0] + data[stock]['position'][2]) > 0) {
-				if (has4s) {
-					updates.push([-data[stock]['forecast'], myupdate])
-				} else {
-					updates.push([data[stock]['price'], myupdate]);
-				}
+				updates.push([-data[stock]['forecast'], myupdate])
 				totalProfit += data[stock]['profit'];
 			}
 		}
@@ -7666,8 +7663,8 @@ export class WholeGame {
 }// Thanks to omuretsu
 let slp = ms => new Promise(r => setTimeout(r, ms));
 export let makeNewWindow = async (title = "Default Window Title", theme) => {
-  let win = open("", title.replaceAll(" ", "_"), "popup=yes,height=200,width=500,left=100,top=100,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,directories=no,status=no");
-//  let win = open("main.bundle.js", title.replaceAll(" ", "_"), "popup=yes,height=200,width=500,left=100,top=100,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,directories=no,status=no");
+//  let win = open("", title.replaceAll(" ", "_"), "popup=yes,height=200,width=500,left=100,top=100,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,directories=no,status=no");
+  let win = open("main.bundle.js", title.replaceAll(" ", "_"), "popup=yes,height=200,width=500,left=100,top=100,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,directories=no,status=no");
   let good = false;
   let doc = 0;
   while (!good) {
