@@ -174,7 +174,7 @@ export async function bn8hackloop(Game) {
     }
     let minsec = await DoAll(Game.ns, "ns.getServerMinSecurityLevel", Object.keys(stockMapping).map(x => stockMapping[x]));
     let volatility = {};
-    for (let stock of await (Game['Stockmarket'].symbols)) {
+    for (let stock of await (Game['StockMarket'].symbols)) {
         volatility[stock] = await Game['StockMarket'].volatility(stock);
     }
     let player = await Do(Game.ns, "ns.getPlayer");
