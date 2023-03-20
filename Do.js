@@ -36,7 +36,7 @@ function uniqueID(s, random = false) {
 
 // Writes a command to a file, runs it, and then returns the result
 export async function Do(ns, command, ...args) { //FFIGNORE
-	if (["ns.gang.setTerritoryWarfare", "ns.bladeburner.stopBladeburnerAction", "ns.bladeburner.setActionLevel", "ns.bladeburner.setActionAutolevel", "ns.singularity.hospitalize"].includes(command)) {
+	if (["ns.sleeve.setToIdle", "ns.gang.setTerritoryWarfare", "ns.bladeburner.stopBladeburnerAction", "ns.bladeburner.setActionLevel", "ns.bladeburner.setActionAutolevel", "ns.singularity.hospitalize"].includes(command)) {
 		return await DoVoid(ns, command, ...args); //FFIGNORE
 	}
 	let progname = "/temp/proc-" + uniqueID(command);
