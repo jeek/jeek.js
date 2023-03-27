@@ -260,7 +260,7 @@ export async function bn2(Game, settings={}) {
                 chances[other] = await (chances[other]);
             }
             let total = Object.keys(othergangs).map(x => chances[x] * othergangs[x].territory).reduce((a, b) => a + b);
-            if ((total / (1 - (await (Game['Gang']['getGangInformation']())).territory) >= settings['clashTarget']) || (Object.keys(chances).every(x => chances[x] >= settings['clashTarget'])));
+            if ((total / (1 - (await (Game['Gang']['getGangInformation']())).territory) >= settings['clashTarget']) || (Object.keys(chances).every(x => chances[x] >= settings['clashTarget'])))
                 Game['Gang']['setTerritoryWarfare'](true);
 
         }
