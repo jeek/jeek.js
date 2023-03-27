@@ -3760,11 +3760,8 @@ function uniqueID(s, random = false) {
 
 // Writes a command to a file, runs it, and then returns the result
 export async function Do(ns, command, ...args) { //FFIGNORE
-	if (["ns.sleeve.setToIdle", "ns.gang.setTerritoryWarfare", "ns.bladeburner.stopBladeburnerAction", "ns.bladeburner.setActionLevel", "ns.bladeburner.setActionAutolevel", "ns.singularity.hospitalize"].includes(command)) {
-		return await DoVoid(ns, command, ...args); //FFIGNORE
-	}
 	let progname = "/temp/proc-" + uniqueID(command);
-	writeIfNotSame(ns, progname + ".js", `export async function main(ns) { ns.writePort(ns.pid, JSON.stringify(` + command + `(...JSON.parse(ns.args[0]))), 'w'); }`);
+	writeIfNotSame(ns, progname + ".js", `export async function main(ns) { ns.writePort(ns.pid, JSON.stringify(` + command + `(...JSON.parse(ns.args[0])) ?? "UnDeFiNeDaF"), 'w'); }`);
 	let pid = ns.run(progname + ".js", 1, JSON.stringify(args));
 	let z = -1;
 	while (0 == pid) {
@@ -3774,21 +3771,7 @@ export async function Do(ns, command, ...args) { //FFIGNORE
 	}
 	await ns.getPortHandle(pid).nextWrite();
 	let answer = JSON.parse(ns.readPort(pid));
-	return answer;
-}
-
-export async function DoVoid(ns, command, ...args) {
-	writeIfNotSame(ns, '/temp/rm.js', `export async function main(ns) {ns.rm(ns.args[0], 'home');}`);
-	let progname = "/temp/proc-V" + uniqueID(command);
-	writeIfNotSame(ns, progname + ".js", `export async function main(ns) { ` + command + `(...JSON.parse(ns.args[0])); }`);
-	let pid = ns.run(progname + ".js", 1, JSON.stringify(args));
-	while (0 == pid) {
-		pid = ns.run(progname + ".js", 1, JSON.stringify(args));
-		await ns.asleep(0);
-	}
-	while (await Do(ns, "ns.isRunning", pid))
-		await ns.asleep(0);
-	return null;
+	return answer === "UnDeFiNeDaF" ? null : answer;
 }
 
 // Writes a command to a file, runs against every argument, and then returns the result as an object
