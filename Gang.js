@@ -22,6 +22,7 @@ export class Gang {
         // Caching of functions that do not change
         this.taskstats = {};
         this.equipstats = {};
+        this.minasc = 0;
     }
     async displayBoxUpdate() {
         if (this.ns.flags(cmdlineflags)['logbox']) {
@@ -52,6 +53,10 @@ export class Gang {
         if (!await (this.canAscend(memberName))) {
             return null;
         }
+        if (this.minasc > (await Do(this.ns, "ns.gang.getGangInformation")).respect) {
+            return false;
+        }
+        this.minasc = (await Do(this.ns, "ns.gang.getGangInformation")).respect;
         return await Do(this.ns, "ns.gang.ascendMember", memberName);
     }
     async ['canRecruitMember']() {
