@@ -1435,6 +1435,8 @@ export async function bn8(Game) {
                 Game.ns.run('/temp/4s.js');
             };
         }
+        let files = await Do(Game.ns, "ns.ls", "home");
+        let zz = 0;
         for (let program of [
             ["BruteSSH.exe", "ns.brutessh"],
             ["FTPCrack.exe", "ns.ftpcrack"],
@@ -1447,23 +1449,9 @@ export async function bn8(Game) {
                     await Do(Game.ns, "ns.singularity.purchaseProgram", program[0]);
                 }
             }
-        }
-        let files = await Do(Game.ns, "ns.ls", "home");
-        let zz = 0;
-        if (files.includes("BruteSSH.exe")) {
-            zz += 1;
-        }
-        if (files.includes("SQLInject.exe")) {
-            zz += 1;
-        }
-        if (files.includes("HTTPWorm.exe")) {
-            zz += 1;
-        }
-        if (files.includes("FTPCrack.exe")) {
-            zz += 1;
-        }
-        if (files.includes("relaySMTP.exe")) {
-            zz += 1;
+            if (files.includes(program[0])) {
+                zz += 1;
+            }
         }
         if (zz >= 5 && ((await (Game.Player.hacking)) > 3000) && (await Do(Game.ns, "ns.singularity.getOwnedAugmentations")).includes("The Red Pill")) {
             await Game.winGame();
