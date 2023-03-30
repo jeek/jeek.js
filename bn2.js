@@ -140,7 +140,7 @@ async function bn2ascendMembers(Game, memberData, settings) {
             ascendable.forEach(x => check[x] = 1.66-.62/Math.exp(((2/memberData[x].str_asc_mult)**2.24)));
             ascendable = ascendable.filter(x => check[x] < ascResult[x]['str']);
         }
-        ascendable = ascendable.filter(x => memberData[x].respectGain < avgrespect);
+        ascendable = ascendable.filter(x => memberData[x].earnedRespect < avgrespect);
         ascendable.sort((a, b) => check[b] - check[a]);
         if (ascendable.length > 0) {
             for (let k = 0; k < ascendable.length; k++) {
