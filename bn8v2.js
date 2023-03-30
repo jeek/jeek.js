@@ -27,14 +27,14 @@ export async function bn8(Game) {
     Game.bn8hackloop();
     let z = 0;
     while (true) {
-            if ((!await Do(Game.ns, "ns.stock.has4SDataTIXAPI", ""))) {
-                if ((await (Game.StockMarket.portfolioValue)) + (await Do(Game.ns, "ns.getPlayer")).money > 25000000000 * ((await Do(Game.ns, "ns.getBitNodeMultipliers"))).FourSigmaMarketDataApiCost) {
-                    Game.ns.write('/temp/4s.js', "export async function main(ns) { for (let stock of ns.stock.getSymbols()) { ns.stock.getPosition(stock)[0] ? ns.stock.sellStock(stock, ns.stock.getPosition(stock)[0]) : 0; ns.stock.getPosition(stock)[2] ? ns.stock.sellShort(stock, ns.stock.getPosition(stock)[2]) : 0; } ns.stock.purchase4SMarketDataTixApi(); }",'w')
-                    await Game.ns.asleep(0);
-                    Game.ns.run('/temp/4s.js');
-                };
-            }
-            for (let program of [
+        if ((!await Do(Game.ns, "ns.stock.has4SDataTIXAPI", ""))) {
+            if ((await (Game.StockMarket.portfolioValue)) + (await Do(Game.ns, "ns.getPlayer")).money > 25000000000 * ((await Do(Game.ns, "ns.getBitNodeMultipliers"))).FourSigmaMarketDataApiCost) {
+                Game.ns.write('/temp/4s.js', "export async function main(ns) { for (let stock of ns.stock.getSymbols()) { ns.stock.getPosition(stock)[0] ? ns.stock.sellStock(stock, ns.stock.getPosition(stock)[0]) : 0; ns.stock.getPosition(stock)[2] ? ns.stock.sellShort(stock, ns.stock.getPosition(stock)[2]) : 0; } ns.stock.purchase4SMarketDataTixApi(); }",'w')
+                await Game.ns.asleep(0);
+                Game.ns.run('/temp/4s.js');
+            };
+        }
+        for (let program of [
             ["BruteSSH.exe", "ns.brutessh"],
             ["FTPCrack.exe", "ns.ftpcrack"],
             ["relaySMTP.exe", "ns.relaysmtp"],
@@ -89,9 +89,6 @@ export async function bn8(Game) {
                 if (chances[stock] > 0) {
                     let shares = Math.floor((-100000 + await Do(Game.ns, "ns.getServerMoneyAvailable", 'home')) / (await Do(Game.ns, "ns.stock.getAskPrice", stock)));
                     shares = Math.min(((await Do(Game.ns, "ns.stock.getMaxShares", stock))) - data[0] - data[2], shares);
-                    //						if (shares > 100 && (200000 < await Do(Game.ns, "ns.getServerMoneyAvailable", "home"))) {
-                    //							ns.toast("Trying to buy " + shares.toString() + " of " + stock);
-                    //						}
                     while ((shares * (await Do(Game.ns, "ns.stock.getBidPrice", stock)) > 200000) && (!await Do(Game.ns, "ns.stock.buyStock", stock, shares))) {
                         shares = Math.floor(shares * .99);
                     }
@@ -115,9 +112,6 @@ export async function bn8(Game) {
                 if (chances[stock] < 0) {
                     let shares = Math.floor((-100000 + await Do(Game.ns, "ns.getServerMoneyAvailable", 'home')) / (await Do(Game.ns, "ns.stock.getAskPrice", stock)));
                     shares = Math.min(((await Do(Game.ns, "ns.stock.getMaxShares", stock))) - data[0] - data[2], shares);
-                    //						if (shares > 100 && (200000 < await Do(Game.ns, "ns.getServerMoneyAvailable", "home"))) {
-                    //							ns.toast("Trying to short " + shares.toString() + " of " + stock);
-                    //						}
                     while ((shares * (await Do(Game.ns, "ns.stock.getBidPrice", stock)) > 200000) && (!await Do(Game.ns, "ns.stock.buyShort", stock, shares))) {
                         shares *= .99;
                     }
@@ -126,7 +120,6 @@ export async function bn8(Game) {
                     }
                 } else {
                     if (data[2] > 0) {
-                        //							ns.toast("Unshorting " + stock);
                         Do(Game.ns, "ns.stock.sellShort", stock, data[2]);
                         if (data[2] > 0) Game.StockMarket.log("Unshorted " + data[2].toString() + " of " + stock);
                     }
@@ -135,8 +128,6 @@ export async function bn8(Game) {
             let data = await Do(Game.ns, "ns.stock.getPosition", stock);
             portvalue += (data[2] * (2 * data[3] - await Do(Game.ns, "ns.stock.getAskPrice", stock)));
         }
-        //			ns.tprint(z ? "Long " : "Short", " ", ns.nFormat((await Do(ns, "ns.getServerMoneyAvailable", "home")) + portvalue, "$0.000a"));
-        //			ns.toast(ns.nFormat((await Do(ns, "ns.getServerMoneyAvailable", "home")) + portvalue, "$0.000a"));
         let ownedAugs = await Do(Game.ns, "ns.singularity.getOwnedAugmentations");
         let playerhack = (await Do(Game.ns, "ns.getPlayer")).skills.hacking;
         if (8 == await (Game.Player.bitNodeN)) {
@@ -184,7 +175,6 @@ export async function bn8hackloop(Game) {
         weakentime[server] = await Do(Game.ns, "ns.formulas.hacking.weakenTime", await Do(Game.ns, "ns.getServer", server), player);
     }
     for (let i of Object.keys(stockMapping).sort((a, b) => { return weakentime[stockMapping[a]] - weakentime[stockMapping[b]] })) {
-        //    for (let i of Object.keys(mapping).sort((a, b) => { return minsec[a] - minsec[b] })) {
         let files = await Do(Game.ns, "ns.ls", "home");
         let z = 0;
         if (files.includes("BruteSSH.exe")) {
