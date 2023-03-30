@@ -51,6 +51,42 @@ export class StockMarket {
 			this.log = this.log.log;
 			this.displayBoxUpdate();
         }
+		this.myvol = {};
+		this.myhist = {};
+		this.myfore = {};
+        this.Start();
+	}
+	async Start() {
+		let symbols = await (this.symbols);
+        for (let stock of symbols) {
+			this.myvol[stock] = 0;
+			this.myfore[stock] = .5;
+			this.myhist[stock] = [await (this.price(stock))];
+		}
+        let canary = this.myhist[symbols[0]][0];
+		while (true) {
+			while (canary == await (this.price(symbols[0]))) {
+				await this.ns.asleep(100);
+			}
+			canary = this.myhist[symbols[0]][this.myhist[symbols[0]].length-1];
+			for (let stock of symbols) {
+				let newprice = await (this.price(stock));
+                this.myvol[stock] = Math.max(this.myvol[stock], newprice / this.myhist[stock][this.myhist[stock].length-1]-1, this.myhist[stock][this.myhist[stock].length-1] / newprice - 1);
+				this.myhist[stock].push(newprice);
+				if (this.myhist[stock].length > 38) {
+					this.myhist[stock].shift();
+				}
+				let a = 0;
+				let b = 0;
+				for (let i = 0 ; i + 1 < this.myhist[stock].length ; i++) {
+                    if (this.myhist[stock][i] < this.myhist[stock][i+1]) {
+						a += 1;
+					}
+					b += 1;
+				}
+				this.myfore[stock] = a / b * 2;
+			}
+		}
 	}
 	async displayBoxUpdate() {
 		while (this.ns.flags(cmdlineflags)['logbox']) {
@@ -100,10 +136,14 @@ export class StockMarket {
 		return await Do(this.ns, "ns.stock.getBidPrice", stock);
 	}
 	async volatility(stock) {
-		return await Do(this.ns, "ns.stock.getVolatility", stock);
+		if (await Do(this.ns, "ns.stock.has4SDataTIXAPI", "")) 
+    		return await Do(this.ns, "ns.stock.getVolatility", stock);
+		return this.myvol[stock];
 	}
 	async forecast(stock) {
-		return await Do(this.ns, "ns.stock.getForecast", stock);
+		if (await Do(this.ns, "ns.stock.has4SDataTIXAPI", "")) 
+			return await Do(this.ns, "ns.stock.getForecast", stock);
+		return this.myfore[stock];
 	}
 	company(stock) {
 		return stockSymbolToCompany[stock];
@@ -164,7 +204,7 @@ export class StockMarket {
 		return (async () => {
 			try {
 				let answer = {};
-				let symbols = await this.symbols;
+				let symbols = await (this.symbols);
 				Object.entries(stockSymbolToCompany).map(x => answer[x[0]] = { 'company': x[1] });
 				Object.entries(await DoAll(this.ns, "ns.stock.getPosition", symbols)).map(x => answer[x[0]]['position'] = x[1]);
 				Object.entries(await DoAll(this.ns, "ns.stock.getPrice", symbols)).map(x => answer[x[0]]['price'] = x[1]);
@@ -173,6 +213,9 @@ export class StockMarket {
 				if (await Do(this.ns, "ns.stock.has4SDataTIXAPI", "")) {
 					Object.entries(await DoAll(this.ns, "ns.stock.getVolatility", symbols)).map(x => answer[x[0]]['volatility'] = x[1]);
 					Object.entries(await DoAll(this.ns, "ns.stock.getForecast", symbols)).map(x => answer[x[0]]['forecast'] = x[1]);
+				} else {
+					symbols.map(x => answer[x]['volatility'] = this.myvol[x]);
+					symbols.map(x => answer[x]['forecast'] = this.myfore[x]);	
 				}
 				Object.entries(await DoAllComplex(this.ns, "ns.stock.getSaleGain", symbols.map(x => [x, answer[x]['position'][0], "Long"]))).map(x => [x[0].split(',')[0], x[1]]).map(x => answer[x[0]]['longsalevalue'] = x[1]);
 				Object.entries(await DoAllComplex(this.ns, "ns.stock.getSaleGain", symbols.map(x => [x, answer[x]['position'][2], "Short"]))).map(x => [x[0].split(',')[0], x[1]]).map(x => answer[x[0]]['shortsalevalue'] = x[1]);
@@ -245,9 +288,7 @@ export class StockMarket {
 		}
 		update += "<TH>Profit</TH>"
 		let has4s = await Do(this.ns, "ns.stock.has4SDataTIXAPI");
-		if (has4s) {
-			update += "<TH>Volatility</TH><TH>Forecast</TH>";
-		}
+		update += "<TH>Volatility</TH><TH>Forecast</TH>";
 		update += "<TH>Server</TH></TR>"
 		let updates = [];
 		let data = await this.market;
@@ -273,11 +314,9 @@ export class StockMarket {
 			} else {
 				myupdate += td("&nbsp;");
 			}
-			if (has4s) {
-				myupdate += td((this.ns.nFormat(100 * data[stock]['volatility'], "0.00")), "RIGHT");
-				let forecast = -100 + 200 * data[stock]['forecast'];
-				myupdate += td((forecast < 0 ? "<FONT COLOR='" + this.ns.ui.getTheme()['error'] + "'>" : "") + jFormat(forecast), "RIGHT");
-			}
+			myupdate += td((this.ns.nFormat(100 * data[stock]['volatility'], "0.00")), "RIGHT");
+			let forecast = -100 + 200 * data[stock]['forecast'];
+			myupdate += td((forecast < 0 ? "<FONT COLOR='" + this.ns.ui.getTheme()['error'] + "'>" : "") + jFormat(forecast), "RIGHT");
 			if (Object.keys(stockMapping).includes(stock)) {
 				myupdate += "<TD>" + stockMapping[stock] + "<BR><SMALL>";
 				myupdate += "$$$: " + Math.floor(100 * (servermoneyavailable[stockMapping[stock]]) / (servermaxmoney[stockMapping[stock]])).toString() + "%<BR>";
@@ -287,11 +326,7 @@ export class StockMarket {
 			}
 			myupdate += "</TR>";
 			if (!this.ns.flags(cmdlineflags)['stockfilter'] || (data[stock]['position'][0] + data[stock]['position'][2]) > 0) {
-				if (has4s) {
-					updates.push([-data[stock]['forecast'], myupdate])
-				} else {
-					updates.push([data[stock]['price'], myupdate]);
-				}
+				updates.push([-data[stock]['forecast'], myupdate])
 				totalProfit += data[stock]['profit'];
 			}
 		}
