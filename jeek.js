@@ -3841,16 +3841,16 @@ export class Hacknet {
 				}
 			}
     		// Pay for yourself, Hacknet
-    		if (!this.Game.Sleeves.startingAGang) {
-	    		if ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses < -1e9) {
-		    		if (0 > ((await Do(this.ns, "ns.getMoneySources")).sinceInstall['hacknet']) + ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses)) {
-			    		if (4 <= (await Do(this.ns, "ns.hacknet.numHashes", ""))) {
-				    		let poof = Math.floor((await Do(this.ns, "ns.hacknet.numHashes", "")) / 4);
-					    	await Do(this.ns, "ns.hacknet.spendHashes", "Sell for Money", "", poof);
-					    }
-					}
-				}
-			}
+//    		if (!this.Game.Sleeves.startingAGang) {
+//	    		if ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses < -1e9) {
+//		    		if (0 > ((await Do(this.ns, "ns.getMoneySources")).sinceInstall['hacknet']) + ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses)) {
+//			    		if (4 <= (await Do(this.ns, "ns.hacknet.numHashes", ""))) {
+//				    		let poof = Math.floor((await Do(this.ns, "ns.hacknet.numHashes", "")) / 4);
+//					    	await Do(this.ns, "ns.hacknet.spendHashes", "Sell for Money", "", poof);
+//					    }
+//					}
+//				}
+//			}
 			if (((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses >= -1e9) || (0 <= ((await Do(this.ns, "ns.getMoneySources")).sinceInstall['hacknet']) + ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses))) {
 				let didSomething = true;
 				let mults = (await Do(this.ns, "ns.getPlayer", "")).mults.hacknet_node_money;
@@ -5715,8 +5715,9 @@ export class Sleeves {
   }
   async startAGangFirst() {
     this.log("Starting a Gang")
-    //this.startingAGang = true;
-    this.Game.Hacknet.goal = "Improve Gym Training";
+    this.startingAGang = true;
+    if (this.Game.Hacknet.goal === "Sell for Money")
+        this.Game.Hacknet.goal = "Improve Gym Training";
     let thresh = 0;
     if (this.Game.bitNodeN == 2) {
       return;
@@ -5810,6 +5811,9 @@ export class Sleeves {
       }
 	}
     }
+  this.startingAGang = false;
+  if (this.Game.Hacknet.goal === "Improve Gym Training")
+      this.Game.Hacknet.goal = "Sell for Money";
   if (!await (this.Game['Gang']['inGang']))
    	await Do(this.ns, "ns.singularity.commitCrime", "Homicide", false);
 	done = false;
@@ -5831,7 +5835,6 @@ export class Sleeves {
 			}
 		}
 	}
-    //this.startingAGang = false;
     for (let i = 0; i < await (this.numSleeves); i++) {
       await Do(this.ns, "ns.sleeve.setToCommitCrime", i, "Homicide");
     }
