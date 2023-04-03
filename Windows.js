@@ -1,8 +1,12 @@
 // Thanks to omuretsu
-let slp = ms => new Promise(r => setTimeout(r, ms));
+let slp = (ms) => new Promise((r) => setTimeout(r, ms));
 export let makeNewWindow = async (title = "Default Window Title", theme) => {
-//  let win = open("", title.replaceAll(" ", "_"), "popup=yes,height=200,width=500,left=100,top=100,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,directories=no,status=no");
-  let win = open("main.bundle.js", title.replaceAll(" ", "_"), "popup=yes,height=200,width=500,left=100,top=100,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,directories=no,status=no");
+  //  let win = open("", title.replaceAll(" ", "_"), "popup=yes,height=200,width=500,left=100,top=100,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,directories=no,status=no");
+  let win = open(
+    "main.bundle.js",
+    title.replaceAll(" ", "_"),
+    "popup=yes,height=200,width=500,left=100,top=100,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,directories=no,status=no"
+  );
   let good = false;
   let doc = 0;
   while (!good) {
@@ -16,15 +20,20 @@ export let makeNewWindow = async (title = "Default Window Title", theme) => {
     }
   }
   await slp(200);
-  doc.head.innerHTML = `
+  doc.head.innerHTML =
+    `
   <title>${title}</title>
   <style>
     *{
       margin:0;
     }
     body{
-      background:` + theme['backgroundprimary'] + `;
-      color:` + theme['primary'] + `;
+      background:` +
+    theme["backgroundprimary"] +
+    `;
+      color:` +
+    theme["primary"] +
+    `;
       overflow:hidden;
       height:100vh;
       width:100vw;
@@ -33,16 +42,24 @@ export let makeNewWindow = async (title = "Default Window Title", theme) => {
       flex-direction:column;
     }
     td{
-      background:` + theme['backgroundsecondary'] + `;
-      color:` + theme['primary'] + `;
+      background:` +
+    theme["backgroundsecondary"] +
+    `;
+      color:` +
+    theme["primary"] +
+    `;
       font-family: "Hack Regular Nerd Font Complete", "Lucida Console", "Lucida Sans Unicode", "Fira Mono", Consolas, "Courier New", Courier, monospace, "Times New Roman";
     }
     a{
-      color:` + theme['primary'] + `;
+      color:` +
+    theme["primary"] +
+    `;
       font-family: "Hack Regular Nerd Font Complete", "Lucida Console", "Lucida Sans Unicode", "Fira Mono", Consolas, "Courier New", Courier, monospace, "Times New Roman";
     }
     warning{
-      color:` + theme['error'] + `;
+      color:` +
+    theme["error"] +
+    `;
       font-family: "Hack Regular Nerd Font Complete", "Lucida Console", "Lucida Sans Unicode", "Fira Mono", Consolas, "Courier New", Courier, monospace, "Times New Roman";
     }
     .title{
@@ -64,7 +81,9 @@ export let makeNewWindow = async (title = "Default Window Title", theme) => {
       font-size:14px;
     }
     .logs::-webkit-scrollbar,::-webkit-scrollbar-corner{
-      background:` + theme['button'] + `;
+      background:` +
+    theme["button"] +
+    `;
       width:10px;
       height:10px;
     }
@@ -73,14 +92,21 @@ export let makeNewWindow = async (title = "Default Window Title", theme) => {
       height:0px;
     }
     .logs::-webkit-scrollbar-thumb{
-      background:` + theme['primary'] + `;
+      background:` +
+    theme["primary"] +
+    `;
     }
   </style>`;
   doc.body.innerHTML = `<div class=title>${title}</div><div class=logs><p></p></div>`;
   let logs = doc.body.querySelector(".logs");
   win.update = (content) => {
     logs.innerHTML = content;
-  }
-  win.reopen = () => open("", title.replaceAll(" ", "_"), "popup=yes,height=200,width=500,left=100,top=100,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,directories=no,status=no");
+  };
+  win.reopen = () =>
+    open(
+      "",
+      title.replaceAll(" ", "_"),
+      "popup=yes,height=200,width=500,left=100,top=100,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,directories=no,status=no"
+    );
   return win;
-}
+};
