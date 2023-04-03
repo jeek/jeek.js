@@ -557,165 +557,127 @@ onmessage = (event) => {postMessage([eval(event.data[0])(event.data[1]), event.d
 `;
 
 export class Contracts {
-  constructor(ns, game) {
-    this.ns = ns;
-    this.game = game ? game : new WholeGame(ns);
-    this.contracts = {};
-    this.times = {};
-    this.log = ns.tprint.bind(ns);
-    if (ns.flags(cmdlineflags)["logbox"]) {
-      this.log =
-        this.game.sidebar.querySelector(".contractbox") ||
-        this.game.createSidebarItem("Contracts", "", "C", "contractbox");
-      this.log = this.log.log;
-    }
-    this.y = 0;
-    this.z = 0;
-    this.procs = [];
-    this.solutions = [];
-    this.blob = new Blob([workerCode], { type: "application/javascript" });
-    for (let i = 0; i < 16; i++) {
-      this.procs.push(new Worker(URL.createObjectURL(this.blob)));
-      this.procs[this.procs.length - 1].onmessage = (event) => {
-        this.solutions.push(event);
-        this.z -= 1;
-      };
-    }
-    this.ns.atExit(() => this.procs.map((x) => x.terminate()));
-  }
-  async list() {
-    //		this['window'] = this['window'] || await makeNewWindow("Contracts", this.ns.ui.getTheme())
-    let files = [];
-    for (let server of this.game["Servers"].serverlist) {
-      files = files.concat(
-        (await Do(this.ns, "ns.ls", server))
-          .filter((x) => x.includes(".cct"))
-          .map((filename) => [server, filename])
-      );
-    }
-    // this.ns.tprint(files);
-    for (let i = 0; i < files.length; i++) {
-      this.contracts[files[i][1]] = {};
-      this.contracts[files[i][1]].server = files[i][0];
-      this.contracts[files[i][1]].type = await Do(
-        this.ns,
-        "ns.codingcontract.getContractType",
-        files[i][1],
-        files[i][0]
-      );
-      this.contracts[files[i][1]].data = await Do(
-        this.ns,
-        "ns.codingcontract.getData",
-        files[i][1],
-        files[i][0]
-      );
-      this.contracts[files[i][1]].description = await Do(
-        this.ns,
-        "ns.codingcontract.getDescription",
-        files[i][1],
-        files[i][0]
-      );
-      while (this.contracts[files[i][1]].description.indexOf("\n") > -1) {
-        this.contracts[files[i][1]].description = this.contracts[
-          files[i][1]
-        ].description.replace("\n", "<BR>");
-      }
-    }
-    //		let output = "<TABLE BORDER=1 CELLPADDING=0 CELLSPACING=0>";
-    //		for (let i of Object.keys(this.contracts)) {
-    //			output += "<TR><TD>" + this.contracts[i].description.replace("\n", "<BR>") + "</TD><TD>" + this.contracts[i].server + "</TD><TD>" + this.contracts[i].type + "</TD><TD>" + JSON.stringify(this.contracts[i].data) + "</TD></TR>";
-    //		}
-    //		output += "</TABLE>";
-    //		this['window'].update(output);
-    return this.contracts;
-  }
-  async loop() {
-    while (true) {
-      await this.solve();
-      await this.ns.asleep(60000);
-    }
-  }
-  async solve() {
-    await this.list();
-    for (let contract of Object.keys(this.contracts)) {
-      let done = false;
-      //this.ns.tprint(contract);
-      for (let types of [
-        ["Minimum Path Sum in a Triangle", "minpathsum"],
-        ["Unique Paths in a Grid I", "uniquepathsI"],
-        ["Unique Paths in a Grid II", "uniquepathsII"],
-        ["Find Largest Prime Factor", "largestprimefactor"],
-        ["Merge Overlapping Intervals", "mergeoverlappingintervals"],
-        ["Encryption I: Caesar Cipher", "caesarcipher"],
-        ["Total Ways to Sum", "totalwaystosum"],
-        ["Total Ways to Sum II", "totalwaystosumII"],
-        ["Spiralize Matrix", "spiralizematrix"],
-        ["Subarray with Maximum Sum", "subarraywithmaximumsum"],
-        ["Proper 2-Coloring of a Graph", "twocolor"],
-        ["Compression I: RLE Compression", "rlecompression"],
-        ["Compression II: LZ Decompression", "lzdecompression"],
-        //["Compression III: LZ Compression", "lzcompression"],
-        ["Algorithmic Stock Trader I", "stonks1"],
-        ["Algorithmic Stock Trader II", "stonks2"],
-        ["Algorithmic Stock Trader III", "stonks3"],
-        ["Algorithmic Stock Trader IV", "stonks4"],
-        ["Encryption II: Vigenère Cipher", "vigenere"],
-        ["Generate IP Addresses", "generateips"],
-        ["Array Jumping Game", "arrayjumpinggame"],
-        ["Array Jumping Game II", "arrayjumpinggameII"],
-        ["HammingCodes: Integer to Encoded Binary", "hammingencode"],
-        ["HammingCodes: Encoded Binary to Integer", "hammingdecode"],
-        ["Find All Valid Math Expressions", "findallvalidmathexpressions"],
-        ["Sanitize Parentheses in Expression", "sanitizeparentheses"],
-        ["Shortest Path in a Grid", "shortestpathinagrid"],
-      ]) {
-        if (!Object.keys(this.times).includes(types[0])) {
-          this.times[types[0]] = [];
-        }
-        if (!done) {
-          if (this.contracts[contract].type === types[0]) {
-            this.log(
-              "Starting " + types[0] + " on " + this.contracts[contract].server
-            );
-            this.procs[this.y % 16].postMessage([
-              types[1],
-              this.contracts[contract].data,
-              contract,
-              this.contracts[contract].server,
-            ]);
-            this.z += 1;
-            this.y += 1;
-            await this.ns.asleep(0);
-            //						let starttime = Date.now();
-            //						this.times[types[0]].push(Date.now() - starttime);
-            //						this.log(types[0] + " average time: " + (this.times[types[0]].reduce((a, b) => a + b) / this.times[types[0]].length).toString());
-          }
-        }
-      }
-    }
-    while (this.z > 0 || this.solutions.length > 0) {
-      await this.ns.asleep(1000);
-      while (this.solutions.length > 0) {
-        let success = await Do(
-          this.ns,
-          "ns.codingcontract.attempt",
-          this.solutions[0].data[0],
-          this.solutions[0].data[1],
-          this.solutions[0].data[2]
-        );
-        if (success.length > 0) {
-          delete this.contracts[this.solutions[0].data[1]];
-          this.log(
-            "Succeeded at " + this.solutions[0].data[3] + ": " + success
-          );
-        } else {
-          this.log("Failed at " + this.solutions[0].data[3]);
-          //this.log("Failed at " + this.solutions[0].data[3], " ", types[1](this.contracts[this.solutions[0].data[1]].data, this.ns));
-          //this.ns.exit();
-        }
-        this.solutions.shift();
-      }
-    }
-    await this.list();
-  }
+	constructor(ns, game) {
+		this.ns = ns;
+		this.game = game ? game : new WholeGame(ns);
+		this.contracts = {};
+		this.times = {};
+		this.log = ns.tprint.bind(ns);
+		if (ns.flags(cmdlineflags)['logbox']) {
+			this.log = this.game.sidebar.querySelector(".contractbox") || this.game.createSidebarItem("Contracts", "", "C", "contractbox");
+			this.log = this.log.log;
+		}
+		this.y = 0;
+		this.z = 0;
+		this.procs = [];
+		this.solutions = [];
+		this.blob = new Blob([workerCode], { type: "application/javascript" });
+		for (let i = 0; i < 16; i++) {
+			this.procs.push(new Worker(URL.createObjectURL(this.blob)));
+			this.procs[this.procs.length - 1].onmessage = (event) => {
+				this.solutions.push(event);
+				this.z -= 1;
+			};
+		}
+		this.ns.atExit(() => this.procs.map(x => x.terminate()));
+	}
+	async list() {
+		//		this['window'] = this['window'] || await makeNewWindow("Contracts", this.ns.ui.getTheme())
+		let files = [];
+		for (let server of this.game['Servers'].serverlist) {
+			files = files.concat((await Do(this.ns, "ns.ls", server)).filter(x => x.includes(".cct")).map(filename => [server, filename]));
+		}
+		// this.ns.tprint(files);
+		for (let i = 0; i < files.length; i++) {
+			this.contracts[files[i][1]] = {};
+			this.contracts[files[i][1]].server = files[i][0];
+			this.contracts[files[i][1]].type = await Do(this.ns, "ns.codingcontract.getContractType", files[i][1], files[i][0]);
+			this.contracts[files[i][1]].data = await Do(this.ns, "ns.codingcontract.getData", files[i][1], files[i][0]);
+			this.contracts[files[i][1]].description = await Do(this.ns, "ns.codingcontract.getDescription", files[i][1], files[i][0]);
+			while (this.contracts[files[i][1]].description.indexOf("\n") > -1) {
+				this.contracts[files[i][1]].description = this.contracts[files[i][1]].description.replace("\n", "<BR>");
+			}
+		}
+		//		let output = "<TABLE BORDER=1 CELLPADDING=0 CELLSPACING=0>";
+		//		for (let i of Object.keys(this.contracts)) {
+		//			output += "<TR><TD>" + this.contracts[i].description.replace("\n", "<BR>") + "</TD><TD>" + this.contracts[i].server + "</TD><TD>" + this.contracts[i].type + "</TD><TD>" + JSON.stringify(this.contracts[i].data) + "</TD></TR>";
+		//		}
+		//		output += "</TABLE>";
+		//		this['window'].update(output);
+		return this.contracts;
+	}
+	async loop() {
+		while (true) {
+    		await this.solve();
+    		await this.ns.asleep(60000);
+		}
+	}
+	async solve() {
+		await this.list();
+		for (let contract of Object.keys(this.contracts)) {
+			let done = false;
+			//this.ns.tprint(contract);
+			for (let types of [
+				["Minimum Path Sum in a Triangle", "minpathsum"],
+				["Unique Paths in a Grid I", "uniquepathsI"],
+				["Unique Paths in a Grid II", "uniquepathsII"],
+				["Find Largest Prime Factor", "largestprimefactor"],
+				["Merge Overlapping Intervals", "mergeoverlappingintervals"],
+				["Encryption I: Caesar Cipher", "caesarcipher"],
+				["Total Ways to Sum", "totalwaystosum"],
+				["Total Ways to Sum II", "totalwaystosumII"],
+				["Spiralize Matrix", "spiralizematrix"],
+				["Subarray with Maximum Sum", "subarraywithmaximumsum"],
+				["Proper 2-Coloring of a Graph", "twocolor"],
+				["Compression I: RLE Compression", "rlecompression"],
+				["Compression II: LZ Decompression", "lzdecompression"],
+				//["Compression III: LZ Compression", "lzcompression"],
+				["Algorithmic Stock Trader I", "stonks1"],
+				["Algorithmic Stock Trader II", "stonks2"],
+				["Algorithmic Stock Trader III", "stonks3"],
+				["Algorithmic Stock Trader IV", "stonks4"],
+				["Encryption II: Vigenère Cipher", "vigenere"],
+				["Generate IP Addresses", "generateips"],
+				["Array Jumping Game", "arrayjumpinggame"],
+				["Array Jumping Game II", "arrayjumpinggameII"],
+				["HammingCodes: Integer to Encoded Binary", "hammingencode"],
+				["HammingCodes: Encoded Binary to Integer", "hammingdecode"],
+				["Find All Valid Math Expressions", "findallvalidmathexpressions"],
+				["Sanitize Parentheses in Expression", "sanitizeparentheses"],
+				["Shortest Path in a Grid", "shortestpathinagrid"]
+			]) {
+				if (!Object.keys(this.times).includes(types[0])) {
+					this.times[types[0]] = [];
+				}
+				if (!done) {
+					if (this.contracts[contract].type === types[0]) {
+						this.log("Starting " + types[0] + " on " + this.contracts[contract].server);
+						this.procs[this.y % 16].postMessage([types[1], this.contracts[contract].data, contract, this.contracts[contract].server]);
+						this.z += 1;
+						this.y += 1;
+						await this.ns.asleep(0);
+						//						let starttime = Date.now();
+						//						this.times[types[0]].push(Date.now() - starttime);
+						//						this.log(types[0] + " average time: " + (this.times[types[0]].reduce((a, b) => a + b) / this.times[types[0]].length).toString());
+					}
+				}
+			}
+		}
+		while (this.z > 0 || this.solutions.length > 0) {
+			await this.ns.asleep(1000);
+			while (this.solutions.length > 0) {
+				let success = await Do(this.ns, "ns.codingcontract.attempt", this.solutions[0].data[0], this.solutions[0].data[1], this.solutions[0].data[2]);
+			    if (success.length > 0) {
+					delete this.contracts[this.solutions[0].data[1]];
+					this.log("Succeeded at " + this.solutions[0].data[3] + ": " + success);
+				} else {
+					this.log("Failed at " + this.solutions[0].data[3]);
+					//this.log("Failed at " + this.solutions[0].data[3], " ", types[1](this.contracts[this.solutions[0].data[1]].data, this.ns));
+					//this.ns.exit();
+				}
+				this.solutions.shift();
+			}
+		}
+		await this.list();
+	}
 }

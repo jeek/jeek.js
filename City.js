@@ -3,48 +3,48 @@ import { Warehouse } from "Warehouse.js";
 import { Office } from "Office.js";
 
 class City extends CorpBaseClass {
-  constructor(ns, Corp, Division, CityName, settings = {}) {
-    super(ns, settings);
-    this.name = CityName;
-    this.Corp = Corp;
-    this.Division = Division;
-    if (Object.keys(this.settings).includes(CityName)) {
-      for (let objKey of Object.keys(this.settings[CityName])) {
-        this.settings[objKey] = this.settings[CityName][objKey];
-      }
+    constructor(ns, Corp, Division, CityName, settings={}) {
+        super(ns, settings);
+        this.name = CityName;
+        this.Corp = Corp;
+        this.Division = Division;
+        if (Object.keys(this.settings).includes(CityName)) {
+            for (let objKey of Object.keys(this.settings[CityName])) {
+                this.settings[objKey] = this.settings[CityName][objKey];
+            }
+        }
+        for (let cityIt of this.Cities) {
+            if (Object.keys(this.settings).includes(cityIt)) {
+                delete this.settings[cityIt];
+            }
+        }
+        this.pricing = {};
+        if (!Object.keys(settings).includes("minEnergy")) {
+            this.settings['minEnergy'] = 98;
+        }
+        if (!Object.keys(settings).includes("minHappy")) {
+            this.settings['minHappy'] = 98;
+        }
+        if (!Object.keys(settings).includes("minMorale")) {
+            this.settings['minMorale'] = 98;
+        }
     }
-    for (let cityIt of this.Cities) {
-      if (Object.keys(this.settings).includes(cityIt)) {
-        delete this.settings[cityIt];
-      }
+    get industryData() {
+        return this.Division.industryData;
     }
-    this.pricing = {};
-    if (!Object.keys(settings).includes("minEnergy")) {
-      this.settings["minEnergy"] = 98;
+    get isHappy() {
+        return this.o.isHappy;
     }
-    if (!Object.keys(settings).includes("minHappy")) {
-      this.settings["minHappy"] = 98;
-    }
-    if (!Object.keys(settings).includes("minMorale")) {
-      this.settings["minMorale"] = 98;
-    }
-  }
-  get industryData() {
-    return this.Division.industryData;
-  }
-  get isHappy() {
-    return this.o.isHappy;
-  }
-  async Start() {
-    while (!this.Division.getDivision.cities.includes(this.name)) {
-      await this.ns.asleep(100);
-      if (this.funds > this.c.getConstants().officeInitialCost) {
-        this.c.expandCity(this.Division.name, this.name);
-      }
-    }
-    this.w = new Warehouse(this.ns, this);
-    this.w.Start();
-    this.o = new Office(this.ns, this);
-    this.o.Start();
-  }
+    async Start() {
+        while (!this.Division.getDivision.cities.includes(this.name)) {
+            await this.ns.asleep(100);
+            if (this.funds > this.c.getConstants().officeInitialCost) {
+                this.c.expandCity(this.Division.name, this.name);
+            }
+        }
+        this.w = new Warehouse(this.ns, this);
+        this.w.Start();
+        this.o = new Office(this.ns, this);
+        this.o.Start();
+    }    
 }
