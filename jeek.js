@@ -1482,7 +1482,7 @@ export async function bn8(Game) {
                         shares = Math.floor(shares * .99);
                     }
                     if (shares * (await Do(Game.ns, "ns.stock.getBidPrice", stock)) > 200000) {
-                        if (shares > 0) Game.StockMarket.log("Bought " + shares.toString() + " of " + stock);
+                        if (shares > 0 && ((await (Game.StockMarket.portfolioValue)) * 9 < (await (Game.money)))) Game.StockMarket.log("Bought " + shares.toString() + " of " + stock);
                     }
                 } else {
                     if (data[0] > 0) {
@@ -1505,7 +1505,7 @@ export async function bn8(Game) {
                         shares *= .99;
                     }
                     if (shares * (await Do(Game.ns, "ns.stock.getBidPrice", stock)) > 200000) {
-                        if (shares > 0) Game.StockMarket.log("Shorted " + shares.toString() + " of " + stock);
+                        if (shares > 0 && ((await (Game.StockMarket.portfolioValue)) * 9 < (await (Game.money)))) Game.StockMarket.log("Shorted " + shares.toString() + " of " + stock);
                     }
                 } else {
                     if (data[2] > 0) {
