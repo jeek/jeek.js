@@ -51,25 +51,26 @@ export class Hacknet {
 		}
 		while (true) {
 			await this.ns.asleep(0);
-			if (this.goal == "Sell for Money") {
-				await Do(this.ns, "ns.hacknet.spendHashes", this.goal, "", Math.floor((await Do(this.ns, "ns.hacknet.numHashes", "")) / 4));
-				this.log("Spent hashes for cash")
+			let hashes = Math.floor((await Do(this.ns, "ns.hacknet.numHashes", "")) / 4);
+			if (this.goal === "Sell for Money" && hashes > 0) {
+				await Do(this.ns, "ns.hacknet.spendHashes", this.goal, "", hashes);
+				this.log("Spent hashes for cash");
 			} else {
 				while (await Do(this.ns, "ns.hacknet.spendHashes", this.goal))
 					this.log("Spent hashes on " + this.goal);
 			}
 			if (await Do(this.ns, "ns.corporation.hasCorporation")) {
 				if (await Do(this.ns, "ns.hacknet.spendHashes", "Sell for Corporation Funds")) {
-                    this.log("Spent hashes on Corp Funds")
+                    this.log("Spent hashes on Corp Funds");
 				}
 				if (await Do(this.ns, "ns.hacknet.spendHashes", "Exchange for Corporation Research")) {
-                    this.log("Spent hashes on Corp Research")
+                    this.log("Spent hashes on Corp Research");
 				}
 			}
 
 		    if (this.Game.Sleeves.startingAGang) {
 				if (await Do(this.ns, "ns.hacknet.spendHashes", "Improve Gym Training")) {
-                    this.log("Spent hashes on Improve Gym Training")
+                    this.log("Spent hashes on Improve Gym Training");
 				}
 			}
     		// Pay for yourself, Hacknet
@@ -88,14 +89,18 @@ export class Hacknet {
 				let mults = (await Do(this.ns, "ns.getPlayer", "")).mults.hacknet_node_money;
 				while (didSomething) {
 					didSomething = false;
-					let shoppingCart = [[(await Do(this.ns, "ns.hacknet.getPurchaseNodeCost")) / (this.ns.formulas.hacknetServers.hashGainRate(1, 0, 1, 1, mults)), await Do(this.ns, "ns.hacknet.getPurchaseNodeCost"), "ns.hacknet.purchaseNode"]]
+					let shoppingCart = [[(await Do(this.ns, "ns.hacknet.getPurchaseNodeCost")) / (this.ns.formulas.hacknetServers.hashGainRate(1, 0, 1, 1, mults)), await Do(this.ns, "ns.hacknet.getPurchaseNodeCost"), "ns.hacknet.purchaseNode"]];
 					for (let i = 0; i < await Do(this.ns, "ns.hacknet.numNodes"); i++) {
 						let current = await Do(this.ns, "ns.hacknet.getNodeStats", i);
 						shoppingCart.push([this.ns.formulas.hacknetServers.ramUpgradeCost(current.ram, 1, mults.hacknet_node_ram_cost) / ((this.ns.formulas.hacknetServers.hashGainRate(current.level, 0, current.ram * 2, current.cores, mults) - (this.ns.formulas.hacknetServers.hashGainRate(current.level, 0, current.ram, current.cores, mults)))), this.ns.formulas.hacknetServers.ramUpgradeCost(current.ram, 1, mults.hacknet_node_ram_cost), "ns.hacknet.upgradeRam", i]);
 						shoppingCart.push([this.ns.formulas.hacknetServers.coreUpgradeCost(current.cores, 1, mults.hacknet_node_core_cost) / ((this.ns.formulas.hacknetServers.hashGainRate(current.level, 0, current.ram, current.cores + 1, mults) - (this.ns.formulas.hacknetServers.hashGainRate(current.level, 0, current.ram, current.cores, mults)))), this.ns.formulas.hacknetServers.coreUpgradeCost(current.cores, 1, mults.hacknet_node_core_cost), "ns.hacknet.upgradeCore", i]);
 						shoppingCart.push([this.ns.formulas.hacknetServers.levelUpgradeCost(current.level, 1, mults.hacknet_node_core_cost) / ((this.ns.formulas.hacknetServers.hashGainRate(current.level + 1, 0, current.ram, current.cores, mults) - (this.ns.formulas.hacknetServers.hashGainRate(current.level, 0, current.ram, current.cores, mults)))), this.ns.formulas.hacknetServers.levelUpgradeCost(current.level, 1, mults.hacknet_node_core_cost), "ns.hacknet.upgradeLevel", i]);
 					}
-					let currentMoney = await Do(this.ns, "ns.getServerMoneyAvailable", "home") / (1 + (await Do(this.ns, "ns.hacknet.numNodes"))) ** 2;
+					let nodes = (await Do(this.ns, "ns.hacknet.numNodes")) ** 2;
+					if (nodes < 1) {
+						nodes = 1;
+					}
+					let currentMoney = await Do(this.ns, "ns.getServerMoneyAvailable", "home") / nodes;
 					shoppingCart = shoppingCart.filter(x => x[1] <= currentMoney);
 					shoppingCart = shoppingCart.filter(x => x[1] != null);
 					shoppingCart = shoppingCart.sort((a, b) => { return a[0] - b[0]; });
