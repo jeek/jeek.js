@@ -73,17 +73,17 @@ export class Hacknet {
 				}
 			}
     		// Pay for yourself, Hacknet
-//    		if (!this.Game.Sleeves.startingAGang) {
-//	    		if ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses < -1e9) {
-//		    		if (0 > ((await Do(this.ns, "ns.getMoneySources")).sinceInstall['hacknet']) + ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses)) {
-//			    		if (4 <= (await Do(this.ns, "ns.hacknet.numHashes", ""))) {
-//				    		let poof = Math.floor((await Do(this.ns, "ns.hacknet.numHashes", "")) / 4);
-//					    	await Do(this.ns, "ns.hacknet.spendHashes", "Sell for Money", "", poof);
-//					    }
-//					}
-//				}
-//			}
-			if (((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses >= -1e9) || (0 <= ((await Do(this.ns, "ns.getMoneySources")).sinceInstall['hacknet']) + ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses))) {
+    		if (!this.Game.Sleeves.startingAGang) {
+	    		if ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses < -1e9) {
+		    		if (0 > ((await Do(this.ns, "ns.getMoneySources")).sinceInstall['hacknet']) + ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses)) {
+			    		if (4 <= (await Do(this.ns, "ns.hacknet.numHashes", ""))) {
+				    		let poof = Math.floor((await Do(this.ns, "ns.hacknet.numHashes", "")) / 4);
+					    	await Do(this.ns, "ns.hacknet.spendHashes", "Sell for Money", "", poof);
+					    }
+					}
+				}
+			}
+			//if (((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses >= -1e9) || (0 <= ((await Do(this.ns, "ns.getMoneySources")).sinceInstall['hacknet']) + ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses))) {
 				let didSomething = true;
 				let mults = (await Do(this.ns, "ns.getPlayer", "")).mults.hacknet_node_money;
 				while (didSomething) {
@@ -95,7 +95,7 @@ export class Hacknet {
 						shoppingCart.push([this.ns.formulas.hacknetServers.coreUpgradeCost(current.cores, 1, mults.hacknet_node_core_cost) / ((this.ns.formulas.hacknetServers.hashGainRate(current.level, 0, current.ram, current.cores + 1, mults) - (this.ns.formulas.hacknetServers.hashGainRate(current.level, 0, current.ram, current.cores, mults)))), this.ns.formulas.hacknetServers.coreUpgradeCost(current.cores, 1, mults.hacknet_node_core_cost), "ns.hacknet.upgradeCore", i]);
 						shoppingCart.push([this.ns.formulas.hacknetServers.levelUpgradeCost(current.level, 1, mults.hacknet_node_core_cost) / ((this.ns.formulas.hacknetServers.hashGainRate(current.level + 1, 0, current.ram, current.cores, mults) - (this.ns.formulas.hacknetServers.hashGainRate(current.level, 0, current.ram, current.cores, mults)))), this.ns.formulas.hacknetServers.levelUpgradeCost(current.level, 1, mults.hacknet_node_core_cost), "ns.hacknet.upgradeLevel", i]);
 					}
-					let currentMoney = await Do(this.ns, "ns.getServerMoneyAvailable", "home");
+					let currentMoney = await Do(this.ns, "ns.getServerMoneyAvailable", "home") / (1 + (await Do(this.ns, "ns.hacknet.numNodes"))) ** 2;
 					shoppingCart = shoppingCart.filter(x => x[1] <= currentMoney);
 					shoppingCart = shoppingCart.filter(x => x[1] != null);
 					shoppingCart = shoppingCart.sort((a, b) => { return a[0] - b[0]; });
@@ -120,7 +120,7 @@ export class Hacknet {
 						done = false;
 					}
 				}
-				if ((await Do(this.ns, "ns.hacknet.numHashes")) * 2 > (await Do(this.ns, "ns.hacknet.hashCapacity")) && !done) {
+				if ((await Do(this.ns, "ns.hacknet.numHashes")) * 2 > (await Do(this.ns, "ns.hacknet.hashCapacity"))) {
 					if (await Do(this.ns, "ns.hacknet.spendHashes", "Sell for Money"))
 						this.log("Sold four hashes for cash.");
 				}
@@ -131,7 +131,7 @@ export class Hacknet {
 					while (await Do(this.ns, "ns.hacknet.spendHashes", this.goal))
 						this.log("Spent hashes on " + this.goal);
 				}
-			}
+		//	}
 		}
 	}
 }
