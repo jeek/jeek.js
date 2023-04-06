@@ -3334,20 +3334,30 @@ export class Factions {
 		this.Game = Game ? Game : new WholeGame(ns);
 		this.log = ns.tprint.bind(ns);
         if (this.ns.flags(cmdlineflags)['logbox']) {
-            this.log = this.Game.sidebar.querySelector(".factionbox") || this.Game.createSidebarItem("Factions", "", "F", "factionbox");
-			this.display = this.Game.sidebar.querySelector(".factionbox").querySelector(".display");
-			this.log = this.log.log;
+            this.log = {
+                "city": this.Game.sidebar.querySelector(".factioncitybox") || this.Game.createSidebarItem("Factions - City", "", "F", "factioncitybox"),
+                "gang": this.Game.sidebar.querySelector(".factiongangbox") || this.Game.createSidebarItem("Factions - Gang", "", "F", "factiongangbox"),
+                "corp": this.Game.sidebar.querySelector(".factioncorpbox") || this.Game.createSidebarItem("Factions - Corp", "", "F", "factioncorpbox"),
+                "hack": this.Game.sidebar.querySelector(".factionhackbox") || this.Game.createSidebarItem("Factions - Hack", "", "F", "factionhackbox"),
+                "end": this.Game.sidebar.querySelector(".factionendbox") || this.Game.createSidebarItem("Factions - Endgame", "", "F", "factionendbox"),
+                "other": this.Game.sidebar.querySelector(".factionotherbox") || this.Game.createSidebarItem("Factions - Other", "", "F", "factionotherbox")
+            };
+			this.display = {
+                "city": this.Game.sidebar.querySelector(".factioncitybox").querySelector(".display"),
+                "gang": this.Game.sidebar.querySelector(".factiongangbox").querySelector(".display"),
+                "corp": this.Game.sidebar.querySelector(".factioncorpbox").querySelector(".display"),
+                "hack": this.Game.sidebar.querySelector(".factionhackbox").querySelector(".display"),
+                "end": this.Game.sidebar.querySelector(".factionendbox").querySelector(".display"),
+                "other": this.Game.sidebar.querySelector(".factionotherbox").querySelector(".display")
+            }
+            for (let logname of Object.keys(this.log)) {
+                this.log[logname] = this.log[logname].log;
+            }
 			this.displayBoxUpdate();
         }
 	}
     async displayBoxUpdate() {
-        if (this.ns.flags(cmdlineflags)['logbox']) {
-            while (!await Do(this.ns, "ns.gang.inGang")) {
-                await this.ns.asleep(1000);
-            }
-        }
         while (this.ns.flags(cmdlineflags)['logbox']) {
-            let result = "";
             let facaugs = {};
             let augs = {};
             let rep = {};
@@ -3357,7 +3367,22 @@ export class Factions {
             let hacking = {};
             let combat = {};
             let social = {};
-            let rows = [];
+            let rows = {
+                "corp": [],
+                "hack": [],
+                "city": [],
+                "gang": [],
+                "other": [],
+                "end": []
+            };
+            let result = {
+                "corp": "<TABLE BORDER=1 CELLSPACING=0 CELLPADDING=0 WIDTH=100%>",
+                "hack": "<TABLE BORDER=1 CELLSPACING=0 CELLPADDING=0 WIDTH=100%>",
+                "end": "<TABLE BORDER=1 CELLSPACING=0 CELLPADDING=0 WIDTH=100%>",
+                "gang": "<TABLE BORDER=1 CELLSPACING=0 CELLPADDING=0 WIDTH=100%>",
+                "city": "<TABLE BORDER=1 CELLSPACING=0 CELLPADDING=0 WIDTH=100%>",
+                "other": "<TABLE BORDER=1 CELLSPACING=0 CELLPADDING=0 WIDTH=100%>"
+            }
             for (let faction of Object.keys(FACTIONS)) {
                 rep[faction] = Math.floor(await Do(this.ns, "ns.singularity.getFactionRep", faction));
                 favor[faction] = Math.floor(await Do(this.ns, "ns.singularity.getFactionFavor", faction));
@@ -3386,17 +3411,35 @@ export class Factions {
                 combat[faction] = jFormat(combat[faction]);
                 social[faction] = jFormat(social[faction]);
                 rep[faction] = jFormat(rep[faction]);
-                rows.push([score, "<TR><TD>" + faction + "</TD><TD>" + rep[faction].toString() + "<BR>" + favor[faction].toString() + " (" + favorgain[faction].toString() + ")</TD><TD>" + hacking[faction].toString() + "</TD><TD>" + combat[faction].toString() + "</TD><TD>" + social[faction].toString() + "</TD></TR>"]);
+                if (["CyberSec", "NiteSec", "The Black Hand", "BitRunners"].includes(faction)) {
+                    rows["hack"].push([score, "<TR><TD>" + faction + "</TD><TD>" + rep[faction].toString() + "<BR>" + favor[faction].toString() + " (" + favorgain[faction].toString() + ")</TD><TD>" + hacking[faction].toString() + "</TD><TD>" + combat[faction].toString() + "</TD><TD>" + social[faction].toString() + "</TD></TR>"]);
+                }
+                if (["Slum Snakes", "Speakers for the Dead", "The Black Hand", "NiteSec", "Tetrads", "The Syndicate", "The Dark Army"].includes(faction)) {
+                    rows["gang"].push([score, "<TR><TD>" + faction + "</TD><TD>" + rep[faction].toString() + "<BR>" + favor[faction].toString() + " (" + favorgain[faction].toString() + ")</TD><TD>" + hacking[faction].toString() + "</TD><TD>" + combat[faction].toString() + "</TD><TD>" + social[faction].toString() + "</TD></TR>"]);
+                }
+                if (["Sector-12", "Aevum", "Volhaven", "Chongqing", "Ishima", "New Tokyo"].includes(faction)) {
+                    rows["city"].push([score, "<TR><TD>" + faction + "</TD><TD>" + rep[faction].toString() + "<BR>" + favor[faction].toString() + " (" + favorgain[faction].toString() + ")</TD><TD>" + hacking[faction].toString() + "</TD><TD>" + combat[faction].toString() + "</TD><TD>" + social[faction].toString() + "</TD></TR>"]);
+                }
+                if (["ECorp", "MegaCorp", "KuaiGong International", "Four Sigma", "NWO", "Blade Industries", "OmniTek Incorporated", "Bachman & Associates", "Clarke Incorporated", "Fulcrum Secret Technologies"].includes(faction)) {
+                    rows["corp"].push([score, "<TR><TD>" + faction + "</TD><TD>" + rep[faction].toString() + "<BR>" + favor[faction].toString() + " (" + favorgain[faction].toString() + ")</TD><TD>" + hacking[faction].toString() + "</TD><TD>" + combat[faction].toString() + "</TD><TD>" + social[faction].toString() + "</TD></TR>"]);
+                }
+                if (["Daedalus", "Illuminati", "The Covenant"].includes(faction)) {
+                    rows["end"].push([score, "<TR><TD>" + faction + "</TD><TD>" + rep[faction].toString() + "<BR>" + favor[faction].toString() + " (" + favorgain[faction].toString() + ")</TD><TD>" + hacking[faction].toString() + "</TD><TD>" + combat[faction].toString() + "</TD><TD>" + social[faction].toString() + "</TD></TR>"]);
+                }
+                if (["Silhouette", "Church of the Machine God", "Bladeburners", "Tian Di Hui", "Shadows of Anarchy", "Netburners"].includes(faction)) {
+                    rows["other"].push([score, "<TR><TD>" + faction + "</TD><TD>" + rep[faction].toString() + "<BR>" + favor[faction].toString() + " (" + favorgain[faction].toString() + ")</TD><TD>" + hacking[faction].toString() + "</TD><TD>" + combat[faction].toString() + "</TD><TD>" + social[faction].toString() + "</TD></TR>"]);
+                }
             }
-            rows = rows.sort((a, b) => b[0] - a[0]);
-            result = "<TABLE BORDER=1 CELLSPACING=0 CELLPADDING=0 WIDTH=100%>";
-            for (let row of rows) {
-                result += row[1];
+            for (let box of ["hack", "gang", "city", "corp", "end", "other"]) {
+                rows[box] = rows[box].sort((a, b) => b[0] - a[0]);
+                for (let row of rows[box]) {
+                    result[box] += row[1];
+                }
+                result[box] += "</TABLE>";
+			    this.display[box].removeAttribute("hidden");
+			    this.display[box].innerHTML = result[box];
+			    this.Game.sidebar.querySelector(".faction" + box + "box").recalcHeight();
             }
-            result += "</TABLE>";
-			this.display.removeAttribute("hidden");
-			this.display.innerHTML = result;
-			this.Game.sidebar.querySelector(".factionbox").recalcHeight(); 
             await this.ns.asleep(10000);
        }
     }
@@ -4449,7 +4492,50 @@ class JeekProduct extends ProductIndustry {
             await this.ns.asleep(0);
         }
     }
-}/* Find the jobs array
+}/** @param {NS} ns **/
+
+export class Jobs {
+    constructor(ns, Game, settings = {}) {
+        this.ns = ns;
+        this.Game = Game ? Game : new WholeGame(ns);
+        this.log = ns.tprint.bind(ns);
+        this.settings = settings;
+        if (this.ns.flags(cmdlineflags)['logbox']) {
+            this.log = this.Game.sidebar.querySelector(".jobsbox") || this.Game.createSidebarItem("Jobs", "", "J", "jobsbox");
+			this.display = this.Game.sidebar.querySelector(".jobsbox").querySelector(".display");
+			this.log = this.log.log;
+			this.displayBoxUpdate();
+        }
+    }
+	async displayBoxUpdate() {
+		let locations = this.ns.enum.locations;
+		let positions = {};
+		for (let i = 0 ; i < locations.length ; i++) {
+			try {
+				positions[locations[i]] = await Do(this.ns, "ns.singularity.getPositions", locations[i]);
+			} catch {
+				locations.splice(i, 1);
+				i -= 1;
+			}
+		}
+		if (locations.length == 0) { // New jobs functions not in yet
+			this.log("No Jobs API. Update your game.");
+		    return;
+	    }
+		while (true) {
+			let result = "<DIV style='overflow-y:scroll'><TABLE BORDER=1 CELLPADDING=0 CELLSPACING=0>";
+			for (let location of locations) {
+                for (let position of positions[location]) {
+					result += "<TR><TD>" + position + "</TD><TD>" + JSON.stringify(await Do(this.ns, "ns.singularity.getCompanyPositionInfo", location, position)) + "</TD></TR>";
+				}
+			}
+			result += "</TABLE></DIV>";
+			this.display.innerHTML = result;
+			await this.ns.sleep(10000);
+		}
+	}
+}
+/* Find the jobs array
 export async function main(ns) {
 	const objects = [];
 	const payload_id = "payload" + String(Math.trunc(performance.now()));
