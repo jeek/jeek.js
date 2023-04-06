@@ -6,6 +6,7 @@ import { Casino, roulettestart } from "Casino.js";
 import { Contracts } from "Contracts.js";
 // import { Corporation } from "Corporation.js";
 import { DebugStuff } from "DebugStuff.js";
+import { Factions } from "Factions.js";
 import { Gang } from "Gang.js";
 import { Grafting } from "Grafting.js";
 import { Hacknet } from "Hacknet.js";
@@ -52,6 +53,7 @@ export class WholeGame {
 		this.ProcessList = new ProcessList(ns, this);
 		this.Augmentations = new Augmentations(ns, this);
 		this.Player = new Player(ns, this);
+		this.Factions = new Factions(ns, this);
 		this.Grafting = new Grafting(ns, this);
 		this.Infiltrations = new Infiltrations(ns, this);
 		this.Jeekipedia = new Jeekipedia(ns, this);
