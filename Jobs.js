@@ -17,30 +17,34 @@ export class Jobs {
         }
     }
 	async displayBoxUpdate() {
-		let locations = this.ns.enum.locations;
+		let locations = ["AeroCorp","Bachman & Associates","Clarke Incorporated","ECorp","Fulcrum Technologies","Galactic Cybersystems","NetLink Technologies","Aevum Police Headquarters","Rho Construction","Watchdog Security","KuaiGong International","Solaris Space Systems","Alpha Enterprises","Blade Industries","Central Intelligence Agency","Carmichael Security","DeltaOne","FoodNStuff","Four Sigma","Icarus Microsystems","Joe's Guns","MegaCorp","National Security Agency","Universal Energy","DefComm","Global Pharmaceuticals","Noodle Bar","VitaLife","Nova Medical","Omega Software","Storm Technologies","CompuTek","Helios Labs","LexoCorp","NWO","OmniTek Incorporated","Omnia Cybersystems","SysCore Securities"];
 		let positions = {};
 		for (let i = 0 ; i < locations.length ; i++) {
-			try {
-				positions[locations[i]] = await Do(this.ns, "ns.singularity.getPositions", locations[i]);
-			} catch {
-				locations.splice(i, 1);
-				i -= 1;
-			}
+			positions[locations[i]] = await Do(this.ns, "ns.singularity.getCompanyPositions", locations[i]);
 		}
 		if (locations.length == 0) { // New jobs functions not in yet
-			this.log("No Jobs API. Update your game.");
-		    return;
-	    }
+ 			this.log("No Jobs API. Update your game.");
+	    return;
+    }
+    this.display.style['overflow-y'] = 'auto';
+    let oldresult = "";
 		while (true) {
-			let result = "<DIV style='overflow-y:scroll'><TABLE BORDER=1 CELLPADDING=0 CELLSPACING=0>";
+      let rows = [];
+			let result = "<TABLE BORDER=1 CELLPADDING=0 CELLSPACING=0>";
 			for (let location of locations) {
-                for (let position of positions[location]) {
-					result += "<TR><TD>" + position + "</TD><TD>" + JSON.stringify(await Do(this.ns, "ns.singularity.getCompanyPositionInfo", location, position)) + "</TD></TR>";
+        for (let position of positions[location]) {
+				    rows.push([(await Do(this.ns, "ns.singularity.getCompanyPositionInfo", location, position)).salary, "<TR><TD>" + location + "</TD><TD>" + position + "</TD><TD>" + JSON.stringify(await Do(this.ns, "ns.singularity.getCompanyPositionInfo", location, position)) + "</TD></TR>"]);
 				}
 			}
-			result += "</TABLE></DIV>";
-			this.display.innerHTML = result;
-			await this.ns.sleep(10000);
+      rows = rows.sort((a, b) => b[0]-a[0]);
+			result += rows.map(x => x[1]).join("");
+      result += "</TABLE>";
+      this.display.removeAttribute("hidden");
+			if (result != oldresult) {
+        this.display.innerHTML = result;
+        this.Game.sidebar.querySelector(".jobsbox").recalcHeight();
+      }
+      await this.ns.asleep(10000);
 		}
 	}
 }
