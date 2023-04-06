@@ -1,3 +1,49 @@
+/** @param {NS} ns **/
+import { Do } from "Do.js";
+import { WholeGame } from "WholeGame.js";
+import { jFormat } from "helpers.js";
+
+export class Jobs {
+    constructor(ns, Game, settings = {}) {
+        this.ns = ns;
+        this.Game = Game ? Game : new WholeGame(ns);
+        this.log = ns.tprint.bind(ns);
+        this.settings = settings;
+        if (this.ns.flags(cmdlineflags)['logbox']) {
+            this.log = this.Game.sidebar.querySelector(".jobsbox") || this.Game.createSidebarItem("Jobs", "", "J", "jobsbox");
+			this.display = this.Game.sidebar.querySelector(".jobsbox").querySelector(".display");
+			this.log = this.log.log;
+			this.displayBoxUpdate();
+        }
+    }
+	async displayBoxUpdate() {
+		let locations = this.ns.enum.locations;
+		let positions = {};
+		for (let i = 0 ; i < locations.length ; i++) {
+			try {
+				positions[locations[i]] = await Do(this.ns, "ns.singularity.getPositions", locations[i]);
+			} catch {
+				locations.splice(i, 1);
+				i -= 1;
+			}
+		}
+		if (locations.length == 0) { // New jobs functions not in yet
+			this.log("No Jobs API. Update your game.");
+		    return;
+	    }
+		while (true) {
+			let result = "<DIV style='overflow-y:scroll'><TABLE BORDER=1 CELLPADDING=0 CELLSPACING=0>";
+			for (let location of locations) {
+                for (let position of positions[location]) {
+					result += "<TR><TD>" + position + "</TD><TD>" + JSON.stringify(await Do(this.ns, "ns.singularity.getCompanyPositionInfo", location, position)) + "</TD></TR>";
+				}
+			}
+			result += "</TABLE></DIV>";
+			this.display.innerHTML = result;
+			await this.ns.sleep(10000);
+		}
+	}
+}
 /* Find the jobs array
 export async function main(ns) {
 	const objects = [];
