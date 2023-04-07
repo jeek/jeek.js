@@ -157,7 +157,7 @@ async function bn2getGear(Game, memberData, settings) {
     let members = Object.keys(memberData);
     // Buy equipment, but only if SQLInject.exe exists or the gang has under 12 people
     members.sort((a, b) => { return memberData[a].str_mult - memberData[b].str_mult; });
-    let funds = (await (Game['Player']['money'])) / (members.length < 12 ? 1 : 1) / Math.max(1, Math.min(12, ((await Do(Game.ns, "ns.getTimeSinceLastAug")) / 3600000)) ** 2);
+    let funds = (await (Game['Player']['money'])) / members.length / Math.max(1, Math.min(12, ((await Do(Game.ns, "ns.getTimeSinceLastAug")) / 3600000)) ** 2);
     //Game.ns.toast(funds);
     if ((await Do(Game.ns, "ns.fileExists", "SQLInject.exe")) || members.length < 12) {
         let equip = await (Game['Gang']['getEquipmentNames']())
@@ -169,9 +169,9 @@ async function bn2getGear(Game, memberData, settings) {
         equip.sort((a, b) => equipCost[b] - equipCost[a]);
         for (let j = 0; j < equip.length; j++) {
             for (let i of members) {
-                let total = memberData[i].str + memberData[i].dex + memberData[i].def + memberData[i].cha + memberData[i]['hack'];
+                let total = Math.min(memberData[i].str, memberData[i].dex, memberData[i].def, memberData[i].cha, memberData[i]['hack']);
                 // Buy the good stuff only once the terrorism stats are over 700.
-                if (total >= 700) {
+                if (total >= 140) {
                     if ((await (equipCost[equip[j]])) < funds) {
                         if (await (Game['Gang']['purchaseEquipment'](i, equip[j]))) {
                             Game['Gang'].log(i + " now owns " + equip[j]);
