@@ -29,21 +29,39 @@ export class Jobs {
     this.display.style['overflow-y'] = 'auto';
     let oldresult = "";
 		while (true) {
-      let rows = [];
+			let rep = {};
+			let favor = {};
+        let rows = [];
 			let result = "<TABLE BORDER=1 CELLPADDING=0 CELLSPACING=0>";
 			for (let location of locations) {
-        for (let position of positions[location]) {
-				    rows.push([(await Do(this.ns, "ns.singularity.getCompanyPositionInfo", location, position)).salary, "<TR><TD>" + location + "</TD><TD>" + position + "</TD><TD>" + JSON.stringify(await Do(this.ns, "ns.singularity.getCompanyPositionInfo", location, position)) + "</TD></TR>"]);
+				rep[location] = await Do(this.ns, "ns.singularity.getCompanyRep", location);
+                favor[location] = await Do(this.ns, "ns.singularity.getCompanyFavor", location);
+                for (let position of positions[location]) {
+					let posdata = (await Do(this.ns, "ns.singularity.getCompanyPositionInfo", location, position));
+					let skills = [posdata.requiredSkills.hacking, posdata.requiredSkills.strength, posdata.requiredSkills.charisma];
+				    posdata.salary *= (1 + favor[location]) * (await Do(this.ns, "ns.getBitNodeMultipliers")).CompanyWorkMoney;
+					rows.push([posdata.salary, location, posdata.requiredReputation, posdata.requiredSkills, "<TR><TD>" + position + "</TD><TD align=right>" + jFormat(Math.ceil(posdata.salary), "$") + "</TD><TD align=right>" + jFormat(posdata.requiredReputation) + "</TD><TD>" + skills.map(x => x.toString()).join("</TD><TD>") + "</TD></TR>"]);
 				}
 			}
-      rows = rows.sort((a, b) => b[0]-a[0]);
-			result += rows.map(x => x[1]).join("");
+            rows = rows.filter(x => rep[x[1]] >= x[2]);
+			let player = await Do(this.ns, "ns.getPlayer");
+			for (let stat of ["hacking", "strength", "dexterity", "defense", "agility", "charisma"]) {
+			    rows = rows.filter(x => player.skills[stat] >= x[3][stat]);	
+			}
+            rows = rows.sort((a, b) => b[0]-a[0]);
+			while (rows.length > 0) {
+				let current = rows[0];
+				result += "<TR><TD COLSPAN=6 ALIGN=CENTER>" + current[1] + " " + jFormat(rep[current[1]]) + "</TD></TR>";
+				result += rows.filter(x => x[1] == current[1]).map(x => x[4]).join("");
+				rows = rows.filter(x => x[1] != current[1]);
+			}
       result += "</TABLE>";
       this.display.removeAttribute("hidden");
 			if (result != oldresult) {
         this.display.innerHTML = result;
         this.Game.sidebar.querySelector(".jobsbox").recalcHeight();
       }
+	  oldresult = result;
       await this.ns.asleep(10000);
 		}
 	}
