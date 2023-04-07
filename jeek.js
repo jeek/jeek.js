@@ -1124,7 +1124,7 @@ async function bn2getGear(Game, memberData, settings) {
     let members = Object.keys(memberData);
     // Buy equipment, but only if SQLInject.exe exists or the gang has under 12 people
     members.sort((a, b) => { return memberData[a].str_mult - memberData[b].str_mult; });
-    let funds = (await (Game['Player']['money'])) / (members.length < 12 ? 1 : 1) / Math.max(1, Math.min(12, ((await Do(Game.ns, "ns.getTimeSinceLastAug")) / 3600000)) ** 2);
+    let funds = (await (Game['Player']['money'])) / members.length / Math.max(1, Math.min(12, ((await Do(Game.ns, "ns.getTimeSinceLastAug")) / 3600000)) ** 2);
     //Game.ns.toast(funds);
     if ((await Do(Game.ns, "ns.fileExists", "SQLInject.exe")) || members.length < 12) {
         let equip = await (Game['Gang']['getEquipmentNames']())
@@ -1136,9 +1136,9 @@ async function bn2getGear(Game, memberData, settings) {
         equip.sort((a, b) => equipCost[b] - equipCost[a]);
         for (let j = 0; j < equip.length; j++) {
             for (let i of members) {
-                let total = memberData[i].str + memberData[i].dex + memberData[i].def + memberData[i].cha + memberData[i]['hack'];
+                let total = Math.min(memberData[i].str, memberData[i].dex, memberData[i].def, memberData[i].cha, memberData[i]['hack']);
                 // Buy the good stuff only once the terrorism stats are over 700.
-                if (total >= 700) {
+                if (total >= 140) {
                     if ((await (equipCost[equip[j]])) < funds) {
                         if (await (Game['Gang']['purchaseEquipment'](i, equip[j]))) {
                             Game['Gang'].log(i + " now owns " + equip[j]);
@@ -1482,7 +1482,7 @@ export async function bn8(Game) {
                         shares = Math.floor(shares * .99);
                     }
                     if (shares * (await Do(Game.ns, "ns.stock.getBidPrice", stock)) > 200000) {
-                        if (shares > 0 && ((await (Game.StockMarket.portfolioValue)) * 9 < (await (Game.money)))) Game.StockMarket.log("Bought " + shares.toString() + " of " + stock);
+                        if (shares > 0 && ((await (Game.StockMarket.portfolioValue)) / 9 < (await (Game.money)))) Game.StockMarket.log("Bought " + shares.toString() + " of " + stock);
                     }
                 } else {
                     if (data[0] > 0) {
@@ -1505,7 +1505,7 @@ export async function bn8(Game) {
                         shares *= .99;
                     }
                     if (shares * (await Do(Game.ns, "ns.stock.getBidPrice", stock)) > 200000) {
-                        if (shares > 0 && ((await (Game.StockMarket.portfolioValue)) * 9 < (await (Game.money)))) Game.StockMarket.log("Shorted " + shares.toString() + " of " + stock);
+                        if (shares > 0 && ((await (Game.StockMarket.portfolioValue)) / 9 < (await (Game.money)))) Game.StockMarket.log("Shorted " + shares.toString() + " of " + stock);
                     }
                 } else {
                     if (data[2] > 0) {
@@ -4520,21 +4520,39 @@ export class Jobs {
     this.display.style['overflow-y'] = 'auto';
     let oldresult = "";
 		while (true) {
-      let rows = [];
+			let rep = {};
+			let favor = {};
+        let rows = [];
 			let result = "<TABLE BORDER=1 CELLPADDING=0 CELLSPACING=0>";
 			for (let location of locations) {
-        for (let position of positions[location]) {
-				    rows.push([(await Do(this.ns, "ns.singularity.getCompanyPositionInfo", location, position)).salary, "<TR><TD>" + location + "</TD><TD>" + position + "</TD><TD>" + JSON.stringify(await Do(this.ns, "ns.singularity.getCompanyPositionInfo", location, position)) + "</TD></TR>"]);
+				rep[location] = await Do(this.ns, "ns.singularity.getCompanyRep", location);
+                favor[location] = await Do(this.ns, "ns.singularity.getCompanyFavor", location);
+                for (let position of positions[location]) {
+					let posdata = (await Do(this.ns, "ns.singularity.getCompanyPositionInfo", location, position));
+					let skills = [posdata.requiredSkills.hacking, posdata.requiredSkills.strength, posdata.requiredSkills.charisma];
+				    posdata.salary *= (1 + favor[location]) * (await Do(this.ns, "ns.getBitNodeMultipliers")).CompanyWorkMoney;
+					rows.push([posdata.salary, location, posdata.requiredReputation, posdata.requiredSkills, "<TR><TD>" + position + "</TD><TD align=right>" + jFormat(Math.ceil(posdata.salary), "$") + "</TD><TD align=right>" + jFormat(posdata.requiredReputation) + "</TD><TD>" + skills.map(x => x.toString()).join("</TD><TD>") + "</TD></TR>"]);
 				}
 			}
-      rows = rows.sort((a, b) => b[0]-a[0]);
-			result += rows.map(x => x[1]).join("");
+            rows = rows.filter(x => rep[x[1]] >= x[2]);
+			let player = await Do(this.ns, "ns.getPlayer");
+			for (let stat of ["hacking", "strength", "dexterity", "defense", "agility", "charisma"]) {
+			    rows = rows.filter(x => player.skills[stat] >= x[3][stat]);	
+			}
+            rows = rows.sort((a, b) => b[0]-a[0]);
+			while (rows.length > 0) {
+				let current = rows[0];
+				result += "<TR><TD COLSPAN=6 ALIGN=CENTER>" + current[1] + " " + jFormat(rep[current[1]]) + "</TD></TR>";
+				result += rows.filter(x => x[1] == current[1]).map(x => x[4]).join("");
+				rows = rows.filter(x => x[1] != current[1]);
+			}
       result += "</TABLE>";
       this.display.removeAttribute("hidden");
 			if (result != oldresult) {
         this.display.innerHTML = result;
         this.Game.sidebar.querySelector(".jobsbox").recalcHeight();
       }
+	  oldresult = result;
       await this.ns.asleep(10000);
 		}
 	}
