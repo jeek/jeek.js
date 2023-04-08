@@ -1124,7 +1124,7 @@ async function bn2getGear(Game, memberData, settings) {
     let members = Object.keys(memberData);
     // Buy equipment, but only if SQLInject.exe exists or the gang has under 12 people
     members.sort((a, b) => { return memberData[a].str_mult - memberData[b].str_mult; });
-    let funds = (await (Game['Player']['money'])) / members.length / Math.max(1, Math.min(12, ((await Do(Game.ns, "ns.getTimeSinceLastAug")) / 3600000)) ** 2);
+    let funds = (await (Game['Player']['money'])) / members.length ** 2;
     //Game.ns.toast(funds);
     if ((await Do(Game.ns, "ns.fileExists", "SQLInject.exe")) || members.length < 12) {
         let equip = await (Game['Gang']['getEquipmentNames']())
@@ -3977,6 +3977,9 @@ export class Hacknet {
 				while (didSomething) {
 					didSomething = false;
 					let shoppingCart = [[(await Do(this.ns, "ns.hacknet.getPurchaseNodeCost")) / (this.ns.formulas.hacknetServers.hashGainRate(1, 0, 1, 1, mults)), await Do(this.ns, "ns.hacknet.getPurchaseNodeCost"), "ns.hacknet.purchaseNode"]];
+					if ((await Do(this.ns, "ns.hacknet.getPurchaseNodeCost")) == null) {
+						shoppingCart.shift();
+					}
 					for (let i = 0; i < await Do(this.ns, "ns.hacknet.numNodes"); i++) {
 						let current = await Do(this.ns, "ns.hacknet.getNodeStats", i);
 						shoppingCart.push([this.ns.formulas.hacknetServers.ramUpgradeCost(current.ram, 1, mults.hacknet_node_ram_cost) / ((this.ns.formulas.hacknetServers.hashGainRate(current.level, 0, current.ram * 2, current.cores, mults) - (this.ns.formulas.hacknetServers.hashGainRate(current.level, 0, current.ram, current.cores, mults)))), this.ns.formulas.hacknetServers.ramUpgradeCost(current.ram, 1, mults.hacknet_node_ram_cost), "ns.hacknet.upgradeRam", i]);
@@ -4065,6 +4068,9 @@ export function killModal() {
 }
 
 export function jFormat(number, format = " ") {
+	if (number === null) {
+		return "null";
+	}
 	if (number === 0) {
 		return "0.000";
 	}
@@ -4079,6 +4085,12 @@ export function jFormat(number, format = " ") {
 	exp -= 3;
 	while (number >= 1000) {
 		number /= 1000;
+		if (number > 1e309 || number == Infinity) {
+			return "Inf";
+		}
+		if (number < -1e309 || number == -Infinity) {
+			return "-Inf";
+		}
 	}
 	exp = Math.max(exp, 0);
 	return (format.toString().includes("$") ? "$" : "") + sign + number.toFixed(3).toString() + (exp < 33 ? ['', 'k', 'm', 'b', 't', 'q', 'Q', 's', 'S', 'o', 'n'][Math.floor(exp / 3)] : "e" + exp.toString());
@@ -4524,7 +4536,7 @@ export class Jobs {
 			let rep = {};
 			let favor = {};
         let rows = [];
-			let result = "<TABLE BORDER=1 CELLPADDING=0 CELLSPACING=0>";
+			let result = "<TABLE WIDTH=100% BORDER=1 CELLPADDING=0 CELLSPACING=0>";
 			for (let location of locations) {
 				rep[location] = await Do(this.ns, "ns.singularity.getCompanyRep", location);
                 favor[location] = await Do(this.ns, "ns.singularity.getCompanyFavor", location);
