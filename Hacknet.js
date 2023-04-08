@@ -91,6 +91,9 @@ export class Hacknet {
 				while (didSomething) {
 					didSomething = false;
 					let shoppingCart = [[(await Do(this.ns, "ns.hacknet.getPurchaseNodeCost")) / (this.ns.formulas.hacknetServers.hashGainRate(1, 0, 1, 1, mults)), await Do(this.ns, "ns.hacknet.getPurchaseNodeCost"), "ns.hacknet.purchaseNode"]];
+					if ((await Do(this.ns, "ns.hacknet.getPurchaseNodeCost")) == null) {
+						shoppingCart.shift();
+					}
 					for (let i = 0; i < await Do(this.ns, "ns.hacknet.numNodes"); i++) {
 						let current = await Do(this.ns, "ns.hacknet.getNodeStats", i);
 						shoppingCart.push([this.ns.formulas.hacknetServers.ramUpgradeCost(current.ram, 1, mults.hacknet_node_ram_cost) / ((this.ns.formulas.hacknetServers.hashGainRate(current.level, 0, current.ram * 2, current.cores, mults) - (this.ns.formulas.hacknetServers.hashGainRate(current.level, 0, current.ram, current.cores, mults)))), this.ns.formulas.hacknetServers.ramUpgradeCost(current.ram, 1, mults.hacknet_node_ram_cost), "ns.hacknet.upgradeRam", i]);

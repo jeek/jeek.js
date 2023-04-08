@@ -157,7 +157,7 @@ async function bn2getGear(Game, memberData, settings) {
     let members = Object.keys(memberData);
     // Buy equipment, but only if SQLInject.exe exists or the gang has under 12 people
     members.sort((a, b) => { return memberData[a].str_mult - memberData[b].str_mult; });
-    let funds = (await (Game['Player']['money'])) / members.length / Math.max(1, Math.min(12, ((await Do(Game.ns, "ns.getTimeSinceLastAug")) / 3600000)) ** 2);
+    let funds = (await (Game['Player']['money'])) / members.length ** 2;
     //Game.ns.toast(funds);
     if ((await Do(Game.ns, "ns.fileExists", "SQLInject.exe")) || members.length < 12) {
         let equip = await (Game['Gang']['getEquipmentNames']())
