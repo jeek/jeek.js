@@ -37,8 +37,17 @@ export function killModal() {
 }
 
 export function jFormat(number, format = " ") {
+	if (number === null) {
+		return "null";
+	}
 	if (number === 0) {
 		return "0.000";
+	}
+	if (number > 1e309) {
+		return "Inf";
+	}
+	if (number < -1e309) {
+		return "Inf";
 	}
 	let sign = number < 0 ? "-" : "";
 	if (number < 0) {
