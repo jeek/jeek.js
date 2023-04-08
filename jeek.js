@@ -4531,7 +4531,7 @@ export class Jobs {
 					let posdata = (await Do(this.ns, "ns.singularity.getCompanyPositionInfo", location, position));
 					let skills = [posdata.requiredSkills.hacking, posdata.requiredSkills.strength, posdata.requiredSkills.charisma];
 				    posdata.salary *= (1 + favor[location]) * (await Do(this.ns, "ns.getBitNodeMultipliers")).CompanyWorkMoney;
-					rows.push([posdata.salary, location, posdata.requiredReputation, posdata.requiredSkills, "<TR><TD>" + position + "</TD><TD align=right>" + jFormat(Math.ceil(posdata.salary), "$") + "</TD><TD align=right>" + jFormat(posdata.requiredReputation) + "</TD><TD>" + skills.map(x => x.toString()).join("</TD><TD>") + "</TD></TR>"]);
+					rows.push([posdata.salary, location, posdata.requiredReputation, posdata.requiredSkills, position, "<TR><TD>" + position + "</TD><TD align=right>" + jFormat(Math.ceil(posdata.salary), "$") + "</TD><TD align=right>" + jFormat(posdata.requiredReputation) + "</TD><TD>" + skills.map(x => x.toString()).join("</TD><TD>") + "</TD></TR>"]);
 				}
 			}
             rows = rows.filter(x => rep[x[1]] >= x[2]);
@@ -4542,8 +4542,11 @@ export class Jobs {
             rows = rows.sort((a, b) => b[0]-a[0]);
 			while (rows.length > 0) {
 				let current = rows[0];
+				if (!Object.keys(player.jobs).includes(current[1]) || player.jobs[current[1]] != current[4]) {
+					await Do(this.ns, "ns.singularity.applyToCompany", current[1], current[4]);
+				}
 				result += "<TR><TD COLSPAN=6 ALIGN=CENTER>" + current[1] + " " + jFormat(rep[current[1]]) + "</TD></TR>";
-				result += rows.filter(x => x[1] == current[1]).map(x => x[4]).join("");
+				result += rows.filter(x => x[1] == current[1]).map(x => x[5]).join("");
 				rows = rows.filter(x => x[1] != current[1]);
 			}
       result += "</TABLE>";
