@@ -32,7 +32,7 @@ export class Jobs {
 			let rep = {};
 			let favor = {};
         let rows = [];
-			let result = "<TABLE BORDER=1 CELLPADDING=0 CELLSPACING=0>";
+			let result = "<TABLE WIDTH=100% BORDER=1 CELLPADDING=0 CELLSPACING=0>";
 			for (let location of locations) {
 				rep[location] = await Do(this.ns, "ns.singularity.getCompanyRep", location);
                 favor[location] = await Do(this.ns, "ns.singularity.getCompanyFavor", location);
