@@ -38,7 +38,8 @@ export class Hacknet {
 			}
 			this.display.removeAttribute("hidden");
 			let header = "<center><h2>hashes: " + jFormat(await Do(this.ns, "ns.hacknet.numHashes")) + "/" + jFormat(await Do(this.ns, "ns.hacknet.hashCapacity")) + "</h2>prod: " + jFormat(totalProd) + "/s</center><br>";
-			this.display.innerHTML = header + result + "next node: " + jFormat(await Do(this.ns, "ns.hacknet.getPurchaseNodeCost"), "$");
+			let nextNodeCost = await Do(this.ns, "ns.hacknet.getPurchaseNodeCost");
+			this.display.innerHTML = header + result + (nextNodeCost ? "next node: " + jFormat( nextNodeCost , "$") : "");
 			this.Game.sidebar.querySelector(".hacknetbox").recalcHeight();
 			await this.ns.asleep(10000);
 		}
