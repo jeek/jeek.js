@@ -43,12 +43,6 @@ export function jFormat(number, format = " ") {
 	if (number === 0) {
 		return "0.000";
 	}
-	if (number > 1e309) {
-		return "Inf";
-	}
-	if (number < -1e309) {
-		return "Inf";
-	}
 	let sign = number < 0 ? "-" : "";
 	if (number < 0) {
 		number = -number;
@@ -60,6 +54,12 @@ export function jFormat(number, format = " ") {
 	exp -= 3;
 	while (number >= 1000) {
 		number /= 1000;
+		if (number > 1e309 || number == Infinity) {
+			return "Inf";
+		}
+		if (number < -1e309 || number == -Infinity) {
+			return "-Inf";
+		}
 	}
 	exp = Math.max(exp, 0);
 	return (format.toString().includes("$") ? "$" : "") + sign + number.toFixed(3).toString() + (exp < 33 ? ['', 'k', 'm', 'b', 't', 'q', 'Q', 's', 'S', 'o', 'n'][Math.floor(exp / 3)] : "e" + exp.toString());
