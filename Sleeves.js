@@ -28,14 +28,14 @@ export class Sleeves {
   }
   async SleeveInfoLog() {
     while (true) {
-      let result = "<TABLE BORDER=1 CELLSPACING=0 WIDTH=100% CELLPADDING=0><TR><th>id</th><th>hack</th><th>str</th><th>def</th><th>dex</th><th>agi</th><th>int</th><th>shk</th></tr>";
+      let result = "<TABLE BORDER=1 CELLSPACING=0 WIDTH=100% CELLPADDING=0><TR><th>id</th><th>hack</th><th>str</th><th>def</th><th>dex</th><th>agi</th><th>cha</th><th>int</th><th>shk</th></tr>";
       if (this.ns.flags(cmdlineflags)['logbox']) {
         let rowData = {};
         for (let i = 0; i < await (this.numSleeves); i++) {
           let me = await Do(this.ns, "ns.sleeve.getSleeve", i);
           let task = "";
           try { task = Object.values(await Do(this.ns, "ns.sleeve.getTask", i)).join(" / ") } catch { };
-          let thisRow = "<TD ALIGN=CENTER>" + [me.skills.hacking.toString(), me.skills.strength.toString(), me.skills.defense.toString(), me.skills.dexterity.toString(), me.skills.agility.toString(), me.skills.intelligence.toString(), Math.ceil(me.shock).toString()].join("</TD><TD ALIGN=CENTER>") + "</TD></TR><TR><TD COLSPAN=7>" + task + "</TD></TR>";
+          let thisRow = "<TD ALIGN=CENTER>" + [me.skills.hacking.toString(), me.skills.strength.toString(), me.skills.defense.toString(), me.skills.dexterity.toString(), me.skills.agility.toString(), me.skills.charisma.toString(), me.skills.intelligence.toString(), Math.ceil(me.shock).toString()].join("</TD><TD ALIGN=CENTER>") + "</TD></TR><TR><TD COLSPAN=8>" + task + "</TD></TR>";
           rowData[thisRow] = (rowData[thisRow] ?? []).concat([i]);
         }
         let rowSort = Object.keys(rowData).sort((a, b) => rowData[a][0] - rowData[b][0]);
