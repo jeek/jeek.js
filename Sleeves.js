@@ -10,6 +10,7 @@ export class Sleeves {
       this.log = this.Game.sidebar.querySelector(".sleevelog") || this.Game.createSidebarItem("Sleeves", "", "S", "sleevelog");
       this.display = this.Game.sidebar.querySelector(".sleevelog").querySelector(".display");
       this.log = this.log.log;
+      this.SleeveInfoLog();
     }
   }
   get numSleeves() {

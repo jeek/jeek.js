@@ -155,7 +155,6 @@ export async function main(ns) {
 	}
 	if (cmdlineargs['bn7'] || cmdlineargs['bn8']) {
     	promises.push(Game.Contracts.loop());
-    	promises.push(Game.Sleeves.SleeveInfoLog());
     	promises.push(Game.Servers.serverbox());
 	}
 	let displays = [];
