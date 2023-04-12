@@ -4713,7 +4713,7 @@ export async function main(ns) {
         while (true) {
             await ns.asleep(10000);
         }
-    }
+    } */
     if (cmdlineargs['guide']) {
         settings.baseOffers = [210e9, 5e12, 800e12, 500e15];
         settings['Agriculture'] = {'name': 'Agriculture', 'plan': 'Guide'};
@@ -4734,7 +4734,7 @@ export async function main(ns) {
             await ns.asleep(10000);
         }
     }
-    if (cmdlineargs['jeek'] || (cmdlineargs['jeek'] + cmdlineargs['guide'] + cmdlineargs['scam'] == 0)) {
+/*    if (cmdlineargs['jeek'] || (cmdlineargs['jeek'] + cmdlineargs['guide'] + cmdlineargs['scam'] == 0)) {
         settings.baseOffers = [270e9, 900e9, 5e12, 1e15];
         settings['Agriculture'] = {'name': 'Agriculture', 'plan': 'Jeek'};
         settings['Food'] = {'name': 'Food', 'plan': 'Jeek'};
@@ -6949,7 +6949,7 @@ export class WholeGame {
 		this.Servers = new Servers(ns, this);
 		// this.BuildProcess = new BuildProcess(ns);
 		this.Debug = new DebugStuff(ns, this);
-		// this.Corporation = new Corporation(ns, this);
+		this.Corporation = new Corporation(ns, this);
 		this.Contracts = new Contracts(ns, this);
 		this.Hacknet = new Hacknet(ns, this);
 		this.StockMarket = new StockMarket(ns, this);
