@@ -2653,13 +2653,32 @@ class CorpBaseClass { // Functions shared between Corporation, Division, and Cit
         this.c = this.ns.corporation;
         this.settings = JSON.parse(JSON.stringify(settings));
     }
+    get c() {
+        return (async () => {
+            try {
+              return (await Do(this.ns, "ns.corporation.getCorporation"));
+            } catch (e) {
+              return 0;
+            }
+          })();
+    }
     get funds() {
-        return this.c.getCorporation().funds;
+        return (async () => {
+            try {
+              return (await (this.c)).funds;
+            } catch (e) {
+              return 0;
+            }
+          })();
     }
     get round() {
-        if (this.c.getCorporation().public)
-            return 5;
-        return this.c.getInvestmentOffer().round;
+        return (async () => {
+            try {
+              return (await (this.c)).public ? 5 : (await Do(this.ns, "ns.corporation.getInvestmentOffer")).round;
+            } catch (e) {
+              return 0;
+            }
+          })();
     }
     get Cities() {
         return Object.values(this.ns.enums.CityName);
@@ -2668,12 +2687,12 @@ class CorpBaseClass { // Functions shared between Corporation, Division, and Cit
         return this.settings["HQ"];
     }
     async WaitOneLoop() {
-        let state = this.c.getCorporation().state;
-        while (this.c.getCorporation().state == state) {
-            await this.ns.asleep(this.c.getBonusTime() > 0 ? 100 : 200);
+        let state = (await (this.c)).state;
+        while ((await (this.c)).state == state) {
+            await this.ns.asleep((await Do(this.ns, "ns.corporation.getBonusTime")) > 0 ? 100 : 200);
         }
-        while (this.c.getCorporation().state != state) {
-            await this.ns.asleep(this.c.getBonusTime() > 0 ? 200 : 2000);
+        while ((await (this.c)).state != state) {
+            await this.ns.asleep((await Do(this.ns, "ns.corporation.getBonusTime")) > 0 ? 200 : 2000);
         }
     }
 }import { CorpBaseClass } from "CorpBaseClass.js";
@@ -2686,15 +2705,16 @@ export class Corporation extends CorpBaseClass {
         }
         this.started = false;
         this.divisionsObj = {};
-        if (this.c.hasCorporation()) {
-            if (!Object.keys(settings).includes("name")) {
-                delete settings["name"];
-            }   
-        }
         this.pause = 0;
     }
     get name() {
-        return this.c.getCorporation().name;
+        return (async () => {
+            try {
+              return (await (this.c)).name;
+            } catch (e) {
+              return 0;
+            }
+          })();
     }
     get Agriculture() {
         return this.divisionsObj['Agriculture'];
@@ -2742,9 +2762,9 @@ export class Corporation extends CorpBaseClass {
         return this.divisionsObj.map(division => division.isHappy).reduce((a, b) => a && b);
     }
     async Start() {
-        while ([undefined, false].includes(this.c.hasCorporation())) {
+        while ([undefined, false].includes(await Do(this.ns, "ns.corporation.hasCorporation"))) {
             try {
-                this.c.createCorporation(this.settings.includes("name") ? this.settings.name : "Corporation", this.ns.getPlayer().bitNodeN == 3 ? false : true);
+                await Do(this.ns, "ns.corporation.createCorporation", this.settings.includes("name") ? this.settings.name : "Corporation", (await Do(this.ns, "ns.getPlayer")).bitNodeN == 3 ? false : true);
                 await this.ns.asleep(0);
             } catch {
                 await this.ns.asleep(60000);
@@ -2755,35 +2775,47 @@ export class Corporation extends CorpBaseClass {
             delete this.settings["name"];
         }
         this.divisionsObj = {};
-        for (let divname of this.c.getCorporation().divisions) {
-            let type = this.c.getDivision(divname).type;
-            this.StartDivision(type, this.settings);
+        for (let divname of await (this.divisions)) {
+            let type = (await Do(this.ns, "ns.corporation.getDivision", divname)).type;
+            if (!Object.keys(settings).includes(type)) {
+                settings[type] = {};
+            }
+            this.StartDivision(type, this.settings[type]);
         }
         this.started = true;
         this.ns.toast("Corporation started.");
         this.Continue();
     }
+    get divisions() {
+        return (async () => {
+            try {
+              return (await (this.c)).divisions;
+            } catch (e) {
+              return 0;
+            }
+          })();
+    }
     async Continue() {
         if (!Object.keys(this.settings).includes("scam") || this.settings.scam == false) {
             await this.WaitOneLoop();
             for (let i = 1; i <= 4; i++) {
-                while (this.round == i && this.c.getInvestmentOffer().funds + (this.funds > 0 ? this.funds : 0) < (Object.keys(this.settings).includes("baseOffers") ? this.settings['baseOffers'][i - 1] : [210e9, 5e12, 800e12, 500e15]) * this.ns.getBitNodeMultipliers().CorporationValuation) {
+                while (this.round == i && (await Do(this.ns, "ns.corporation.getInvestmentOffer")).funds + (await (this.funds) > 0 ? (await this.funds) : 0) < (Object.keys(this.settings).includes("baseOffers") ? this.settings['baseOffers'][i - 1] : [210e9, 5e12, 800e12, 500e15]) * (await Do(this.ns, "ns.getBitNodeMultipliers")).CorporationValuation) {
                     await this.WaitOneLoop();
                 }
                 if (this.round == i) {
-                    this.c.acceptInvestmentOffer();
+                    await Do(this.ns, "ns.corporation.acceptInvestmentOffer");
                     await this.WaitOneLoop();
                 }
             }
-            if (!this.c.getCorporation().public)
-                this.c.goPublic(0);
+            if (!(await (this.c)).public)
+                await Do(this.ns, "ns.corporation.goPublic", 0);
         }
         while (this.round < 5)
             await this.WaitOneLoop();
-        this.c.issueDividends(1);
+        await Do(this.ns, "ns.corporation.issueDividends", 1);
         while (this.funds < 1e21)
             await this.WaitOneLoop();
-        this.c.getConstants().unlockNames.map(unlock => this.c.hasUnlockUpgrade(unlock) ? true : this.c.unlockUpgrade(unlock));
+        (await Do(this.ns, "ns.corporation.getConstants")).unlockNames.map(unlock => Do(this.ns, "ns.corporation.unlockUpgrade", unlock));
     }
     async StartDivision(type, settings = {}) {
         if (Object.keys(this.divisionsObj).includes(type)) {
@@ -2793,45 +2825,46 @@ export class Corporation extends CorpBaseClass {
         if (Object.keys(this.settings).includes(type) && Object.keys(this.settings[type]).includes("plan")) {
             plan = this.settings[type].plan;
         }
-        let makesProducts = Object.keys(this.c.getIndustryData(type)).includes("product");
-        let makesMaterials = Object.keys(this.c.getIndustryData(type)).includes("producedMaterials");
+        let makesProducts = Object.keys((await Do(this.ns, "ns.corporation.getIndustryData", type))).includes("product");
+        let makesMaterials = Object.keys((await Do(this.ns, "ns.corporation.getIndustryData", type))).includes("producedMaterials");
         switch (plan) {
-            case "Scam":
-                this.divisionsObj[type]=new Scam(this.ns, this, type, this.settings);
-                break;
-            case "Shell":
-                this.divisionsObj[type]=new Shell(this.ns, this, type, this.settings);
-                break;
+//            case "Scam":
+//                this.divisionsObj[type]=new Scam(this.ns, this, type, this.settings);
+//                break;
+//            case "Shell":
+//                this.divisionsObj[type]=new Shell(this.ns, this, type, this.settings);
+//                break;
             case "Guide":
-                if (makesMaterials) {
+                default:
+                    if (makesMaterials) {
                     this.divisionsObj[type]=new GuideMaterial(this.ns, this, type, this.settings);
                 }
                 if (makesProducts) {
                     this.divisionsObj[type]=new GuideProduct(this.ns, this, type, this.settings);
                 }
                 break;
-            case "Jeek":
-            default:
-                if (makesMaterials) {
-                    this.divisionsObj[type]=new JeekMaterial(this.ns, this, type, this.settings);
-                }
-                if (makesProducts) {
-                    this.divisionsObj[type]=new JeekProduct(this.ns, this, type, this.settings);
-                }
+//            case "Jeek":
+//                if (makesMaterials) {
+//                    this.divisionsObj[type]=new JeekMaterial(this.ns, this, type, this.settings);
+//                }
+//                if (makesProducts) {
+//                    this.divisionsObj[type]=new JeekProduct(this.ns, this, type, this.settings);
+//                }
         }
         this.divisionsObj[type].Start();
     }
     async GetUpgrade(upgrade, level = 1) {
-        while (this.c.getUpgradeLevel(upgrade) < level) {
-            while (this.c.getUpgradeLevel(upgrade) < level && this.c.getUpgradeLevelCost(upgrade) <= this.funds) {
-                this.c.levelUpgrade(upgrade);
+        while ((await Do(this.ns, "ns.corporation.getUpgradeLevel", upgrade)) < level) {
+            while ((await Do(this.ns, "ns.corporation.getUpgradeLevel", upgrade)) < level && (await Do(this.ns, "ns.corporation.getUpgradeLevelCost", upgrade)) <= await (this.funds)) {
+                await Do(this.ns, "ns.corporation.levelUpgrade", upgrade);
             }
-            if (this.c.getUpgradeLevel(upgrade) < level) {
+            if ((await Do(this.ns, "ns.corporation.getUpgradeLevel", upgrade)) < level) {
                 await this.WaitOneLoop();
             }
         }
     }
-}export let CITIES = ["Sector-12", "Aevum", "Chongqing", "Ishima", "New Tokyo", "Volhaven"];
+}
+export let CITIES = ["Sector-12", "Aevum", "Chongqing", "Ishima", "New Tokyo", "Volhaven"];
 
 export let FACTIONS = {
 	"CyberSec": { "abbrev": "CS", "early": true, "backdoor": "CSEC" },
@@ -3161,22 +3194,29 @@ class Division extends CorpBaseClass {
                 this.settings[objKey] = this.settings[industry][objKey];
             }
         }
-        for (let industryIt of this.c.getConstants().industryNames) {
-            if (Object.keys(this.settings).includes(industryIt)) {
-                delete this.settings[industryIt];
-            }
-        }
         // Stored here so all six warehouses can share a cache
         this.Optimizer = new WarehouseOptimizer(...(["aiCoreFactor", "hardwareFactor", "realEstateFactor", "robotFactor"].map(factor => Object.keys(this.c.getIndustryData(this.industry)).includes(factor) ? this.c.getIndustryData(this.industry)[factor] : 0)), ns);
     }
     get name() {
-        return this.c.getCorporation().divisions.map(div => [div, this.c.getDivision(div).type]).filter(x => x[1] == this.industry)[0][0];
+        return (async () => {
+            try {
+                let names = {};
+                for (let div of (await (this.c)).divisions) {
+                    if ((await Do(this.ns, "ns.corporation.getDivision", div)).type == this.industry)
+                        return div;
+                }
+            } catch (e) {
+              return "ERROR";
+            }
+        })();
     }
     get cities() {
         return Object.values(this.citiesObj);
     }
     get industryData() {
-        return this.c.getIndustryData(this.industry);
+        return (async () => {
+            return await Do(this.ns, "ns.corporation.getIndustryData", this.industry);
+        })();
     }
     get Aevum() {
         return this.citiesObj['Aevum'];
@@ -3197,14 +3237,16 @@ class Division extends CorpBaseClass {
         return this.citiesObj['Volhaven'];
     }
     get getDivision() {
-        return this.c.getDivision(this.name);
+        return (async () => {
+            return await Do(this.ns, "ns.corporation.getDivision", await (this.name))
+        })();
     }
     async Advert(toLevel = 1) {
-        while (this.c.getHireAdVertCount(this.name) < toLevel) {
-            if (this.getDivision.awareness + this.getDivision.popularity > 1e300)
+        while ((await Do(this.ns, "ns.corporation.getHireAdVertCount", await (this.name))) < toLevel) {
+            if ((await (this.getDivision)).awareness + (await (this.getDivision)).popularity > 1e300)
                 return;
-            if (this.funds >= this.c.getHireAdVertCost(this.name)) {
-                this.c.hireAdVert(this.name);
+            if (await (this.funds) >= (await Do(this.ns, "this.corporation.getHireAdVertCost", await (this.name)))) {
+                await Do(this.ns, "ns.corporation.hireAdVert", (await (this.name)));
             } else {
                 await this.WaitOneLoop();
             }
@@ -3229,14 +3271,13 @@ class Division extends CorpBaseClass {
         await this.Corp.WaitOneLoop();
     }
     async Research(queue) {
-        while (queue.map(x => this.c.hasResearched(this.name, x)).reduce((a, b) => a && b) == false) {
-            let cost = queue.filter(x => !this.c.hasResearched(this.name, x)).map(x => this.c.getResearchCost(this.name, x)).reduce((a, b) => a + b, 0) * 2;
-            if (this.getDivision.research >= cost) {
-                for (let item of queue) {
-                    this.c.research(this.name, item);
+        for (let item of queue) {
+            if (!await Do(this.ns, "ns.corporation.hasResearched", await (this.name), x)) {
+                while ((await (this.getdivision)).research <= cost) {
+                    await this.WaitOneLoop();
                 }
+                await Do(this.ns, "ns.corporation.research", await (this.name), item); 
             }
-            await this.WaitOneLoop();
         }
     }
 
