@@ -1,9 +1,6 @@
 import { CorpBaseClass } from "CorpBaseClass.js";
 import { GuideMaterial } from "GuideMaterial.js";
 import { GuideProduct } from "GuideProduct.js";
-import { JeekMaterial } from "JeekMaterial.js";
-import { JeekProduct } from "JeekProduct.js";
-import { Scam } from "Scam.js";
 
 export class Corporation extends CorpBaseClass {
     constructor(ns, settings = {}) {
@@ -13,15 +10,16 @@ export class Corporation extends CorpBaseClass {
         }
         this.started = false;
         this.divisionsObj = {};
-        if (this.c.hasCorporation()) {
-            if (!Object.keys(settings).includes("name")) {
-                delete settings["name"];
-            }   
-        }
         this.pause = 0;
     }
     get name() {
-        return this.c.getCorporation().name;
+        return (async () => {
+            try {
+              return (await (this.c)).name;
+            } catch (e) {
+              return 0;
+            }
+          })();
     }
     get Agriculture() {
         return this.divisionsObj['Agriculture'];
@@ -69,9 +67,9 @@ export class Corporation extends CorpBaseClass {
         return this.divisionsObj.map(division => division.isHappy).reduce((a, b) => a && b);
     }
     async Start() {
-        while ([undefined, false].includes(this.c.hasCorporation())) {
+        while ([undefined, false].includes(await Do(this.ns, "ns.corporation.hasCorporation"))) {
             try {
-                this.c.createCorporation(this.settings.includes("name") ? this.settings.name : "Corporation", this.ns.getPlayer().bitNodeN == 3 ? false : true);
+                await Do(this.ns, "ns.corporation.createCorporation", this.settings.includes("name") ? this.settings.name : "Corporation", (await Do(this.ns, "ns.getPlayer")).bitNodeN == 3 ? false : true);
                 await this.ns.asleep(0);
             } catch {
                 await this.ns.asleep(60000);
@@ -82,35 +80,47 @@ export class Corporation extends CorpBaseClass {
             delete this.settings["name"];
         }
         this.divisionsObj = {};
-        for (let divname of this.c.getCorporation().divisions) {
-            let type = this.c.getDivision(divname).type;
-            this.StartDivision(type, this.settings);
+        for (let divname of await (this.divisions)) {
+            let type = (await Do(this.ns, "ns.corporation.getDivision", divname)).type;
+            if (!Object.keys(settings).includes(type)) {
+                settings[type] = {};
+            }
+            this.StartDivision(type, this.settings[type]);
         }
         this.started = true;
         this.ns.toast("Corporation started.");
         this.Continue();
     }
+    get divisions() {
+        return (async () => {
+            try {
+              return (await (this.c)).divisions;
+            } catch (e) {
+              return 0;
+            }
+          })();
+    }
     async Continue() {
         if (!Object.keys(this.settings).includes("scam") || this.settings.scam == false) {
             await this.WaitOneLoop();
             for (let i = 1; i <= 4; i++) {
-                while (this.round == i && this.c.getInvestmentOffer().funds + (this.funds > 0 ? this.funds : 0) < (Object.keys(this.settings).includes("baseOffers") ? this.settings['baseOffers'][i - 1] : [210e9, 5e12, 800e12, 500e15]) * this.ns.getBitNodeMultipliers().CorporationValuation) {
+                while (this.round == i && (await Do(this.ns, "ns.corporation.getInvestmentOffer")).funds + (await (this.funds) > 0 ? (await this.funds) : 0) < (Object.keys(this.settings).includes("baseOffers") ? this.settings['baseOffers'][i - 1] : [210e9, 5e12, 800e12, 500e15]) * (await Do(this.ns, "ns.getBitNodeMultipliers")).CorporationValuation) {
                     await this.WaitOneLoop();
                 }
                 if (this.round == i) {
-                    this.c.acceptInvestmentOffer();
+                    await Do(this.ns, "ns.corporation.acceptInvestmentOffer");
                     await this.WaitOneLoop();
                 }
             }
-            if (!this.c.getCorporation().public)
-                this.c.goPublic(0);
+            if (!(await (this.c)).public)
+                await Do(this.ns, "ns.corporation.goPublic", 0);
         }
         while (this.round < 5)
             await this.WaitOneLoop();
-        this.c.issueDividends(1);
+        await Do(this.ns, "ns.corporation.issueDividends", 1);
         while (this.funds < 1e21)
             await this.WaitOneLoop();
-        this.c.getConstants().unlockNames.map(unlock => this.c.hasUnlockUpgrade(unlock) ? true : this.c.unlockUpgrade(unlock));
+        (await Do(this.ns, "ns.corporation.getConstants")).unlockNames.map(unlock => Do(this.ns, "ns.corporation.unlockUpgrade", unlock));
     }
     async StartDivision(type, settings = {}) {
         if (Object.keys(this.divisionsObj).includes(type)) {
@@ -120,40 +130,40 @@ export class Corporation extends CorpBaseClass {
         if (Object.keys(this.settings).includes(type) && Object.keys(this.settings[type]).includes("plan")) {
             plan = this.settings[type].plan;
         }
-        let makesProducts = Object.keys(this.c.getIndustryData(type)).includes("product");
-        let makesMaterials = Object.keys(this.c.getIndustryData(type)).includes("producedMaterials");
+        let makesProducts = Object.keys((await Do(this.ns, "ns.corporation.getIndustryData", type))).includes("product");
+        let makesMaterials = Object.keys((await Do(this.ns, "ns.corporation.getIndustryData", type))).includes("producedMaterials");
         switch (plan) {
-            case "Scam":
-                this.divisionsObj[type]=new Scam(this.ns, this, type, this.settings);
-                break;
-            case "Shell":
-                this.divisionsObj[type]=new Shell(this.ns, this, type, this.settings);
-                break;
+//            case "Scam":
+//                this.divisionsObj[type]=new Scam(this.ns, this, type, this.settings);
+//                break;
+//            case "Shell":
+//                this.divisionsObj[type]=new Shell(this.ns, this, type, this.settings);
+//                break;
             case "Guide":
-                if (makesMaterials) {
+                default:
+                    if (makesMaterials) {
                     this.divisionsObj[type]=new GuideMaterial(this.ns, this, type, this.settings);
                 }
                 if (makesProducts) {
                     this.divisionsObj[type]=new GuideProduct(this.ns, this, type, this.settings);
                 }
                 break;
-            case "Jeek":
-            default:
-                if (makesMaterials) {
-                    this.divisionsObj[type]=new JeekMaterial(this.ns, this, type, this.settings);
-                }
-                if (makesProducts) {
-                    this.divisionsObj[type]=new JeekProduct(this.ns, this, type, this.settings);
-                }
+//            case "Jeek":
+//                if (makesMaterials) {
+//                    this.divisionsObj[type]=new JeekMaterial(this.ns, this, type, this.settings);
+//                }
+//                if (makesProducts) {
+//                    this.divisionsObj[type]=new JeekProduct(this.ns, this, type, this.settings);
+//                }
         }
         this.divisionsObj[type].Start();
     }
     async GetUpgrade(upgrade, level = 1) {
-        while (this.c.getUpgradeLevel(upgrade) < level) {
-            while (this.c.getUpgradeLevel(upgrade) < level && this.c.getUpgradeLevelCost(upgrade) <= this.funds) {
-                this.c.levelUpgrade(upgrade);
+        while ((await Do(this.ns, "ns.corporation.getUpgradeLevel", upgrade)) < level) {
+            while ((await Do(this.ns, "ns.corporation.getUpgradeLevel", upgrade)) < level && (await Do(this.ns, "ns.corporation.getUpgradeLevelCost", upgrade)) <= await (this.funds)) {
+                await Do(this.ns, "ns.corporation.levelUpgrade", upgrade);
             }
-            if (this.c.getUpgradeLevel(upgrade) < level) {
+            if ((await Do(this.ns, "ns.corporation.getUpgradeLevel", upgrade)) < level) {
                 await this.WaitOneLoop();
             }
         }

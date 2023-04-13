@@ -14,22 +14,29 @@ class Division extends CorpBaseClass {
                 this.settings[objKey] = this.settings[industry][objKey];
             }
         }
-        for (let industryIt of this.c.getConstants().industryNames) {
-            if (Object.keys(this.settings).includes(industryIt)) {
-                delete this.settings[industryIt];
-            }
-        }
         // Stored here so all six warehouses can share a cache
         this.Optimizer = new WarehouseOptimizer(...(["aiCoreFactor", "hardwareFactor", "realEstateFactor", "robotFactor"].map(factor => Object.keys(this.c.getIndustryData(this.industry)).includes(factor) ? this.c.getIndustryData(this.industry)[factor] : 0)), ns);
     }
     get name() {
-        return this.c.getCorporation().divisions.map(div => [div, this.c.getDivision(div).type]).filter(x => x[1] == this.industry)[0][0];
+        return (async () => {
+            try {
+                let names = {};
+                for (let div of (await (this.c)).divisions) {
+                    if ((await Do(this.ns, "ns.corporation.getDivision", div)).type == this.industry)
+                        return div;
+                }
+            } catch (e) {
+              return "ERROR";
+            }
+        })();
     }
     get cities() {
         return Object.values(this.citiesObj);
     }
     get industryData() {
-        return this.c.getIndustryData(this.industry);
+        return (async () => {
+            return await Do(this.ns, "ns.corporation.getIndustryData", this.industry);
+        })();
     }
     get Aevum() {
         return this.citiesObj['Aevum'];
@@ -50,14 +57,16 @@ class Division extends CorpBaseClass {
         return this.citiesObj['Volhaven'];
     }
     get getDivision() {
-        return this.c.getDivision(this.name);
+        return (async () => {
+            return await Do(this.ns, "ns.corporation.getDivision", await (this.name))
+        })();
     }
     async Advert(toLevel = 1) {
-        while (this.c.getHireAdVertCount(this.name) < toLevel) {
-            if (this.getDivision.awareness + this.getDivision.popularity > 1e300)
+        while ((await Do(this.ns, "ns.corporation.getHireAdVertCount", await (this.name))) < toLevel) {
+            if ((await (this.getDivision)).awareness + (await (this.getDivision)).popularity > 1e300)
                 return;
-            if (this.funds >= this.c.getHireAdVertCost(this.name)) {
-                this.c.hireAdVert(this.name);
+            if (await (this.funds) >= (await Do(this.ns, "this.corporation.getHireAdVertCost", await (this.name)))) {
+                await Do(this.ns, "ns.corporation.hireAdVert", (await (this.name)));
             } else {
                 await this.WaitOneLoop();
             }
@@ -82,14 +91,13 @@ class Division extends CorpBaseClass {
         await this.Corp.WaitOneLoop();
     }
     async Research(queue) {
-        while (queue.map(x => this.c.hasResearched(this.name, x)).reduce((a, b) => a && b) == false) {
-            let cost = queue.filter(x => !this.c.hasResearched(this.name, x)).map(x => this.c.getResearchCost(this.name, x)).reduce((a, b) => a + b, 0) * 2;
-            if (this.getDivision.research >= cost) {
-                for (let item of queue) {
-                    this.c.research(this.name, item);
+        for (let item of queue) {
+            if (!await Do(this.ns, "ns.corporation.hasResearched", await (this.name), x)) {
+                while ((await (this.getdivision)).research <= cost) {
+                    await this.WaitOneLoop();
                 }
+                await Do(this.ns, "ns.corporation.research", await (this.name), item); 
             }
-            await this.WaitOneLoop();
         }
     }
 

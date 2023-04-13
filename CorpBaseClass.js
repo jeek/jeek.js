@@ -4,13 +4,32 @@ class CorpBaseClass { // Functions shared between Corporation, Division, and Cit
         this.c = this.ns.corporation;
         this.settings = JSON.parse(JSON.stringify(settings));
     }
+    get c() {
+        return (async () => {
+            try {
+              return (await Do(this.ns, "ns.corporation.getCorporation"));
+            } catch (e) {
+              return 0;
+            }
+          })();
+    }
     get funds() {
-        return this.c.getCorporation().funds;
+        return (async () => {
+            try {
+              return (await (this.c)).funds;
+            } catch (e) {
+              return 0;
+            }
+          })();
     }
     get round() {
-        if (this.c.getCorporation().public)
-            return 5;
-        return this.c.getInvestmentOffer().round;
+        return (async () => {
+            try {
+              return (await (this.c)).public ? 5 : (await Do(this.ns, "ns.corporation.getInvestmentOffer")).round;
+            } catch (e) {
+              return 0;
+            }
+          })();
     }
     get Cities() {
         return Object.values(this.ns.enums.CityName);
@@ -19,12 +38,12 @@ class CorpBaseClass { // Functions shared between Corporation, Division, and Cit
         return this.settings["HQ"];
     }
     async WaitOneLoop() {
-        let state = this.c.getCorporation().state;
-        while (this.c.getCorporation().state == state) {
-            await this.ns.asleep(this.c.getBonusTime() > 0 ? 100 : 200);
+        let state = (await (this.c)).state;
+        while ((await (this.c)).state == state) {
+            await this.ns.asleep((await Do(this.ns, "ns.corporation.getBonusTime")) > 0 ? 100 : 200);
         }
-        while (this.c.getCorporation().state != state) {
-            await this.ns.asleep(this.c.getBonusTime() > 0 ? 200 : 2000);
+        while ((await (this.c)).state != state) {
+            await this.ns.asleep((await Do(this.ns, "ns.corporation.getBonusTime")) > 0 ? 200 : 2000);
         }
     }
 }
