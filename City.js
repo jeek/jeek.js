@@ -30,7 +30,13 @@ class City extends CorpBaseClass {
         }
     }
     get industryData() {
-        return this.Division.industryData;
+        return (async () => {
+            try {
+                return await (this.Division.industryData);
+            } catch {
+                return {};    
+            }
+        })();
     }
     get isHappy() {
         return this.o.isHappy;

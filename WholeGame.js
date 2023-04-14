@@ -4,7 +4,7 @@ import { Bladeburner } from "Bladeburner.js";
 import { CacheServer } from "CacheServer.js";
 import { Casino, roulettestart } from "Casino.js";
 import { Contracts } from "Contracts.js";
-// import { Corporation } from "Corporation.js";
+import { Corporation } from "Corporation.js";
 import { DebugStuff } from "DebugStuff.js";
 import { Factions } from "Factions.js";
 import { Gang } from "Gang.js";

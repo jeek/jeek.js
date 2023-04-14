@@ -73,8 +73,17 @@ class Division extends CorpBaseClass {
         }
     }
     async getHappy() {
-        while (!this.c.getCorporation().divisions.map(x => this.c.getDivision(x).type).includes(this.industry)) {
-            await this.WaitOneLoop();
+        let done = false;
+        while (!done) {
+            let industries = {};
+            for (let div of (await (this.Corp.divisions))) {
+                if (this.industry == (await Do(this.ns, "ns.corporation.getDivision", div)).type) {
+                    done = true;
+                }
+            }
+            if (!done) {
+                await this.WaitOneLoop();
+            }
         }
         await Promise.all(this.cities.map(city => city.o.getHappy()));
     }
