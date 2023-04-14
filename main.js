@@ -1,4 +1,5 @@
 /** @param {NS} ns */
+import { WholeGame } from "WholeGame.js"
 
 const cmdlineflags = [
 	["logbox", false], //box.js
@@ -24,8 +25,6 @@ const cmdlineflags = [
     ["jakobag", false], // Use Jakob's round 1 agriculture method
     ["update", false]
 ];
-
-import { WholeGame } from "WholeGame.js"
 
 async function displayloop(display) {
 	while (true) {

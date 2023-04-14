@@ -1,6 +1,6 @@
 import { Do } from "Do.js";
-import { WholeGame } from "WholeGame.js";
 import { jFormat } from "helpers.js";
+import { WholeGame } from "WholeGame.js";
 
 export class Hacknet {
 	constructor(ns, Game, goal = "") {
