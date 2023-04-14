@@ -1,8 +1,7 @@
 class CorpBaseClass { // Functions shared between Corporation, Division, and City
     constructor(ns, settings) {
         this.ns = ns;
-        this.c = this.ns.corporation;
-        this.settings = JSON.parse(JSON.stringify(settings));
+        this.settings = JSON.parse(JSON.stringify(settings ?? {}));
     }
     get c() {
         return (async () => {

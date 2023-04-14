@@ -73,6 +73,7 @@ export async function main(ns) {
         }
     } */
     if (cmdlineargs['guide']) {
+        let settings = {};
         settings.baseOffers = [210e9, 5e12, 800e12, 500e15];
         settings['Agriculture'] = {'name': 'Agriculture', 'plan': 'Guide'};
         settings['Tobacco'] = {'name': 'Tobacco', 'plan': 'Guide'};
