@@ -1,8 +1,8 @@
 import { CorpBaseClass } from "CorpBaseClass.js";
 
 class Office extends CorpBaseClass {
-    constructor(ns, City) {
-        super(ns, City.settings);
+    constructor(Game, City) {
+        super(Game, City.settings);
         this.Corp = City.Corp;
         this.Division = City.Division;
         this.City = City;

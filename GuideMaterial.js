@@ -2,8 +2,8 @@ import { MaterialIndustry } from "MaterialIndustry.js";
 import { City } from "City.js";
 
 class GuideMaterial extends MaterialIndustry {
-    constructor(ns, Corp, industry, settings = {}) {
-        super(ns, Corp, industry, settings);
+    constructor(Game, Corp, industry, settings = {}) {
+        super(Game, Corp, industry, settings);
     }
     async GiveUp() {
         let start = Date.now();

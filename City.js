@@ -3,8 +3,8 @@ import { Warehouse } from "Warehouse.js";
 import { Office } from "Office.js";
 
 class City extends CorpBaseClass {
-    constructor(ns, Corp, Division, CityName, settings={}) {
-        super(ns, settings);
+    constructor(Game, Corp, Division, CityName, settings={}) {
+        super(Game, settings);
         this.name = CityName;
         this.Corp = Corp;
         this.Division = Division;
