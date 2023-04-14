@@ -1,7 +1,7 @@
 import { Division } from "Division.js";
 
 class MaterialIndustry extends Division {
-    constructor(ns, Corp, industry, settings = {}) {
-        super(ns, Corp, industry, settings);
+    constructor(Game, Corp, industry, settings = {}) {
+        super(Game, Corp, industry, settings);
     }
 }

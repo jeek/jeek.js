@@ -3,8 +3,8 @@ import { City } from "City.js";
 import { WarehouseOptimizer } from "WarehouseOptimizer.js";
 
 class Division extends CorpBaseClass {
-    constructor(ns, Corp, industry, settings = {}) {
-        super(ns, settings);
+    constructor(Game, Corp, industry, settings = {}) {
+        super(Game, settings);
         this.Corp = Corp;
         this.industry = industry;
         this.citiesObj = {};
@@ -15,7 +15,7 @@ class Division extends CorpBaseClass {
             }
         }
         // Stored here so all six warehouses can share a cache
-        this.Optimizer = new WarehouseOptimizer(...(["aiCoreFactor", "hardwareFactor", "realEstateFactor", "robotFactor"].map(factor => Object.keys(this.c.getIndustryData(this.industry)).includes(factor) ? this.c.getIndustryData(this.industry)[factor] : 0)), ns);
+        this.Optimizer = new WarehouseOptimizer(...(["aiCoreFactor", "hardwareFactor", "realEstateFactor", "robotFactor"].map(factor => Object.keys(this.c.getIndustryData(this.industry)).includes(factor) ? this.c.getIndustryData(this.industry)[factor] : 0)), this.ns);
     }
     get name() {
         return (async () => {

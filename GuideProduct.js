@@ -2,8 +2,8 @@ import { ProductIndustry } from "ProductIndustry.js";
 import { City } from "City.js";
 
 class GuideProduct extends ProductIndustry {
-    constructor(ns, Corp, industry, settings = {}) {
-        super(ns, Corp, industry, settings);
+    constructor(Game, Corp, industry, settings = {}) {
+        super(Game, Corp, industry, settings);
     }
     async Start() {
         while (this.c.getCorporation().divisions.map(div => [div, this.c.getDivision(div).type]).filter(x => x[1] == this.industry).length == 0) {

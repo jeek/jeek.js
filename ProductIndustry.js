@@ -1,8 +1,8 @@
 import { Division } from "Division.js";
 
 class ProductIndustry extends Division {
-    constructor(ns, Corp, industry, settings = {}) {
-        super(ns, Corp, industry, settings);
+    constructor(Game, Corp, industry, settings = {}) {
+        super(Game, Corp, industry, settings);
         if (!Object.keys(this.settings).includes("productNames")) {
             this.settings.productNames = ["A","B","C","D","E"].map(x => this.industry + " " + x);
         }

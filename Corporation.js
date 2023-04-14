@@ -3,8 +3,8 @@ import { GuideMaterial } from "GuideMaterial.js";
 import { GuideProduct } from "GuideProduct.js";
 
 export class Corporation extends CorpBaseClass {
-    constructor(ns, settings = {}) {
-        super(ns, settings);
+    constructor(Game, settings = {}) {
+        super(Game, settings);
         if (!Object.keys(this.settings).includes("HQ")) {
             this.settings['HQ'] = "Sector-12";
         }
