@@ -2656,8 +2656,7 @@ export class Contracts {
 class CorpBaseClass { // Functions shared between Corporation, Division, and City
     constructor(ns, settings) {
         this.ns = ns;
-        this.c = this.ns.corporation;
-        this.settings = JSON.parse(JSON.stringify(settings));
+        this.settings = JSON.parse(JSON.stringify(settings ?? {}));
     }
     get c() {
         return (async () => {
@@ -4770,6 +4769,7 @@ export async function main(ns) {
         }
     } */
     if (cmdlineargs['guide']) {
+        let settings = {};
         settings.baseOffers = [210e9, 5e12, 800e12, 500e15];
         settings['Agriculture'] = {'name': 'Agriculture', 'plan': 'Guide'};
         settings['Tobacco'] = {'name': 'Tobacco', 'plan': 'Guide'};
