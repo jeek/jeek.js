@@ -1949,7 +1949,13 @@ class City extends CorpBaseClass {
         }
     }
     get industryData() {
-        return this.Division.industryData;
+        return (async () => {
+            try {
+                return await (this.Division.industryData);
+            } catch {
+                return {};    
+            }
+        })();
     }
     get isHappy() {
         return this.o.isHappy;
@@ -3253,8 +3259,17 @@ class Division extends CorpBaseClass {
         }
     }
     async getHappy() {
-        while (!this.c.getCorporation().divisions.map(x => this.c.getDivision(x).type).includes(this.industry)) {
-            await this.WaitOneLoop();
+        let done = false;
+        while (!done) {
+            let industries = {};
+            for (let div of (await (this.Corp.divisions))) {
+                if (this.industry == (await Do(this.ns, "ns.corporation.getDivision", div)).type) {
+                    done = true;
+                }
+            }
+            if (!done) {
+                await this.WaitOneLoop();
+            }
         }
         await Promise.all(this.cities.map(city => city.o.getHappy()));
     }
@@ -4001,17 +4016,17 @@ export class Hacknet {
                     this.log("Spent hashes on Improve Gym Training");
 				}
 			}
-    		// Pay for yourself, Hacknet
-    		if (!this.Game.Sleeves.startingAGang) {
-	    		if ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses < -1e9) {
-		    		if (0 > ((await Do(this.ns, "ns.getMoneySources")).sinceInstall['hacknet']) + ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses)) {
-			    		if (4 <= (await Do(this.ns, "ns.hacknet.numHashes", ""))) {
-				    		let poof = Math.floor((await Do(this.ns, "ns.hacknet.numHashes", "")) / 4);
-					    	await Do(this.ns, "ns.hacknet.spendHashes", "Sell for Money", "", poof);
-					    }
-					}
-				}
-			}
+//    		// Pay for yourself, Hacknet
+//    		if (!this.Game.Sleeves.startingAGang) {
+//	    		if ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses < -1e9) {
+//		    		if (0 > ((await Do(this.ns, "ns.getMoneySources")).sinceInstall['hacknet']) + ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses)) {
+//			    		if (4 <= (await Do(this.ns, "ns.hacknet.numHashes", ""))) {
+//				    		let poof = Math.floor((await Do(this.ns, "ns.hacknet.numHashes", "")) / 4);
+//					    	await Do(this.ns, "ns.hacknet.spendHashes", "Sell for Money", "", poof);
+//					    }
+//					}
+//				}
+//			}
 			//if (((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses >= -1e9) || (0 <= ((await Do(this.ns, "ns.getMoneySources")).sinceInstall['hacknet']) + ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses))) {
 				let didSomething = true;
 				let mults = (await Do(this.ns, "ns.getPlayer", "")).mults.hacknet_node_money;
@@ -6863,13 +6878,18 @@ class Warehouse extends CorpBaseClass {
     constructor(ai, hw, re, rob, ns) {
         this.mults = [ai, hw, re, rob];
         this.ns = ns;
-        this.sizes = [
-            this.ns.corporation.getMaterialData("AI Cores").size,
-            this.ns.corporation.getMaterialData("Hardware").size,
-            this.ns.corporation.getMaterialData("Real Estate").size,
-            this.ns.corporation.getMaterialData("Robots").size
-        ]
         this.cache = {};
+        this.ready = false;
+        this.Start();
+    }
+    async Start() {
+        this.sizes = [
+            (await Do(this.ns, "ns.corporation.getMaterialData", "AI Cores").size),
+            (await Do(this.ns, "ns.corporation.getMaterialData", "Hardware").size),
+            (await Do(this.ns, "ns.corporation.getMaterialData", "Real Estate").size),
+            (await Do(this.ns, "ns.corporation.getMaterialData", "Robots").size)
+        ]
+        this.ready = true;
     }
     calc(ai = 0, hw = 0, re = 0, rob = 0) {
         return (((.002 * ai + 1) ** this.mults[0]) * ((.002 * hw + 1) ** this.mults[1]) * ((.002 * re + 1) ** this.mults[2]) * ((.002 * rob + 1) ** this.mults[3])) ** .73
@@ -6920,13 +6940,16 @@ class Warehouse extends CorpBaseClass {
         }
         return [scores[scores.length - 1][0], scores[scores.length - 1][1], size - scores[scores.length - 1][1]];
     }
-    optimize(size) {
+    async optimize(size) {
         if (!Object.keys(this.cache).includes(size)) {
-            this.cache[size] = this.optimizeit(size);
+            this.cache[size] = await this.optimizeit(size);
         }
         return this.cache[size];
     }
-    optimizeit(size) {
+    async optimizeit(size) {
+        while (!ready) {
+            await (this.ns.asleep(1000));
+        }
         if (size == 0) {
             return [0, 0, 0, 0, 0];
         }
@@ -6966,7 +6989,6 @@ class Warehouse extends CorpBaseClass {
     }
 }import { Augmentations } from "Augmentations.js";
 // import { BuildProcess } from "BuildProcess.js";
-// import { Corporation } from "Corporation.js";
 
 export class WholeGame {
 	constructor(ns) {
