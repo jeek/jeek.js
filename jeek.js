@@ -4723,7 +4723,6 @@ const cmdlineflags = [
     ["update", false]
 ];
 
-
 async function displayloop(display) {
 	while (true) {
         await (display.updateDisplay());
