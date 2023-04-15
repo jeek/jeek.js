@@ -1922,8 +1922,8 @@ export class Casino {
 }
 
 class City extends CorpBaseClass {
-    constructor(ns, Corp, Division, CityName, settings={}) {
-        super(ns, settings);
+    constructor(Game, Corp, Division, CityName, settings={}) {
+        super(Game, settings);
         this.name = CityName;
         this.Corp = Corp;
         this.Division = Division;
@@ -2654,8 +2654,8 @@ export class Contracts {
 	}
 }
 class CorpBaseClass { // Functions shared between Corporation, Division, and City
-    constructor(ns, settings) {
-        this.ns = ns;
+    constructor(Game, settings) {
+        this.ns = Game.ns;
         this.settings = JSON.parse(JSON.stringify(settings ?? {}));
     }
     get c() {
@@ -2703,8 +2703,8 @@ class CorpBaseClass { // Functions shared between Corporation, Division, and Cit
 }import { CorpBaseClass } from "CorpBaseClass.js";
 
 export class Corporation extends CorpBaseClass {
-    constructor(ns, settings = {}) {
-        super(ns, settings);
+    constructor(Game, settings = {}) {
+        super(Game, settings);
         if (!Object.keys(this.settings).includes("HQ")) {
             this.settings['HQ'] = "Sector-12";
         }
@@ -3188,8 +3188,8 @@ export async function main(ns) {
 }
 
 class Division extends CorpBaseClass {
-    constructor(ns, Corp, industry, settings = {}) {
-        super(ns, settings);
+    constructor(Game, Corp, industry, settings = {}) {
+        super(Game, settings);
         this.Corp = Corp;
         this.industry = industry;
         this.citiesObj = {};
@@ -3200,7 +3200,7 @@ class Division extends CorpBaseClass {
             }
         }
         // Stored here so all six warehouses can share a cache
-        this.Optimizer = new WarehouseOptimizer(...(["aiCoreFactor", "hardwareFactor", "realEstateFactor", "robotFactor"].map(factor => Object.keys(this.c.getIndustryData(this.industry)).includes(factor) ? this.c.getIndustryData(this.industry)[factor] : 0)), ns);
+        this.Optimizer = new WarehouseOptimizer(...(["aiCoreFactor", "hardwareFactor", "realEstateFactor", "robotFactor"].map(factor => Object.keys(this.c.getIndustryData(this.industry)).includes(factor) ? this.c.getIndustryData(this.industry)[factor] : 0)), this.ns);
     }
     get name() {
         return (async () => {
@@ -3732,8 +3732,8 @@ export class Grafting {
 }
 
 class GuideMaterial extends MaterialIndustry {
-    constructor(ns, Corp, industry, settings = {}) {
-        super(ns, Corp, industry, settings);
+    constructor(Game, Corp, industry, settings = {}) {
+        super(Game, Corp, industry, settings);
     }
     async GiveUp() {
         let start = Date.now();
@@ -3855,8 +3855,8 @@ class GuideMaterial extends MaterialIndustry {
 }import { ProductIndustry } from "ProductIndustry.js";
 
 class GuideProduct extends ProductIndustry {
-    constructor(ns, Corp, industry, settings = {}) {
-        super(ns, Corp, industry, settings);
+    constructor(Game, Corp, industry, settings = {}) {
+        super(Game, Corp, industry, settings);
     }
     async Start() {
         while (this.c.getCorporation().divisions.map(div => [div, this.c.getDivision(div).type]).filter(x => x[1] == this.industry).length == 0) {
@@ -4878,14 +4878,14 @@ export async function main(ns) {
 }
 
 class MaterialIndustry extends Division {
-    constructor(ns, Corp, industry, settings = {}) {
-        super(ns, Corp, industry, settings);
+    constructor(Game, Corp, industry, settings = {}) {
+        super(Game, Corp, industry, settings);
     }
 }import { CorpBaseClass } from "CorpBaseClass.js";
 
 class Office extends CorpBaseClass {
-    constructor(ns, City) {
-        super(ns, City.settings);
+    constructor(Game, City) {
+        super(Game, City.settings);
         this.Corp = City.Corp;
         this.Division = City.Division;
         this.City = City;
@@ -5226,8 +5226,8 @@ export class ProcessList {
 }
 
 class ProductIndustry extends Division {
-    constructor(ns, Corp, industry, settings = {}) {
-        super(ns, Corp, industry, settings);
+    constructor(Game, Corp, industry, settings = {}) {
+        super(Game, Corp, industry, settings);
         if (!Object.keys(this.settings).includes("productNames")) {
             this.settings.productNames = ["A","B","C","D","E"].map(x => this.industry + " " + x);
         }
@@ -6544,8 +6544,8 @@ export class StockMarket {
 }
 
 class Warehouse extends CorpBaseClass {
-    constructor(ns, City) {
-        super(ns, City.settings);
+    constructor(Game, City) {
+        super(Game, City.settings);
         this.Corp = City.Corp;
         this.Division = City.Division;
         this.City = City;
