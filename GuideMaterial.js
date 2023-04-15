@@ -6,6 +6,7 @@ class GuideMaterial extends MaterialIndustry {
         super(Game, Corp, industry, settings);
     }
     async GiveUp() {
+        let promises = [];
         let start = Date.now();
         while (Date.now() - start < 600000 && this.round <= 2)
             await this.WaitOneLoop();
@@ -18,6 +19,7 @@ class GuideMaterial extends MaterialIndustry {
                 this.cities.map(city => promises.push(city.o.Hire({ "Operations": 3, "Engineer": 2, "Business": 2, "Management": 2, "Research & Development": 3 })));
             }
         }
+        await Promise.all(promises);
         return;
     }
     async Start() {

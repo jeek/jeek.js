@@ -1,12 +1,20 @@
 class WarehouseOptimizer {
-    constructor(ai, hw, re, rob, ns) {
-        this.mults = [ai, hw, re, rob];
+    constructor(industry, ns) {
+        this.industry = industry;
+        this.mults = [0, 0, 0, 0];
         this.ns = ns;
         this.cache = {};
         this.ready = false;
         this.Start();
     }
     async Start() {
+        let data = await Do(this.ns, "ns.corporation.getIndustryData", this.industry);
+        this.mults = [
+            data["aiCoreFactor"] ?? 0,
+            data["hardwareFactor"] ?? 0,
+            data["realEstateFactor"] ?? 0,
+            data["robotFactor"] ?? 0
+        ];
         this.sizes = [
             (await Do(this.ns, "ns.corporation.getMaterialData", "AI Cores").size),
             (await Do(this.ns, "ns.corporation.getMaterialData", "Hardware").size),

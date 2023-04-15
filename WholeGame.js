@@ -46,7 +46,7 @@ export class WholeGame {
 		this.Servers = new Servers(this);
 		// this.BuildProcess = new BuildProcess(ns);
 		this.Debug = new DebugStuff(this);
-		this.Corporation = new Corporation(this);
+		// this.Corporation = new Corporation(this);
 		this.Contracts = new Contracts(this);
 		this.Hacknet = new Hacknet(this);
 		this.StockMarket = new StockMarket(this);

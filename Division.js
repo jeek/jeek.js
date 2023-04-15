@@ -15,7 +15,7 @@ class Division extends CorpBaseClass {
             }
         }
         // Stored here so all six warehouses can share a cache
-        this.Optimizer = new WarehouseOptimizer(...(["aiCoreFactor", "hardwareFactor", "realEstateFactor", "robotFactor"].map(factor => Object.keys(this.c.getIndustryData(this.industry)).includes(factor) ? this.c.getIndustryData(this.industry)[factor] : 0)), this.ns);
+        this.Optimizer = new WarehouseOptimizer(this.industry, this.ns);
     }
     get name() {
         return (async () => {
