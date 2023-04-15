@@ -557,13 +557,13 @@ onmessage = (event) => {postMessage([eval(event.data[0])(event.data[1]), event.d
 `;
 
 export class Contracts {
-	constructor(game) {
+	constructor(Game) {
 		this.ns = Game.ns;
 		this.Game = Game;
 		this.contracts = {};
 		this.times = {};
-		this.log = ns.tprint.bind(ns);
-		if (ns.flags(cmdlineflags)['logbox']) {
+		this.log = this.ns.tprint.bind(this.ns);
+		if (this.ns.flags(cmdlineflags)['logbox']) {
 			this.log = this.Game.sidebar.querySelector(".contractbox") || this.Game.createSidebarItem("Contracts", "", "C", "contractbox");
 			this.log = this.log.log;
 		}

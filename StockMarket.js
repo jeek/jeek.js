@@ -44,8 +44,8 @@ export class StockMarket {
 		this.ns = Game.ns;
 		this.Game = Game;
 		this.liquidate = false;
-		this.log = ns.tprint.bind(Game.ns);
-        if (ns.flags(cmdlineflags)['logbox']) {
+		this.log = this.ns.tprint.bind(Game.ns);
+        if (this.ns.flags(cmdlineflags)['logbox']) {
             this.log = this.Game.sidebar.querySelector(".stockbox") || this.Game.createSidebarItem("Stocks", "", "S", "stockbox");
 			this.display = this.Game.sidebar.querySelector(".stockbox").querySelector(".display");
 			this.log = this.log.log;

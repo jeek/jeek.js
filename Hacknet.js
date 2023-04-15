@@ -6,10 +6,10 @@ export class Hacknet {
 	constructor(Game, goal = "") {
 		this.ns = Game.ns;
 		this.Game = Game;
-		this.log = ns.tprint.bind(Game.ns);
+		this.log = this.ns.tprint.bind(Game.ns);
 		this.goal = goal;
 		this.start = Date.now();
-		if (ns.flags(cmdlineflags)['logbox']) {
+		if (this.ns.flags(cmdlineflags)['logbox']) {
 			this.log = this.Game.sidebar.querySelector(".hacknetbox") || this.Game.createSidebarItem("Hacknet", "", "H", "hacknetbox");
 			this.display = this.Game.sidebar.querySelector(".hacknetbox").querySelector(".display");
 			this.log = this.log.log;

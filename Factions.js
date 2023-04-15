@@ -8,7 +8,7 @@ export class Factions {
 		this.ns = Game.ns;
 		this.settings = settings;
 		this.Game = Game;
-		this.log = ns.tprint.bind(Game.ns);
+		this.log = this.ns.tprint.bind(Game.ns);
         if (this.ns.flags(cmdlineflags)['logbox']) {
             this.log = {
                 "city": this.Game.sidebar.querySelector(".factioncitybox") || this.Game.createSidebarItem("Factions - City", "", "F", "factioncitybox"),

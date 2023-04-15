@@ -7,7 +7,7 @@ export class Jobs {
     constructor(Game, settings = {}) {
         this.ns = Game.ns;
         this.Game = Game;
-        this.log = ns.tprint.bind(Game.ns);
+        this.log = this.ns.tprint.bind(Game.ns);
         this.settings = settings;
         if (this.ns.flags(cmdlineflags)['logbox']) {
             this.log = this.Game.sidebar.querySelector(".jobsbox") || this.Game.createSidebarItem("Jobs", "", "J", "jobsbox");

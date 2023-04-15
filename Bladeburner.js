@@ -13,8 +13,8 @@ export class Bladeburner {
 		this.minStamina = Object.keys(this.settings).includes("minStamina") ? this.settings.minStamina : .6;
 		this.maxStamina = Object.keys(this.settings).includes("maxStamina") ? this.settings.maxStamina : .9;
 		this.Game = Game;
-		this.log = ns.tprint.bind(ns);
-		if (ns.flags(cmdlineflags)['logbox']) {
+		this.log = this.ns.tprint.bind(this.ns);
+		if (this.ns.flags(cmdlineflags)['logbox']) {
 			this.log = this.Game.sidebar.querySelector(".bladebox") || this.Game.createSidebarItem("Bladeburner", "", "B", "bladebox");
 			this.log = this.log.log;
 		}

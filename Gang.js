@@ -7,7 +7,7 @@ export class Gang {
     constructor(Game, settings = {}) {
         this.ns = Game.ns;
         this.Game = Game;
-        this.log = ns.tprint.bind(Game.ns);
+        this.log = this.ns.tprint.bind(Game.ns);
         this.settings = settings;
         this.memberData = {};
         this.nextTask = {};

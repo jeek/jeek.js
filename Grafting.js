@@ -5,15 +5,15 @@ import { WholeGame } from "WholeGame.js";
 export class Grafting {
     constructor(Game) {
         this.ns = Game.ns;
-        this.game = Game;
-        this.log = ns.tprint.bind(Game.ns);
-        if (ns.flags(cmdlineflags)['logbox']) {
-            this.log = this.game.sidebar.querySelector(".graftbox") || this.game.createSidebarItem("Grafting", "", "G", "graftbox");
+        this.Game = Game;
+        this.log = this.ns.tprint.bind(Game.ns);
+        if (this.ns.flags(cmdlineflags)['logbox']) {
+            this.log = this.Game.sidebar.querySelector(".graftbox") || this.Game.createSidebarItem("Grafting", "", "G", "graftbox");
             this.log = this.log.log;
         }
     }
     async checkIn(type = "Hacking", force=false) {
-        let Game = await(this.game);
+        let Game = await(this.Game);
         if ((!await Do(this.ns, "ns.singularity.isBusy", "")) && (!await Do(this.ns, "ns.singularity.isFocused", ""))) {
             let auglist = await Do(this.ns, "ns.grafting.getGraftableAugmentations", "");
             let augs = await DoAll(this.ns, "ns.singularity.getAugmentationStats", auglist);

@@ -25,9 +25,9 @@ Infiltration data for given location.
 Remarks
 RAM cost: 15 GB`
     };
-    constructor(ns, Game, settings = {}) {
-        this.ns = ns;
-        this.Game = Game ? Game : new WholeGame(ns);
+    constructor(Game, settings = {}) {
+        this.ns = Game.ns;
+        this.Game = Game;
         this.settings = settings;
     }
     get ['getPossibleLocations']() {
