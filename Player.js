@@ -1,9 +1,9 @@
 import { Do } from "Do.js";
 
 export class Player {
-	constructor(ns, game) {
-		this.ns = ns;
-		this.game = game ? game : new WholeGame(ns);
+	constructor(Game) {
+		this.ns = Game.ns;
+		this.Game = Game;
 	}
 	get hacking() {
 		return (async () => {
@@ -132,9 +132,9 @@ export class Player {
 	async trainCombatStatsUpTo(goal, withSleeves = false) {
 		let didSomething = false;
 		for (let stat of ["Strength", "Defense", "Dexterity", "Agility"]) {
-			if (withSleeves && (await (this.game.Sleeves.numSleeves)) > 0) {
+			if (withSleeves && (await (this.Game.Sleeves.numSleeves)) > 0) {
 				if (goal > ((await Do(this.ns, "ns.getPlayer")).skills[stat.toLowerCase()])) {
-					await (this.game.Sleeves.trainWithMe(stat));
+					await (this.Game.Sleeves.trainWithMe(stat));
 					await this.Gym(stat, "Powerhouse Gym", false);
 					didSomething = true;
 				}

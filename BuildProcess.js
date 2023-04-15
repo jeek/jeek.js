@@ -1,6 +1,6 @@
 export class BuildProcess {
-	constructor(ns, settings = {}) {
-        this.ns = ns;
+	constructor(Game, settings = {}) {
+        this.ns = Game.ns;
         this.settings = settings;
         this.settings.repo = this.settings.repo ?? "https://raw.githubusercontent.com/jeek/jeek.js/dev/";
     }

@@ -3,10 +3,10 @@ import { makeNewWindow } from "Windows.js";
 import { WholeGame } from "WholeGame.js";
 
 export class Grafting {
-    constructor(ns, game) {
-        this.ns = ns;
-        this.game = game ? game : new WholeGame(ns);
-        this.log = ns.tprint.bind(ns);
+    constructor(Game) {
+        this.ns = Game.ns;
+        this.game = Game;
+        this.log = ns.tprint.bind(Game.ns);
         if (ns.flags(cmdlineflags)['logbox']) {
             this.log = this.game.sidebar.querySelector(".graftbox") || this.game.createSidebarItem("Grafting", "", "G", "graftbox");
             this.log = this.log.log;

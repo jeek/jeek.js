@@ -71,9 +71,9 @@ export async function roulettestart(Game) {
 }
 
 export class Casino {
-	constructor(ns, Game) {
-		this.ns = ns;
-		this.Game = Game ? Game : new WholeGame(ns);
+	constructor(Game) {
+		this.ns = Game.ns;
+		this.Game = Game;
 	}
 	async roulette() {
 		while (!((await Do(this.ns, "ns.getPlayer")).city == "Aevum" || (await Do(this.ns, "ns.singularity.travelToCity", 'Aevum')))) {

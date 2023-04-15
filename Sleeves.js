@@ -2,9 +2,9 @@ import { Do, DoAll } from "Do.js";
 import { WholeGame } from "WholeGame.js";
 
 export class Sleeves {
-  constructor(ns, Game) {
-    this.ns = ns;
-    this.Game = Game ? Game : new WholeGame(ns);
+  constructor(Game) {
+    this.ns = Game.ns;
+    this.Game = Game;
     this.startingAGang = false;
     if (this.ns.flags(cmdlineflags)['logbox']) {
       this.log = this.Game.sidebar.querySelector(".sleevelog") || this.Game.createSidebarItem("Sleeves", "", "S", "sleevelog");

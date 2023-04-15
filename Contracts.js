@@ -557,14 +557,14 @@ onmessage = (event) => {postMessage([eval(event.data[0])(event.data[1]), event.d
 `;
 
 export class Contracts {
-	constructor(ns, game) {
-		this.ns = ns;
-		this.game = game ? game : new WholeGame(ns);
+	constructor(game) {
+		this.ns = Game.ns;
+		this.Game = Game;
 		this.contracts = {};
 		this.times = {};
 		this.log = ns.tprint.bind(ns);
 		if (ns.flags(cmdlineflags)['logbox']) {
-			this.log = this.game.sidebar.querySelector(".contractbox") || this.game.createSidebarItem("Contracts", "", "C", "contractbox");
+			this.log = this.Game.sidebar.querySelector(".contractbox") || this.Game.createSidebarItem("Contracts", "", "C", "contractbox");
 			this.log = this.log.log;
 		}
 		this.y = 0;
@@ -584,7 +584,7 @@ export class Contracts {
 	async list() {
 		//		this['window'] = this['window'] || await makeNewWindow("Contracts", this.ns.ui.getTheme())
 		let files = [];
-		for (let server of this.game['Servers'].serverlist) {
+		for (let server of this.Game['Servers'].serverlist) {
 			files = files.concat((await Do(this.ns, "ns.ls", server)).filter(x => x.includes(".cct")).map(filename => [server, filename]));
 		}
 		// this.ns.tprint(files);

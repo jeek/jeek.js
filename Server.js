@@ -2,10 +2,10 @@ import { Do } from "Do.js";
 import { WholeGame } from "WholeGame.js";
 
 export class Server {
-	constructor(ns, name = "home", game) {
-		this.ns = ns;
+	constructor(Game, name = "home") {
+		this.ns = Game.ns;
 		this.name = name;
-		this.game = game ? game : new WholeGame(ns);
+		this.Game = Game;
 	}
 	get backdoorInstalled() {
 		return (async () => {
@@ -224,7 +224,7 @@ export class Server {
 
   console.log(foo); // [ "0.322", "0.133" ] */
 	async prep() {
-		let Game = this.game;
+		let Game = this.Game;
 		let serverList = await Game["Servers"].pop_them_all();
 		let pids = [];
 		while ((await this.moneyAvailable) < (await this.moneyMax)) {

@@ -4,11 +4,11 @@ import { WholeGame } from "WholeGame.js";
 import { jFormat } from "helpers.js";
 
 export class Factions {
-	constructor(ns, Game, settings = {}) {
-		this.ns = ns;
+	constructor(Game, settings = {}) {
+		this.ns = Game.ns;
 		this.settings = settings;
-		this.Game = Game ? Game : new WholeGame(ns);
-		this.log = ns.tprint.bind(ns);
+		this.Game = Game;
+		this.log = ns.tprint.bind(Game.ns);
         if (this.ns.flags(cmdlineflags)['logbox']) {
             this.log = {
                 "city": this.Game.sidebar.querySelector(".factioncitybox") || this.Game.createSidebarItem("Factions - City", "", "F", "factioncitybox"),

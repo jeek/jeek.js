@@ -142,10 +142,10 @@ export class Corporation extends CorpBaseClass {
             case "Guide":
                 default:
                     if (makesMaterials) {
-                    this.divisionsObj[type]=new GuideMaterial(this.ns, this, type, this.settings);
+                    this.divisionsObj[type]=new GuideMaterial(Game, this, type, this.settings);
                 }
                 if (makesProducts) {
-                    this.divisionsObj[type]=new GuideProduct(this.ns, this, type, this.settings);
+                    this.divisionsObj[type]=new GuideProduct(Game, this, type, this.settings);
                 }
                 break;
 //            case "Jeek":

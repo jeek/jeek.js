@@ -2,11 +2,11 @@ import { WholeGame } from "WholeGame.js";
 import { Server } from "Server.js";
 
 export class CacheServer {
-	constructor(ns, name = "home", game) {
-		this.ns = ns;
+	constructor(Game, name = "home") {
+		this.ns = Game.ns;
 		this.name = name;
-		this.game = game ? game : new WholeGame(ns);
-		this.server = new Server(ns, this.name, game);
+		this.Game = Game;
+		this.server = new Server(Game, this.name);
 	}
 	async init() {
 		this.backdoorInstalled = await this.server.backdoorInstalled;

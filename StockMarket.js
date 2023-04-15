@@ -39,12 +39,12 @@ const stockMapping = {
 }
 
 export class StockMarket {
-	constructor(ns, Game) {
-		helperScripts(ns);
-		this.ns = ns;
-		this.Game = Game ?? new WholeGame(ns);
+	constructor(Game) {
+		helperScripts(Game.ns);
+		this.ns = Game.ns;
+		this.Game = Game;
 		this.liquidate = false;
-		this.log = ns.tprint.bind(ns);
+		this.log = ns.tprint.bind(Game.ns);
         if (ns.flags(cmdlineflags)['logbox']) {
             this.log = this.Game.sidebar.querySelector(".stockbox") || this.Game.createSidebarItem("Stocks", "", "S", "stockbox");
 			this.display = this.Game.sidebar.querySelector(".stockbox").querySelector(".display");

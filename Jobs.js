@@ -4,10 +4,10 @@ import { WholeGame } from "WholeGame.js";
 import { jFormat } from "helpers.js";
 
 export class Jobs {
-    constructor(ns, Game, settings = {}) {
-        this.ns = ns;
-        this.Game = Game ? Game : new WholeGame(ns);
-        this.log = ns.tprint.bind(ns);
+    constructor(Game, settings = {}) {
+        this.ns = Game.ns;
+        this.Game = Game;
+        this.log = ns.tprint.bind(Game.ns);
         this.settings = settings;
         if (this.ns.flags(cmdlineflags)['logbox']) {
             this.log = this.Game.sidebar.querySelector(".jobsbox") || this.Game.createSidebarItem("Jobs", "", "J", "jobsbox");

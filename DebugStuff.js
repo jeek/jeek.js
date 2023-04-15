@@ -1,9 +1,9 @@
 import { WholeGame } from "WholeGame.js";
 
 export class DebugStuff {
-	constructor(ns, game) {
-		this.ns = ns;
-		this.game = game ? game : new WholeGame(ns);
+	constructor(Game) {
+		this.ns = Game.ns;
+		this.Game = Game;
 		/*
 		const objects = [];
 		const payload_id = "payload" + String(Math.trunc(performance.now()));

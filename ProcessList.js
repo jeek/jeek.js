@@ -3,9 +3,9 @@ import { makeNewWindow } from "Windows.js";
 import { WholeGame } from "WholeGame.js";
 
 export class ProcessList {
-	constructor(ns, game) {
-		this.ns = ns;
-		this.game = game ? game : new WholeGame(ns);
+	constructor(Game) {
+		this.ns = Game.ns;
+		this.Game = Game;
 	}
 	async createDisplay() {
 		this.psWindow = await makeNewWindow("Process List", this.ns.ui.getTheme());
