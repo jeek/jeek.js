@@ -57,8 +57,8 @@ export class WholeGame {
 		this.Infiltrations = new Infiltrations(this);
 		this.Jeekipedia = new Jeekipedia(this);
 		this.Casino = new Casino(this);
-		this.Bladeburner = new Bladeburner(this, {"raid": false, "sting": false});
 		this.Sleeves = new Sleeves(this);
+		this.Bladeburner = new Bladeburner(this, {"raid": false, "sting": false});
 		this.Gang = new Gang(this);
 		this.Jobs = new Jobs(this);
 		this.Factions = new Factions(this);

@@ -146,7 +146,7 @@ export class Player {
 			await this.ns.asleep(1000);
 		}
 		if (withSleeves) {
-			await this.game.Sleeves.deShock();
+			await this.Game.Sleeves.deShock();
 		}
 		return didSomething;
 	}
