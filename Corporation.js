@@ -69,7 +69,7 @@ export class Corporation extends CorpBaseClass {
     async Start() {
         while ([undefined, false].includes(await Do(this.ns, "ns.corporation.hasCorporation"))) {
             try {
-                await Do(this.ns, "ns.corporation.createCorporation", this.settings.includes("name") ? this.settings.name : "Corporation", (await Do(this.ns, "ns.getPlayer")).bitNodeN == 3 ? false : true);
+                await Do(this.ns, "ns.corporation.createCorporation", Object.keys(this.settings).includes("name") ? this.settings.name : "Corporation", (await Do(this.ns, "ns.getPlayer")).bitNodeN == 3 ? false : true);
                 await this.ns.asleep(0);
             } catch {
                 await this.ns.asleep(60000);
@@ -82,8 +82,8 @@ export class Corporation extends CorpBaseClass {
         this.divisionsObj = {};
         for (let divname of await (this.divisions)) {
             let type = (await Do(this.ns, "ns.corporation.getDivision", divname)).type;
-            if (!Object.keys(settings).includes(type)) {
-                settings[type] = {};
+            if (!Object.keys(this.settings).includes(type)) {
+                this.settings[type] = {};
             }
             this.StartDivision(type, this.settings[type]);
         }
@@ -142,10 +142,10 @@ export class Corporation extends CorpBaseClass {
             case "Guide":
                 default:
                     if (makesMaterials) {
-                    this.divisionsObj[type]=new GuideMaterial(Game, this, type, this.settings);
+                    this.divisionsObj[type]=new GuideMaterial(this.Game, this, type, this.settings);
                 }
                 if (makesProducts) {
-                    this.divisionsObj[type]=new GuideProduct(Game, this, type, this.settings);
+                    this.divisionsObj[type]=new GuideProduct(this.Game, this, type, this.settings);
                 }
                 break;
 //            case "Jeek":
