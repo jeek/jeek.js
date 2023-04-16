@@ -4709,6 +4709,7 @@ const cmdlineflags = [
 	["bn8", false],  // Main Stocks Loop
 	["bn8b", false], // Stockhack Loop
 	["bbdisplay", false], //Bladeburner Display
+	["serverdisplay", false], // Display Server Info
 	["stockdisplay", false], // Display Stock Info
 	["stockfilter", false], // Only show owned stocks
 	["ps", false],  // Process List
@@ -4867,6 +4868,11 @@ export async function main(ns) {
 		await (displays[displays.length - 1].createDisplay());
 		promises.push(displayloop(displays[displays.length-1]));
 	}
+	if (cmdlineargs['serverdisplay']) {
+		displays.push(Game.Servers);
+		await (displays[displays.length - 1].createDisplay());
+		promises.push(displayloop(displays[displays.length-1]));
+	}
 	if (cmdlineargs['ps']) {
 		displays.push(Game.ProcessList);
 		await (displays[displays.length - 1].createDisplay());
@@ -4895,27 +4901,51 @@ class Office extends CorpBaseClass {
         this.name = this.City.name;
     }
     get size() {
-        return this.c.getOffice(this.Division.name, this.name).size;
+        return (async () => {
+            try {
+                return (await Do(this.ns, "ns.corporation.getOffice", this.Division.name, this.name)).size;
+            } catch {
+                return 0;
+            }
+        })();
     }
     get employees() {
-        return this.c.getOffice(this.Division.name, this.name).employees;
+        return (async () => {
+            try {
+                return (await Do(this.ns, "ns.corporation.getOffice", this.Division.name, this.name)).employees;
+            } catch {
+                return 0;
+            }
+        })();
     }
     get industryData() {
-        return this.Division.industryData;
+        return (async () => {
+            try {
+                return await (this.Division.industryData);
+            } catch {
+                return 0;
+            }
+        })();
     }
     get getOffice() {
-        return this.c.getOffice(this.Division.name, this.name);
+        return (async () => {
+            try {
+                return (await Do(this.ns, "ns.corporation.getOffice", this.Division.name, this.name));
+            } catch {
+                return 0;
+            }
+        })();
     }
     async Start() {
         await this.getAPI();
-        if (this.size == 3 && this.c.getOffice(this.Division.name, this.name).employeeJobs["Unassigned"] == 3)
+        if ((await (this.size)) == 3 && (await (this.getOffice)).employeeJobs["Unassigned"] == 3)
             await this.Hire({ "Operations": 1, "Engineer": 1, "Business": 1 })
         this.coffeeparty();
     }
     async getAPI() {
-        while (!this.c.hasUnlockUpgrade("Office API")) {
-            if (this.c.getUnlockUpgradeCost("Office API") <= this.funds) {
-                this.c.unlockUpgrade("Office API");
+        while (!await Do(this.ns, "ns.corporation.hasUnlockUpgrade", "Office API")) {
+            if ((await Do(this.ns, "ns.corporation.getUnlockUpgradeCost", "Office API")) <= this.funds) {
+                await Do(this.ns, "ns.corporation.unlockUpgrade", "Office API");
             } else {
                 await this.WaitOneLoop();
             }
@@ -4930,27 +4960,29 @@ class Office extends CorpBaseClass {
         let total = Object.values(roles).reduce((a, b) => a + b, 0);
         await this.getAPI();
         while (this.size < total) {
-            if (this.c.getOfficeSizeUpgradeCost(this.Division.name, this.name, 3) <= this.funds) {
-                this.c.upgradeOfficeSize(this.Division.name, this.name, 3);
+            if ((await Do(this.ns, "ns.corporation.getOfficeSizeUpgradeCost", this.Division.name, this.name, 3)) <= this.funds) {
+                await Do(this.ns, "ns.corporation.upgradeOfficeSize", this.Division.name, this.name, 3);
             } else {
                 await this.WaitOneLoop();
             }
-            for (let job of ["Operations", "Engineer", "Management", "Business", "Research & Development"].sort((a, b) => this.c.getOffice(this.Division.name, this.name).employeeJobs[a] - roles[a] - this.c.getOffice(this.Division.name, this.name).employeeJobs[b] + roles[b])
+            let officeData = await(this.getOffice);
+            for (let job of ["Operations", "Engineer", "Management", "Business", "Research & Development"].sort((a, b) => officeData.employeeJobs[a] - roles[a] - officeData.employeeJobs[b] + roles[b])
             ) {
-                while (this.employees < this.size && (this.getOffice.employeeJobs[job] < roles[job])) {
-                    this.c.hireEmployee(this.Division.name, this.name, job);
+                while (await(this.employees) < (await(this.size)) && (await (this.getOffice).employeeJobs[job] < roles[job])) {
+                    await Do(this.ns, "ns.corporation.hireEmployee", this.Division.name, this.name, job);
                 }
             }
         }
-        while (this.employees < this.size) {
-            this.c.hireEmployee(this.Division.name, this.name, "Unassigned");
+        while (await(this.employees) < await(this.size)) {
+            await Do(this.ns, "ns.corporation.hireEmployee", this.Division.name, this.name, "Unassigned");
         }
         let good = true;
-        for (let job of Object.keys(roles).sort((a, b) => this.c.getOffice(this.Division.name, this.name).employeeJobs[a] - roles[a] - this.c.getOffice(this.Division.name, this.name).employeeJobs[b] + roles[b])
+        let officeData = await(this.getOffice);
+        for (let job of Object.keys(roles).sort((a, b) => officeData.employeeJobs[a] - roles[a] - officeData.employeeJobs[b] + roles[b])
         ) {
-            if (this.getOffice.employeeJobs[job] < roles[job]) {
+            if ((await(this.getOffice)).employeeJobs[job] < roles[job]) {
                 try {
-                    if (this.c.setAutoJobAssignment(this.Division.name, this.name, job, roles[job])) {
+                    if (await Do(this.ns, "ns.corporation.setAutoJobAssignment", this.Division.name, this.name, job, roles[job])) {
                     } else {
                         good = false;
                     }
@@ -4962,13 +4994,13 @@ class Office extends CorpBaseClass {
         if (!good) {
             await this.WaitOneLoop();
             for (let job of ["Operations", "Engineer", "Management", "Business", "Research & Development"]) {
-                this.c.setAutoJobAssignment(this.Division.name, this.name, job, 0);
+                await Do(this.ns, "ns.corporation.setAutoJobAssignment", this.Division.name, this.name, job, 0);
             }
             await this.WaitOneLoop();
             for (let job of Object.keys(roles)) {
-                if (this.getOffice.employeeJobs[job] < roles[job]) {
+                if ((await (this.getOffice)).employeeJobs[job] < roles[job]) {
                     try {
-                        if (this.c.setAutoJobAssignment(this.Division.name, this.name, job, roles[job])) {
+                        if (await Do(this.ns, "ns.corporation.setAutoJobAssignment", this.Division.name, this.name, job, roles[job])) {
                         } else {
                             good = false;
                         }
@@ -4983,13 +5015,13 @@ class Office extends CorpBaseClass {
         await this.getAPI();
         while (true) {
             let happy = true;
-            if (this.getOffice.avgEne < this.settings.minEnergy) {
+            if ((await (this.getOffice)).avgEne < this.settings.minEnergy) {
                 happy = false;
             }
-            if (this.getOffice.avgHap < this.settings.minHappy) {
+            if ((await (this.getOffice)).avgHap < this.settings.minHappy) {
                 happy = false;
             }
-            if (this.getOffice.avgMor < this.settings.minMorale) {
+            if ((await (this.getOffice)).avgMor < this.settings.minMorale) {
                 happy = false;
             }
             if (happy) {
@@ -4999,33 +5031,39 @@ class Office extends CorpBaseClass {
         }
     }
     get isHappy() {
-        let happy = true;
-        if (this.getOffice.avgEne < this.settings.minEnergy) {
-            happy = false;
-        }
-        if (this.getOffice.avgHap < this.settings.minHappy) {
-            happy = false;
-        }
-        if (this.getOffice.avgMor < this.settings.minMorale) {
-            happy = false;
-        }
-        return happy;
+        return (async () => {
+            try {
+                let happy = true;
+                if ((await (this.getOffice)).avgEne < this.settings.minEnergy) {
+                    happy = false;
+                }
+                if ((await (this.getOffice)).avgHap < this.settings.minHappy) {
+                    happy = false;
+                }
+                if ((await (this.getOffice)).avgMor < this.settings.minMorale) {
+                    happy = false;
+                }
+                return happy;
+            } catch {
+                return false
+            }
+        })();
     }
     async coffeeparty() {
         await this.getAPI();
         while (true) {
-            while (this.c.getCorporation().state != "SALE") {
+            while ((await Do(this.ns, "ns.corporation.getCorporation")).state != "SALE") {
                 await this.ns.asleep(400);
             }
-            if (this.getOffice.employees > 0) {
-                if (this.getOffice.avgEne < this.settings.minEnergy && this.getOffice.employees * this.c.getConstants().coffeeCostPerEmployee < this.funds) {
-                    this.c.buyCoffee(this.Division.name, this.name);
+            if ((await (this.getOffice)).employees > 0) {
+                if ((await (this.getOffice)).avgEne < this.settings.minEnergy && (await (this.getOffice)).employees * (await Do(this.ns, "ns.corporation.getConstants")).coffeeCostPerEmployee < await (this.funds)) {
+                    await Do(this.ns, "ns.corporation.buyCoffee", this.Division.name, this.name);
                 }
-                if ((this.getOffice.avgHap < this.settings.minHappy || this.getOffice.avgMor < this.settings.minMorale) && this.getOffice.employees * this.c.getConstants().coffeeCostPerEmployee < this.funds) {
-                    this.c.throwParty(this.Division.name, this.name, this.c.getConstants().coffeeCostPerEmployee);
+                if (((await (this.getOffice)).avgHap < this.settings.minHappy || (await (this.getOffice)).avgMor < this.settings.minMorale) && (await (this.getOffice)).employees * (await Do(this.ns, "ns.corporation.getConstants")).coffeeCostPerEmployee < await(this.funds)) {
+                    await Do(this.ns, "ns.corporation.throwParty", this.Division.name, this.name, (await Do(this.ns, "ns.corporation.getConstants")).coffeeCostPerEmployee);
                 }
             }
-            while (this.c.getCorporation().state == "SALE") {
+            while ((await Do(this.ns, "ns.corporation.getCorporation")).state === "SALE") {
                 await this.ns.asleep(400);
             }
         }
@@ -5882,7 +5920,7 @@ export class Servers {
 		}
 		return false;
 	}
-	async display() {
+	async updateDisplay() {
 		this['window'] = this['window'] || await makeNewWindow("Servers", this.ns.ui.getTheme());
 		let text = "<TABLE CELLPADDING=0 CELLSPACING = 0 BORDER=1><TR><TH>Name</TD><TH>Popped</TD></TR>";
 		for (let server of this.serverlist) {
