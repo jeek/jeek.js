@@ -197,7 +197,7 @@ export class Servers {
 		}
 		return false;
 	}
-	async display() {
+	async updateDisplay() {
 		this['window'] = this['window'] || await makeNewWindow("Servers", this.ns.ui.getTheme());
 		let text = "<TABLE CELLPADDING=0 CELLSPACING = 0 BORDER=1><TR><TH>Name</TD><TH>Popped</TD></TR>";
 		for (let server of this.serverlist) {

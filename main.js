@@ -10,6 +10,7 @@ const cmdlineflags = [
 	["bn8", false],  // Main Stocks Loop
 	["bn8b", false], // Stockhack Loop
 	["bbdisplay", false], //Bladeburner Display
+	["serverdisplay", false], // Display Server Info
 	["stockdisplay", false], // Display Stock Info
 	["stockfilter", false], // Only show owned stocks
 	["ps", false],  // Process List
@@ -165,6 +166,11 @@ export async function main(ns) {
 	}
 	if (cmdlineargs['bbdisplay']) {
 		displays.push(Game.Bladeburner);
+		await (displays[displays.length - 1].createDisplay());
+		promises.push(displayloop(displays[displays.length-1]));
+	}
+	if (cmdlineargs['serverdisplay']) {
+		displays.push(Game.Servers);
 		await (displays[displays.length - 1].createDisplay());
 		promises.push(displayloop(displays[displays.length-1]));
 	}
