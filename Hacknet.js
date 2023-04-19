@@ -53,12 +53,16 @@ export class Hacknet {
 		while (true) {
 			await this.ns.asleep(0);
 			let hashes = Math.floor((await Do(this.ns, "ns.hacknet.numHashes", "")) / 4);
-			if (this.goal === "Sell for Money" && hashes > 0) {
-				await Do(this.ns, "ns.hacknet.spendHashes", this.goal, "", hashes);
-				this.log("Spent hashes for cash");
-			} else {
-				while (await Do(this.ns, "ns.hacknet.spendHashes", this.goal))
-					this.log("Spent hashes on " + this.goal);
+			if ((await(this.Game.Player.money)) < 0) {
+				await Do(this.ns, "ns.hacknet.spendHashes", "Sell for Money", "", hashes);
+			}
+			if (await Do(this.ns, "ns.bladeburner.inBladeburner")) {
+				if (await Do(this.ns, "ns.hacknet.spendHashes", "Exchange for Bladeburner Rank")) {
+                    this.log("Spent hashes on Bladeburner Rank");
+				}
+				if (await Do(this.ns, "ns.hacknet.spendHashes", "Exchange for Bladeburner SP")) {
+                    this.log("Spent hashes on Bladeburner SP");
+				}
 			}
 			if (await Do(this.ns, "ns.corporation.hasCorporation")) {
 				if (await Do(this.ns, "ns.hacknet.spendHashes", "Sell for Corporation Funds")) {
@@ -74,7 +78,10 @@ export class Hacknet {
                     this.log("Spent hashes on Improve Gym Training");
 				}
 			}
-//    		// Pay for yourself, Hacknet
+			if (await Do(this.ns, "ns.hacknet.spendHashes", "Generate Coding Contract")) {
+				this.log("Generated a Contract");
+			}
+			//    		// Pay for yourself, Hacknet
 //    		if (!this.Game.Sleeves.startingAGang) {
 //	    		if ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses < -1e9) {
 //		    		if (0 > ((await Do(this.ns, "ns.getMoneySources")).sinceInstall['hacknet']) + ((await Do(this.ns, "ns.getMoneySources")).sinceInstall.hacknet_expenses)) {
@@ -129,16 +136,9 @@ export class Hacknet {
 						done = false;
 					}
 				}
-				if ((await Do(this.ns, "ns.hacknet.numHashes")) * 2 > (await Do(this.ns, "ns.hacknet.hashCapacity"))) {
+				while ((await Do(this.ns, "ns.hacknet.numHashes")) * 2 > (await Do(this.ns, "ns.hacknet.hashCapacity"))) {
 					if (await Do(this.ns, "ns.hacknet.spendHashes", "Sell for Money"))
 						this.log("Sold four hashes for cash.");
-				}
-				if (this.goal == "Sell for Money") {
-					let poof = Math.floor((await Do(this.ns, "ns.hacknet.numHashes", "")) / 4);
-					await Do(this.ns, "ns.hacknet.spendHashes", "Sell for Money", "", poof);
-				} else {
-					while (await Do(this.ns, "ns.hacknet.spendHashes", this.goal))
-						this.log("Spent hashes on " + this.goal);
 				}
 		//	}
 		}
