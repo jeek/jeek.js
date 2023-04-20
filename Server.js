@@ -303,4 +303,24 @@ export class Server {
 			}
 		}
 	}
+	// xsinx's
+	get weight() {
+		return (async () => {
+			try {
+				if (this.name.startsWith('hacknet-node')) return 0;
+				let player = await Do(this.ns, "ns.getPlayer");
+				let so = await Do(this.ns, "ns.getServer", this.name);
+				so.hackDifficulty = so.minDifficulty;
+				if (so.requiredHackingSkill > player.skills.hacking) return 0;
+				let weight = so.moneyMax / so.minDifficulty;
+				if (so.requiredHackingSkill > player.skills.hacking / 2 || !await Do(this.ns, "ns.fileExists", 'Formulas.exe'))
+    				return 0;
+				const wt = ns.formulas.hacking.weakenTime(so, player);
+				const hc = ns.formulas.hacking.hackChance(so, player);
+				return so.moneyMax / wt * hc;
+			} catch {
+				return 0;
+			}
+		})();
+	}
 }
