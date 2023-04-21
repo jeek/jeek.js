@@ -78,6 +78,12 @@ export class Hacknet {
                     this.log("Spent hashes on Improve Gym Training");
 				}
 			}
+			let currentWork = await Do(this.ns, "ns.singularity.getCurrentWork");
+			if (Object.keys(currentWork).includes("companyName")) {
+				if (await Do(this.ns, "ns.hacknet.spendHashes", "Company Favor", currentWork["companyName"])) {
+					this.log("5 Favor for " + currentWork["companyName"]);
+				}
+			}
 			if (await Do(this.ns, "ns.hacknet.spendHashes", "Generate Coding Contract")) {
 				this.log("Generated a Contract");
 			}
