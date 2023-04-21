@@ -4022,6 +4022,12 @@ export class Hacknet {
                     this.log("Spent hashes on Improve Gym Training");
 				}
 			}
+			let currentWork = await Do(this.ns, "ns.singularity.getCurrentWork");
+			if (Object.keys(currentWork).includes("companyName")) {
+				if (await Do(this.ns, "ns.hacknet.spendHashes", "Company Favor", currentWork["companyName"])) {
+					this.log("5 Favor for " + currentWork["companyName"]);
+				}
+			}
 			if (await Do(this.ns, "ns.hacknet.spendHashes", "Generate Coding Contract")) {
 				this.log("Generated a Contract");
 			}
@@ -5763,7 +5769,7 @@ export class Servers {
       this.log = this.Game.sidebar.querySelector(".serverbox") || this.Game.createSidebarItem("Servers", "", "S", "serverbox");
       this.body = this.log.body;
       this.display = this.Game.sidebar.querySelector(".serverbox").querySelector(".display");
-      this.body.innerHTML = "<canvas width=1000 height=1000 id='servermap'></canvas>";
+      this.body.innerHTML = "";
       this.log.recalcHeight();
       this.log = this.log.log;
       
@@ -6049,7 +6055,8 @@ export class Servers {
       costs = costs.filter(x => x.cost <= funds);
       costs = costs.sort((a, b) => (b.efficiency != a.efficiency) ? a.efficiency - b.efficiency : b.increase - a.increase);
       if (costs.length > 0) {
-        await Do(this.ns, costs[0].command, ...(costs[0].args));
+        await
+        Do(this.ns, costs[0].command, ...(costs[0].args));
       } else {
         await this.ns.asleep(10000);
       }
