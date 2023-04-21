@@ -17,6 +17,7 @@ export class Servers {
       this.map = this.map.log;
       this.log = this.Game.sidebar.querySelector(".serverbox") || this.Game.createSidebarItem("Servers", "", "S", "serverbox");
       this.body = this.log.body;
+      this.display = this.Game.sidebar.querySelector(".serverbox").querySelector(".display");
       this.body.innerHTML = "<canvas width=1000 height=1000 id='servermap'></canvas>";
       this.log.recalcHeight();
       this.log = this.log.log;
@@ -29,6 +30,7 @@ export class Servers {
   }
   async serverbox() {
     if (this.ns.flags(cmdlineflags)['logbox']) {
+      this.display.style['overflow-y'] = 'auto';
       while (true) {
         let servers = new Set();
         let serverdata = {};
@@ -36,14 +38,21 @@ export class Servers {
         for (let server of servers) {
           for (let addable of await Do(this.ns, "ns.scan", server)) {
             servers.add(addable);
+            if(!Object.keys(this).includes(addable)) {
+              this[addable] = new Server(this.Game, addable);
+            }
+            if(!this.serverlist.includes(addable)) {
+              this.serverlist.push(addable);
+            }
             serverdata[server] = await Do(this.ns, "ns.getServer", server);
           }
         }
-        this.body.innerHTML = "<TABLE>";
-        Object.keys(serverdata).sort((a, b) => b['maxRam'] - a['maxRam']).map(x =>
-          this.box.innerHTML += x['hasAdminRights'] ? ("<TR><TD>" + x + "</TD><TD>" + serverdata['ramUsed'].toString() + "</TD><TD>" + serverdata['maxRam'].toString() + "</TD><TD>" + jFormat(serverdata['moneyAvailable'], "$") + "</TD><TD>" + jFormat(serverdata['moneyMax'],"$") + "</TD></TR>") : "");
-        this.body.innerHTML += "</TABLE>";
-        
+        let result = "<TABLE>";
+        Object.keys(serverdata).sort((a, b) => serverdata[b]['maxRam'] - serverdata[a]['maxRam']).map(x =>
+          result += serverdata[x]['hasAdminRights'] ? ("<TR><TD>" + x + "</TD><TD>" + serverdata[x]['ramUsed'].toString() + "</TD><TD>" + serverdata[x]['maxRam'].toString() + "</TD><TD>" + jFormat(serverdata[x]['moneyAvailable'], "$") + "</TD><TD>" + jFormat(serverdata[x]['moneyMax'],"$") + "</TD></TR>") : "");
+        result += "</TABLE>";
+        this.body.innerHTML = result;
+        await this.ns.asleep(10000);
       }
     }
   }
