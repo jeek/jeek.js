@@ -4856,6 +4856,7 @@ export async function main(ns) {
 	}
 	if (cmdlineargs['bn7'] || cmdlineargs['bn8']) {
     	promises.push(Game.Contracts.loop());
+    	promises.push(Game.Servers.servermap());
     	promises.push(Game.Servers.serverbox());
 	}
 	let displays = [];
@@ -5754,11 +5755,17 @@ export class Servers {
     ["home", "n00dles", "foodnstuff", "sigma-cosmetics", "joesguns", "hong-fang-tea", "harakiri-sushi", "iron-gym", "CSEC", "zer0", "nectar-net", "max-hardware", "phantasy", "neo-net", "omega-net", "silver-helix", "netlink", "crush-fitness", "computek", "johnson-ortho", "the-hub", "avmnite-02h", "rothman-uni", "I.I.I.I", "syscore", "summit-uni", "catalyst", "zb-institute", "aevum-police", "lexo-corp", "alpha-ent", "millenium-fitness", "rho-construction", "aerocorp", "global-pharm", "galactic-cyber", "snap-fitness", "omnia", "unitalife", "deltaone", "univ-energy", "zeus-med", "solaris", "defcomm", "icarus", "infocomm", "zb-def", "nova-med", "taiyang-digital", "titan-labs", "microdyne", "applied-energetics", "run4theh111z", "stormtech", "fulcrumtech", "helios", "vitalife", "omnitek", "kuai-gong", "4sigma", ".", "powerhouse-fitness", "nwo", "b-and-a", "blade", "clarkinc", "ecorp", "The-Cave", "megacorp", "fulcrumassets"].map(x => this[x] = new Server(Game, x));
     this.log = this.ns.tprint.bind(Game.ns);
     if (this.ns.flags(cmdlineflags)['logbox']) {
-      this.log = this.Game.sidebar.querySelector(".servers") || this.Game.createSidebarItem("Servers", "", "S", "servers");
+      this.map = this.Game.sidebar.querySelector(".servermap") || this.Game.createSidebarItem("Server Map", "", "S", "servermap");
+      this.mapbody = this.map.body;
+      this.mapbody.innerHTML = "<canvas width=1000 height=1000 id='servermap'></canvas>";
+      this.map.recalcHeight();
+      this.map = this.map.log;
+      this.log = this.Game.sidebar.querySelector(".serverbox") || this.Game.createSidebarItem("Servers", "", "S", "serverbox");
       this.body = this.log.body;
-      this.body.innerHTML = "<canvas width=1000 height=1000 id='serverbox'></canvas>";
+      this.body.innerHTML = "<canvas width=1000 height=1000 id='servermap'></canvas>";
       this.log.recalcHeight();
       this.log = this.log.log;
+      
     }
 	this.ratio = -1;
 	this.buyHacknet = true;
@@ -5766,6 +5773,26 @@ export class Servers {
 	this.purchaser();
   }
   async serverbox() {
+    if (this.ns.flags(cmdlineflags)['logbox']) {
+      while (true) {
+        let servers = new Set();
+        let serverdata = {};
+        servers.add("home");
+        for (let server of servers) {
+          for (let addable of await Do(this.ns, "ns.scan", server)) {
+            servers.add(addable);
+            serverdata[server] = await Do(this.ns, "ns.getServer", server);
+          }
+        }
+        this.body.innerHTML = "<TABLE>";
+        Object.keys(serverdata).sort((a, b) => b['maxRam'] - a['maxRam']).map(x =>
+          this.box.innerHTML += x['hasAdminRights'] ? ("<TR><TD>" + x + "</TD><TD>" + serverdata['ramUsed'].toString() + "</TD><TD>" + serverdata['maxRam'].toString() + "</TD><TD>" + jFormat(serverdata['moneyAvailable'], "$") + "</TD><TD>" + jFormat(serverdata['moneyMax'],"$") + "</TD></TR>") : "");
+        this.body.innerHTML += "</TABLE>";
+        
+      }
+    }
+  }
+  async servermap() {
     if (this.ns.flags(cmdlineflags)['logbox']) {
       let layout = [[], ['home']];
       let purchasedServers = await Do(this.ns, "ns.getPurchasedServers");
@@ -5809,7 +5836,7 @@ export class Servers {
       while (heights.length < layout.length) {
         heights.push(heights[heights.length - 1] + 950 / layout.length);
       }
-      let c = eval("document").getElementById("serverbox");
+      let c = eval("document").getElementById("servermap");
       let ctx = c.getContext("2d");
       let minsec = {};
       let sec = {};
@@ -5822,10 +5849,10 @@ export class Servers {
         Object.keys(scans).map(x => mon[x] = Do(this.ns, "ns.getServerMoneyAvailable", x));
         Object.keys(scans).map(x => maxmon[x] = Do(this.ns, "ns.getServerMaxMoney", x));
         for (let server of Object.keys(scans)) {
-          await minsec[server];
-          await sec[server];
-          await mon[server];
-          await maxmon[server];
+          minsec[server] = await minsec[server];
+          sec[server] = await sec[server];
+          mon[server] = await mon[server];
+          maxmon[server] = await maxmon[server];
         }
 
         ctx = c.getContext("2d");
